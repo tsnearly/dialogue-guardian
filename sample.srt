@@ -1,0 +1,20 @@
+1
+00:00:00,000 --> 00:00:01,750
+This is a test script.
+
+2
+00:00:02,000 --> 00:00:04,800
+It has some damn words in it,
+which is absolute bullshit.
+
+3
+00:00:05,000 --> 00:00:05,900
+This part should be audible.
+
+4
+00:00:06,000 --> 00:00:06,800
+What the hell.
+
+5
+00:00:06,900 --> 00:00:09,500
+And this final part should be okay too.

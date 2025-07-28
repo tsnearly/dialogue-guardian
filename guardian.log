@@ -1,0 +1,84 @@
+2025-07-17 13:37:01,587 - INFO - Processing file: /Volumes/hubExpansion/movies/Tetris (2023)/Tetris (2023).mp4
+2025-07-17 13:37:01,587 - DEBUG - Getting video details for: /Volumes/hubExpansion/movies/Tetris (2023)/Tetris (2023).mp4
+2025-07-17 13:37:12,121 - DEBUG - Video Info Dictionary:
+{
+    "duration": "7066.912000",
+    "codec": "ac3",
+    "samplerate": "48000",
+    "channels": "6",
+    "audioconfig": "5.1(side)",
+    "width": "1920",
+    "height": "804",
+    "framerate": "24000/1001",
+    "fps": "23.976",
+    "frameduration": "1001/24000"
+}
+2025-07-17 13:37:12,123 - DEBUG - Precise rational duration: 169605436/24000s (169436 frames)
+2025-07-17 13:37:12,226 - DEBUG - Match found in subtitle #80: "jesus no i'm not that crazy"
+2025-07-17 13:37:12,281 - DEBUG - Match found in subtitle #91: "this jackass stein won't stop
+faxing us wasting our paper"
+2025-07-17 13:37:12,283 - DEBUG - Match found in subtitle #237: "hence the call
+what the fuck kevin"
+2025-07-17 13:37:12,283 - DEBUG - Match found in subtitle #239: "what the fuck mr maxwell"
+2025-07-17 13:37:12,284 - DEBUG - Match found in subtitle #316: "you're doing less than zero
+which is fuck all"
+2025-07-17 13:37:12,285 - DEBUG - Match found in subtitle #322: "henk rogers to see kevin maxwell
+what the bloody hell is he doing here"
+2025-07-17 13:37:12,286 - DEBUG - Match found in subtitle #397: "but now they supposedly have
+a handheld device with our damn game"
+2025-07-17 13:37:12,288 - DEBUG - Match found in subtitle #679: "who the hell gave you these numbers"
+2025-07-17 13:37:12,289 - DEBUG - Match found in subtitle #712: "you bastard"
+2025-07-17 13:37:12,289 - DEBUG - Match found in subtitle #719: "more like tit for shit"
+2025-07-17 13:37:12,289 - DEBUG - Match found in subtitle #731: "so spare me the bolshevik shit"
+2025-07-17 13:37:12,290 - DEBUG - Match found in subtitle #740: "if you are in search of a pawn
+i do suggest you fuck off"
+2025-07-17 13:37:12,291 - DEBUG - Match found in subtitle #840: "yeah i know but sometimes
+you gotta say fuck the rules right"
+2025-07-17 13:37:12,292 - DEBUG - Match found in subtitle #944: "oh shit"
+2025-07-17 13:37:12,292 - DEBUG - Match found in subtitle #945: "you son of a bitch"
+2025-07-17 13:37:12,292 - DEBUG - Match found in subtitle #962: "mr belikov with all due respect
+what the hell is going on"
+2025-07-17 13:37:12,293 - DEBUG - Match found in subtitle #1001: "mr be oh for fuck"
+2025-07-17 13:37:12,294 - DEBUG - Match found in subtitle #1019: "and royalties
+jesus fucking christ"
+2025-07-17 13:37:12,294 - DEBUG - Match found in subtitle #1068: "and i promised myself that i would never
+put my kids through that kind of hell"
+2025-07-17 13:37:12,295 - DEBUG - Match found in subtitle #1102: "oh shit"
+2025-07-17 13:37:12,295 - DEBUG - Match found in subtitle #1104: "jesus no"
+2025-07-17 13:37:12,295 - DEBUG - Match found in subtitle #1126: "it's over and you're giving me shit
+about missing a concert"
+2025-07-17 13:37:12,296 - DEBUG - Match found in subtitle #1158: "what the hell is going on"
+2025-07-17 13:37:12,297 - DEBUG - Match found in subtitle #1168: "stop with your damn we're friends bit"
+2025-07-17 13:37:12,297 - DEBUG - Match found in subtitle #1176: "jesus christ father
+you said we were fine"
+2025-07-17 13:37:12,297 - DEBUG - Match found in subtitle #1183: "let's sue the fuck out of them
+this is the lowest of the low"
+2025-07-17 13:37:12,298 - DEBUG - Match found in subtitle #1188: "what the hell is he doing here
+read this"
+2025-07-17 13:37:12,298 - DEBUG - Match found in subtitle #1190: "an8what the fuck is that
+atari stole our patent"
+2025-07-17 13:37:12,298 - DEBUG - Match found in subtitle #1195: "who the hell is a"
+2025-07-17 13:37:12,298 - DEBUG - Match found in subtitle #1220: "damn"
+2025-07-17 13:37:12,299 - DEBUG - Match found in subtitle #1300: "you son of a bitch"
+2025-07-17 13:37:12,301 - DEBUG - Match found in subtitle #1356: "respectfully mr trifonov we've got
+this far without you so do fuck off"
+2025-07-17 13:37:12,302 - DEBUG - Match found in subtitle #1394: "what the bloody hell is this
+choice"
+2025-07-17 13:37:12,302 - DEBUG - Match found in subtitle #1395: "they can choose your shit deal
+or our fair deal"
+2025-07-17 13:37:12,306 - DEBUG - Match found in subtitle #1400: "fuck you sign the deal
+honor the contract"
+2025-07-17 13:37:12,306 - DEBUG - Match found in subtitle #1402: "mr belikov
+do not fall for his shit every"
+2025-07-17 13:37:12,307 - DEBUG - Match found in subtitle #1406: "father what the fuck is happening
+nothing"
+2025-07-17 13:37:12,307 - DEBUG - Match found in subtitle #1411: "mr belikov
+you bastard"
+2025-07-17 13:37:12,307 - DEBUG - Match found in subtitle #1424: "what you bribed this piece of shit"
+2025-07-17 13:37:12,308 - DEBUG - Match found in subtitle #1434: "you whore yourself"
+2025-07-17 13:37:12,308 - DEBUG - Match found in subtitle #1488: "what the fuck"
+2025-07-17 13:37:12,309 - DEBUG - Match found in subtitle #1496: "what the fuck is this"
+2025-07-17 13:37:12,309 - DEBUG - Match found in subtitle #1501: "is it because i called you a whore"
+2025-07-17 13:37:12,310 - INFO - Generated 173 unique keyframes for volume adjustment.
+2025-07-17 13:37:12,566 - INFO - Writing FCPXML to: /Volumes/hubExpansion/movies/Tetris (2023)/Tetris (2023).fcpxml
+2025-07-17 13:37:12,600 - INFO - Script finished successfully.

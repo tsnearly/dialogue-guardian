@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<fcpxml version="1.9">
+    <resources>
+        <format id="r1" name="FFVideoFormat720p24_000" frameDuration="1/24s" width="1280" height="720"/>
+        <format id="r2" name="FFVideoFormat720p24_000" frameDuration="1/24s" width="1280" height="720"/>
+        <asset id="r3" name="sample.mp4" duration="227/24s" hasVideo="1" hasAudio="1" format="r1" audioChannels="1" audioRate="22050">
+            <media-rep kind="original-media" src="file:///Volumes/Expansion/dev/dialogue-guardian/sample.mp4"/>
+        </asset>
+    </resources>
+    <library location="file:///Users/Shared/">
+        <event name="Imported Media">
+            <project name="sample">
+                <sequence format="r2" duration="227/24s" tcFormat="NDF" audioLayout="stereo" audioRate="22.05k">
+                    <spine>
+                        <asset-clip ref="r3" name="sample" format="r1" duration="227/24s">
+                            <adjust-volume>
+                                <param name="amount">
+                                    <keyframeAnimation>
+                                        <keyframe time="0/24s" value="0dB"/>
+                                        <keyframe time="43/24s" value="0dB"/>
+                                        <keyframe time="48/24s" value="-96dB"/>
+                                        <keyframe time="115/24s" value="-96dB"/>
+                                        <keyframe time="120/24s" value="0dB"/>
+                                        <keyframe time="139/24s" value="0dB"/>
+                                        <keyframe time="144/24s" value="-96dB"/>
+                                        <keyframe time="163/24s" value="-96dB"/>
+                                        <keyframe time="168/24s" value="0dB"/>
+                                    </keyframeAnimation>
+                                </param>
+                            </adjust-volume>
+                        </asset-clip>
+                    </spine>
+                </sequence>
+            </project>
+        </event>
+    </library>
+</fcpxml>
