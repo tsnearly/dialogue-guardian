@@ -1,8 +1,35 @@
-# Censor
+# Dialoque Guardian: Universal Media Censor
+This project provides a powerful and accessible Python application designed to automatically detect and censor profane language in video files. Leveraging the robust capabilities of FFmpeg, Guardian now offers a streamlined, platform-independent solution, eliminating the previous reliance on Apple's Final Cut Pro.
 
-## Overview
+## Key Features:
+Automated Profanity Detection: Scans subtitle tracks (SRT) for a predefined list of offensive words and phrases.
 
-`guardian.py` is a Python script designed to automate the process of generating Final Cut Pro XML (FCPXML) files for video projects. It scans a video and its corresponding subtitle file (`.srt`) for a list of predefined words and phrases, then creates an FCPXML file with automated audio volume keyframes to mute those words in the video. This is useful for quickly censoring inappropriate language or content in videos.
+Direct Audio Censoring: Utilizes FFmpeg's audio filters to precisely mute or reduce the volume of identified profane segments, creating a new, censored video file.
+
+Universal Compatibility:
+
+No FCP Dependency: The tool no longer requires Final Cut Pro, making it usable on any operating system where FFmpeg is installed (Windows, macOS, Linux).
+
+FFmpeg-Centric Workflow: All media processing is handled directly by FFmpeg, a free and open-source command-line tool.
+
+Automatic SRT Extraction: If an external SRT subtitle file is not found, the application will automatically attempt to extract embedded SRT tracks from the video file (e.g., from MKV containers), ensuring a comprehensive subtitle source.
+
+Non-Destructive Editing: Creates a new video file with censored audio, leaving the original media untouched.
+
+Efficient Processing: Copies the video stream directly to avoid re-encoding and maintain original video quality, focusing re-encoding only on the audio stream.
+
+## How it Works:
+The user provides a path to a video file (e.g., an MKV or MP4).
+
+The script first looks for an external SRT file with the same base name.
+
+If no external SRT is found, it uses ffprobe to detect and ffmpeg to extract any embedded SRT subtitle tracks from the video.
+
+It then parses the SRT content, identifying time segments that contain words from its internal profanity list.
+
+Finally, it constructs and executes an FFmpeg command that applies a volume filter to mute the audio during these identified time segments, outputting a new, censored video file.
+
+Guardian aims to provide a simple, effective, and universally available tool for content creators and consumers to manage explicit language in their media.
 
 ---
 
