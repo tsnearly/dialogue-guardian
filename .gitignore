@@ -1,4 +1,5 @@
 .DS_Store
+.vscode/
 .qodo
 misc/
 __pycache__/

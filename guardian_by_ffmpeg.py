@@ -20,8 +20,8 @@ matching_words = [
 ]
 
 # Assume ffmpeg and ffprobe are in the system's PATH
-ffprobe_cmd = './ffprobe'
-ffmpeg_cmd = './ffmpeg'
+ffprobe_cmd = 'ffprobe'
+ffmpeg_cmd = 'ffmpeg'
 
 def get_video_details(filename):
     """
@@ -190,6 +190,15 @@ def censor_audio_with_ffmpeg(video_path):
         str: Path to the newly created censored video file, or None if an error occurred.
     """
     srt_path = os.path.splitext(video_path)[0] + '.srt'
+    if not os.path.exists(srt_path):
+        # Check for language-specific SRT files
+        base_path = os.path.splitext(video_path)[0]
+        for lang in ['en', 'fr', 'es', 'de', 'it']:  # Add more languages as needed
+            lang_srt_path = f"{base_path}.{lang}.srt"
+            if os.path.exists(lang_srt_path):
+                srt_path = lang_srt_path
+                logging.info(f"Found language-specific SRT file: {srt_path}")
+                break
     output_filename = f"{os.path.splitext(video_path)[0]}_censored.mp4"
 
     # Try to load external SRT first

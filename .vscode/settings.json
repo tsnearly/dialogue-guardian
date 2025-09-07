@@ -1,4 +1,13 @@
 {
     "editor.formatOnSave": true,
-    "python.analysis.enableTroubleshootMissingImports": true
+    "python.analysis.enableTroubleshootMissingImports": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        ".",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
 }

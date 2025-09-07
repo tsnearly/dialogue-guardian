@@ -143,6 +143,15 @@ def create_fcpxml(video_path, video_info):
     keyframes = [(time_s_to_rational_str(0), '0dB')]
 
     srt_path = os.path.splitext(video_path)[0] + '.srt'
+    if not os.path.exists(srt_path):
+        # Check for language-specific SRT files
+        base_path = os.path.splitext(video_path)[0]
+        for lang in ['en', 'fr', 'es', 'de', 'it']:  # Add more languages as needed
+            lang_srt_path = f"{base_path}.{lang}.srt"
+            if os.path.exists(lang_srt_path):
+                srt_path = lang_srt_path
+                logging.info(f"Found language-specific SRT file: {srt_path}")
+                break
     try:
         with open(srt_path, 'r', encoding='utf-8-sig') as f:
             srt_content = f.read()
