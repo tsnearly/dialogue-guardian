@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dialogue-guardian"
+version = "1.1.0"
+authors = [
+    {name = "Tony Snearly"},
+]
+description = "Universal Media Censor - Automatically detect and censor profane language in video files"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Text Processing :: Filters",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+keywords = ["video", "audio", "censoring", "subtitles", "ffmpeg", "profanity", "media"]
+dependencies = [
+    "srt2",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/dialogue-guardian"
+"Bug Reports" = "https://github.com/yourusername/dialogue-guardian/issues"
+"Source" = "https://github.com/yourusername/dialogue-guardian"
+
+[project.scripts]
+guardian = "guardian.cli:main"
+dialogue-guardian = "guardian.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["guardian*"]
+
+[tool.setuptools.package-data]
+guardian = ["*.md", "*.txt"]
