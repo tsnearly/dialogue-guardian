@@ -1,0 +1,100 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        cd dialogue-guardian
+        pip install -e ".[dev]"
+    
+    - name: Run flake8
+      run: |
+        cd dialogue-guardian
+        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Run black
+      run: |
+        cd dialogue-guardian
+        black --check --diff src/ tests/
+    
+    - name: Run isort
+      run: |
+        cd dialogue-guardian
+        isort --check-only --diff src/ tests/
+    
+    - name: Run mypy
+      run: |
+        cd dialogue-guardian
+        mypy src/guardian/ --ignore-missing-imports
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+        cd dialogue-guardian
+        pip install -e .
+    
+    - name: Run bandit security linter
+      run: |
+        cd dialogue-guardian
+        bandit -r src/ -f json -o bandit-report.json || true
+        bandit -r src/
+    
+    - name: Run safety check
+      run: |
+        cd dialogue-guardian
+        safety check --json --output safety-report.json || true
+        safety check
+
+  complexity:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install radon xenon
+    
+    - name: Run radon complexity analysis
+      run: |
+        cd dialogue-guardian
+        radon cc src/ -a -nb
+        radon mi src/ -nb
+    
+    - name: Run xenon complexity check
+      run: |
+        cd dialogue-guardian
+        xenon --max-absolute B --max-modules A --max-average A src/

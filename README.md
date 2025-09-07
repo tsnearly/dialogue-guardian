@@ -1,11 +1,15 @@
 # Dialogue Guardian
 
-[![PyPI version](https://badge.fury.io/py/dialogue-guardian.svg)](https://badge.fury.io/py/dialogue-guardian)
-[![Python Support](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
-[![Tests](https://github.com/yourusername/dialogue-guardian/workflows/Tests/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions)
-[![Coverage Status](https://coveralls.io/repos/github/yourusername/dialogue-guardian/badge.svg?branch=main)](https://coveralls.io/github/yourusername/dialogue-guardian?branch=main)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![CI/CD Pipeline](https://github.com/yourusername/dialogue-guardian/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/ci.yml)
+[![PyPI Package](https://github.com/yourusername/dialogue-guardian/actions/workflows/publish.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/publish.yml)
+[![Tests](https://github.com/yourusername/dialogue-guardian/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/yourusername/dialogue-guardian/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/dialogue-guardian)
+[![PyPI version](https://img.shields.io/pypi/v/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
+[![Python versions](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
+[![Downloads](https://img.shields.io/pypi/dm/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
+[![License](https://img.shields.io/github/license/yourusername/dialogue-guardian.svg)](https://github.com/yourusername/dialogue-guardian/blob/main/LICENSE)
+[![Code Quality](https://github.com/yourusername/dialogue-guardian/actions/workflows/quality.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/quality.yml)
+[![Security Scan](https://github.com/yourusername/dialogue-guardian/actions/workflows/security.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/security.yml)
 
 <p align="center">
   <img src="logo.png" alt="Dialogue Guardian Logo" width="200">

@@ -44,6 +44,7 @@ jobs:
         git config --local user.name "GitHub Action"
     
     - name: Bump version
+      id: bump
       run: |
         cd dialogue-guardian
         # Create .bumpversion.cfg if it doesn't exist
@@ -75,6 +76,7 @@ jobs:
         # Get the new version
         NEW_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d' ' -f3)
         echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        echo "::set-output name=version::$NEW_VERSION"
     
     - name: Build package
       run: |
@@ -85,7 +87,7 @@ jobs:
       run: |
         cd dialogue-guardian
         # Simple changelog generation
-        echo "## Version $NEW_VERSION" > CHANGELOG_ENTRY.md
+        echo "## Version ${{ env.NEW_VERSION }}" > CHANGELOG_ENTRY.md
         echo "" >> CHANGELOG_ENTRY.md
         echo "### Changes" >> CHANGELOG_ENTRY.md
         git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG_ENTRY.md || echo "- Initial release" >> CHANGELOG_ENTRY.md
