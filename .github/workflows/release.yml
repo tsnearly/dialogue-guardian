@@ -97,12 +97,13 @@ jobs:
         git push origin main --tags
     
     - name: Create GitHub Release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v${{ env.NEW_VERSION }}
-        release_name: Release v${{ env.NEW_VERSION }}
+        name: Release v${{ env.NEW_VERSION }}
         body_path: dialogue-guardian/CHANGELOG_ENTRY.md
         draft: false
         prerelease: ${{ github.event.inputs.prerelease }}
+        files: dialogue-guardian/dist/*
