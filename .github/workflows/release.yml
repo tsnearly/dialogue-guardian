@@ -43,11 +43,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install bump2version build
     
-    - name: Configure git
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git config --local url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
     
     - name: Bump version
       id: bump
@@ -87,8 +83,16 @@ jobs:
           git push origin ":refs/tags/v$NEXT_VERSION" || true
         fi
         
-        # Now bump version
+        # Configure git for commits
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Now bump version (this will commit and tag)
         bump2version ${{ github.event.inputs.version_type }}
+        
+        # Push the version bump commit
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git push origin main
     
     - name: Get new version
       id: get_version
