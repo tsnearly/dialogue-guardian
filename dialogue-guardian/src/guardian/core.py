@@ -367,9 +367,7 @@ class GuardianProcessor:
                         )
                         return None
                 else:
-                    logging.error(
-                        "No valid SRT file found. Cannot censor audio."
-                    )
+                    logging.error("No valid SRT file found. Cannot censor audio.")
                     return None
         else:
             logging.info(
@@ -388,9 +386,7 @@ class GuardianProcessor:
                     )
                     return None
             else:
-                logging.error(
-                    "No SRT file found or extractable. Cannot censor audio."
-                )
+                logging.error("No SRT file found or extractable. Cannot censor audio.")
                 return None
 
         if not subs:

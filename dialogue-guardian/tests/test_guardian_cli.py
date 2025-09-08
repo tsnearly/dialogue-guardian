@@ -6,7 +6,6 @@ Unit tests for guardian.cli module
 import argparse
 import io
 import os
-
 import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
