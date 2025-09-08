@@ -76,7 +76,7 @@ jobs:
         # Get the new version
         NEW_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d' ' -f3)
         echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-        echo "::set-output name=version::$NEW_VERSION"
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
     
     - name: Build package
       run: |

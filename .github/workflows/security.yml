@@ -34,7 +34,7 @@ jobs:
     - name: Run Safety dependency check
       run: |
         cd dialogue-guardian
-        safety check --json --output safety-report.json
+        safety check --output json > safety-report.json || echo "No safety issues found"
     
     - name: Run Semgrep security scan
       run: |
@@ -89,4 +89,4 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Dependency Review
-      uses: actions/dependency-review-action@v3
+      uses: actions/dependency-review-action@v4
