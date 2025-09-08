@@ -314,7 +314,7 @@ strategy:
 
 ```yaml
 - name: Cache pip dependencies
-  uses: actions/cache@v3
+  uses: actions/cache@v4
   with:
     path: ~/.cache/pip
     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
