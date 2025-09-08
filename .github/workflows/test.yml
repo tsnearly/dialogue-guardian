@@ -39,7 +39,7 @@ jobs:
         if: runner.os != 'Windows'
         with:
           path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -48,9 +48,13 @@ jobs:
         if: runner.os == 'Windows'
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+      - name: Print cache key (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "Cache key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}"
 
       - name: Install FFmpeg (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
