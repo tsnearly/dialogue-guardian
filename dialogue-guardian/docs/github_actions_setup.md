@@ -60,15 +60,19 @@ Codecov provides detailed code coverage reports and integrates with GitHub to sh
    - Find your `dialogue-guardian` repository
    - Click on it to set it up
 
-3. **Get Repository Token (For Private Repos)**
-   - If your repository is private, you'll need a token
-   - In Codecov, go to your repository settings
+3. **Get Repository Token (Required)**
+   - Go to your repository in Codecov dashboard
+   - Click on "Settings" tab
    - Copy the "Repository Upload Token"
    - Add it as a GitHub secret named `CODECOV_TOKEN`
 
-4. **For Public Repositories**
-   - No token needed! Codecov works automatically with public repos
-   - The workflows are already configured to upload coverage
+4. **Add Token to GitHub Secrets**
+   - Go to your GitHub repository
+   - Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `CODECOV_TOKEN`
+   - Value: Your Codecov repository token
+   - Click "Add secret"
 
 5. **Configure Codecov (Optional)**
    
@@ -113,9 +117,11 @@ Codecov provides detailed code coverage reports and integrates with GitHub to sh
 
 **Troubleshooting Codecov:**
 
+- **"Token required because branch is protected"**: Add `CODECOV_TOKEN` secret even for public repos
 - **Coverage not uploading**: Check that `pytest-cov` is installed and `--cov` flag is used
-- **Token issues**: Ensure `CODECOV_TOKEN` secret is set correctly for private repos
+- **Token issues**: Ensure `CODECOV_TOKEN` secret is set correctly in GitHub repository settings
 - **Low coverage**: Review which files are being tested and add more tests
+- **"Failed to properly create commit"**: Verify the token has the correct permissions in Codecov
 
 ## Workflow Configuration
 
