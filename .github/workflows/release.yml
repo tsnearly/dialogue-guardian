@@ -18,6 +18,10 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -27,6 +31,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
+        persist-credentials: true
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -42,6 +47,7 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        git config --local url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
     
     - name: Bump version
       id: bump
@@ -101,10 +107,6 @@ jobs:
         echo "### Changes" >> CHANGELOG_ENTRY.md
         git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG_ENTRY.md || echo "- Initial release" >> CHANGELOG_ENTRY.md
     
-    - name: Push changes
-      run: |
-        git push origin main --tags
-    
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       env:
@@ -116,3 +118,5 @@ jobs:
         draft: false
         prerelease: ${{ github.event.inputs.prerelease }}
         files: dialogue-guardian/dist/*
+        make_latest: true
+        generate_release_notes: true
