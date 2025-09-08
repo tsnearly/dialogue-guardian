@@ -1,9 +1,7 @@
 Dialogue Guardian Documentation
 ================================
 
-<div align="right"><img src="logo.png" alt="Dialogue Guardian Logo" width="200"></div>
-
-.. image:: logo.png
+.. image:: ../logo.png
    :height: 200px
    :width: 200px
    :scale: 100%
