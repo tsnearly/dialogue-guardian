@@ -6,7 +6,7 @@ Unit tests for guardian.cli module
 import argparse
 import io
 import os
-import sys
+
 import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
@@ -87,9 +87,7 @@ class TestGuardianCLI(unittest.TestCase):
 
     def test_validate_args_invalid_file(self):
         """Test argument validation with non-existent file"""
-        args = argparse.Namespace(
-            video_file="/nonexistent/file.mp4", output=None
-        )
+        args = argparse.Namespace(video_file="/nonexistent/file.mp4", output=None)
 
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
@@ -105,16 +103,12 @@ class TestGuardianCLI(unittest.TestCase):
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
             self.assertFalse(result)
-            self.assertIn(
-                "Output directory does not exist", mock_stderr.getvalue()
-            )
+            self.assertIn("Output directory does not exist", mock_stderr.getvalue())
 
     def test_validate_args_valid_output_dir(self):
         """Test argument validation with valid output directory"""
         output_path = os.path.join(self.temp_dir, "output.mp4")
-        args = argparse.Namespace(
-            video_file=self.test_video, output=output_path
-        )
+        args = argparse.Namespace(video_file=self.test_video, output=output_path)
 
         result = validate_args(args)
         self.assertTrue(result)
@@ -149,7 +143,7 @@ class TestGuardianCLI(unittest.TestCase):
         """Test successful main execution"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
             "guardian.cli.setup_logging"
-        ) as mock_setup_logging, patch(
+        ) as _mock_setup_logging, patch(
             "guardian.cli.GuardianProcessor"
         ) as mock_processor_class, patch(
             "os.path.exists", return_value=True
@@ -189,7 +183,7 @@ class TestGuardianCLI(unittest.TestCase):
         """Test main execution with processing failure"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
             "guardian.cli.setup_logging"
-        ) as mock_setup_logging, patch(
+        ) as _mock_setup_logging, patch(
             "guardian.cli.GuardianProcessor"
         ) as mock_processor_class, patch(
             "os.path.exists", return_value=True
@@ -217,7 +211,7 @@ class TestGuardianCLI(unittest.TestCase):
         """Test main execution with keyboard interrupt"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
             "guardian.cli.setup_logging"
-        ) as mock_setup_logging, patch(
+        ) as _mock_setup_logging, patch(
             "guardian.cli.GuardianProcessor"
         ) as mock_processor_class, patch(
             "os.path.exists", return_value=True
@@ -238,16 +232,14 @@ class TestGuardianCLI(unittest.TestCase):
             result = main()
 
             self.assertEqual(result, 1)
-            self.assertIn(
-                "Process interrupted by user", mock_stderr.getvalue()
-            )
+            self.assertIn("Process interrupted by user", mock_stderr.getvalue())
 
     @patch("sys.argv", ["guardian", "test.mp4"])
     def test_main_unexpected_error(self):
         """Test main execution with unexpected error"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
             "guardian.cli.setup_logging"
-        ) as mock_setup_logging, patch(
+        ) as _mock_setup_logging, patch(
             "guardian.cli.GuardianProcessor"
         ) as mock_processor_class, patch(
             "os.path.exists", return_value=True
@@ -262,17 +254,13 @@ class TestGuardianCLI(unittest.TestCase):
 
             # Mock processor to raise unexpected error
             mock_processor = MagicMock()
-            mock_processor.process_video.side_effect = RuntimeError(
-                "Unexpected error"
-            )
+            mock_processor.process_video.side_effect = RuntimeError("Unexpected error")
             mock_processor_class.return_value = mock_processor
 
             result = main()
 
             self.assertEqual(result, 1)
-            self.assertIn(
-                "An unexpected error occurred", mock_stderr.getvalue()
-            )
+            self.assertIn("An unexpected error occurred", mock_stderr.getvalue())
 
     @patch("sys.argv", ["guardian", "--version"])
     def test_version_argument(self):

@@ -81,7 +81,8 @@ class GuardianProcessor:
         Initialize the GuardianProcessor.
 
         Args:
-            matching_words: Custom list of words to censor. Uses default if None.
+            matching_words: Custom list of words to censor. Uses default if
+                None.
             ffmpeg_cmd: Path to ffmpeg executable.
             ffprobe_cmd: Path to ffprobe executable.
         """
@@ -146,9 +147,7 @@ class GuardianProcessor:
                         details["codec"] = parts[0]
                         details["samplerate"] = parts[1]
                         details["channels"] = parts[2]
-                        details["audioconfig"] = (
-                            parts[3] if len(parts) > 3 else ""
-                        )
+                        details["audioconfig"] = parts[3] if len(parts) > 3 else ""
                         save_channels = test_channels
 
             # Get video stream details
@@ -193,22 +192,19 @@ class GuardianProcessor:
                 details["framerate"] = None
                 details["frameduration"] = None
 
-            logging.debug(
-                f"Video Info Dictionary:\n{json.dumps(details, indent=4)}"
-            )
+            logging.debug(f"Video Info Dictionary:\n{json.dumps(details, indent=4)}")
             return details
         except subprocess.CalledProcessError as e:
             logging.error(f"ffprobe command failed: {e.stderr}")
             return None
         except FileNotFoundError:
             logging.error(
-                "ffprobe not found. Please ensure FFmpeg is installed and in your system's PATH."
+                "ffprobe not found. Please ensure FFmpeg is installed and in "
+                "your system's PATH."
             )
             return None
 
-    def extract_embedded_srt(
-        self, video_path: str, output_srt_path: str
-    ) -> bool:
+    def extract_embedded_srt(self, video_path: str, output_srt_path: str) -> bool:
         """
         Extracts the first embedded SRT subtitle track from a video file,
         prioritizing default tracks.
@@ -257,7 +253,7 @@ class GuardianProcessor:
                     if stream.get("disposition", {}).get("default") == 1:
                         srt_stream_index = stream["index"]
                         logging.info(
-                            f"Found default embedded SRT stream at index: {srt_stream_index}"
+                            f"Found default SRT stream at index: {srt_stream_index}"
                         )
                         break
 
@@ -265,7 +261,7 @@ class GuardianProcessor:
                 if srt_stream_index == -1:
                     srt_stream_index = found_srt_streams[0]["index"]
                     logging.info(
-                        f"Found non-default embedded SRT stream at index: {srt_stream_index}"
+                        f"Found non-default SRT stream at index: {srt_stream_index}"
                     )
 
             if srt_stream_index != -1:
@@ -283,23 +279,15 @@ class GuardianProcessor:
                     output_srt_path,
                     "-y",
                 ]
-                logging.info(
-                    f"Executing SRT extraction: {' '.join(cmd_extract_srt)}"
-                )
+                logging.info(f"Executing SRT extraction: {' '.join(cmd_extract_srt)}")
                 process = subprocess.run(
                     cmd_extract_srt, check=True, capture_output=True, text=True
                 )
-                logging.info(
-                    f"FFmpeg stdout (SRT extraction):\n{process.stdout}"
-                )
-                logging.info(
-                    f"Successfully extracted SRT to: {output_srt_path}"
-                )
+                logging.info(f"FFmpeg stdout (SRT extraction):\n{process.stdout}")
+                logging.info(f"Successfully extracted SRT to: {output_srt_path}")
                 return True
             else:
-                logging.info(
-                    "No embedded SRT subtitle track (subrip codec) found."
-                )
+                logging.info("No embedded SRT subtitle track (subrip codec) found.")
                 return False
 
         except json.JSONDecodeError as e:
@@ -308,20 +296,18 @@ class GuardianProcessor:
             return False
         except subprocess.CalledProcessError as e:
             logging.error(
-                f"FFmpeg/ffprobe command failed during SRT extraction. Return code: {e.returncode}"
+                f"FFmpeg/ffprobe failed during extraction. Return code: {e.returncode}"
             )
             logging.error(f"FFmpeg stdout (SRT extraction error):\n{e.stdout}")
             logging.error(f"FFmpeg stderr (SRT extraction error):\n{e.stderr}")
             return False
         except FileNotFoundError:
             logging.error(
-                "ffmpeg or ffprobe not found during SRT extraction. Ensure FFmpeg is installed and in your system's PATH."
+                "ffmpeg or ffprobe not found. Check installation and system path."
             )
             return False
         except Exception as e:
-            logging.error(
-                f"An unexpected error occurred during SRT extraction: {e}"
-            )
+            logging.error(f"An unexpected error occurred during SRT extraction: {e}")
             return False
 
     def censor_audio_with_ffmpeg(
@@ -332,10 +318,12 @@ class GuardianProcessor:
 
         Args:
             video_path: Path to the input video file.
-            output_path: Optional custom output path. If None, generates default name.
+            output_path: Optional custom output path. If None, generates
+                default name.
 
         Returns:
-            Path to the newly created censored video file, or None if an error occurred.
+            Path to the newly created censored video file, or None if an
+                error occurred.
         """
         if output_path is None:
             output_path = f"{os.path.splitext(video_path)[0]}_censored.mp4"
@@ -349,9 +337,7 @@ class GuardianProcessor:
                 lang_srt_path = f"{base_path}.{lang}.srt"
                 if os.path.exists(lang_srt_path):
                     srt_path = lang_srt_path
-                    logging.info(
-                        f"Found language-specific SRT file: {srt_path}"
-                    )
+                    logging.info(f"Found language-specific SRT file: {srt_path}")
                     break
 
         # Try to load external SRT first
@@ -377,17 +363,17 @@ class GuardianProcessor:
                         )
                     except Exception as e:
                         logging.error(
-                            f"Error reading or parsing extracted SRT file {srt_path}: {e}"
+                            f"Error parsing extracted SRT file {srt_path}: {e}"
                         )
                         return None
                 else:
                     logging.error(
-                        "No valid SRT file (external or embedded) found or extractable. Cannot censor audio."
+                        "No valid SRT file found. Cannot censor audio."
                     )
                     return None
         else:
             logging.info(
-                f"External SRT file not found: {srt_path}. Attempting to extract from video."
+                f"External SRT not found: {srt_path}. Attempting video extraction."
             )
             # If external SRT not found, try to extract embedded SRT
             if self.extract_embedded_srt(video_path, srt_path):
@@ -395,9 +381,7 @@ class GuardianProcessor:
                     with open(srt_path, "r", encoding="utf-8-sig") as f:
                         srt_content = f.read()
                     subs = list(srt.parse(srt_content))
-                    logging.info(
-                        f"Successfully loaded extracted SRT from {srt_path}"
-                    )
+                    logging.info(f"Successfully loaded extracted SRT from {srt_path}")
                 except Exception as e:
                     logging.error(
                         f"Error reading or parsing extracted SRT file {srt_path}: {e}"
@@ -405,17 +389,17 @@ class GuardianProcessor:
                     return None
             else:
                 logging.error(
-                    "No SRT file (external or embedded) found or extractable. Cannot censor audio."
+                    "No SRT file found or extractable. Cannot censor audio."
                 )
                 return None
 
         if not subs:
             logging.warning(
-                "No subtitles found after checking external and embedded sources. No audio censoring will be applied."
+                "No subtitles found in sources. No censoring will be applied."
             )
             audio_filter_graph = "anull"
         else:
-            # Build a single regex pattern to find any of the words/phrases as whole words
+            # Build a single regex pattern to find any phrases as whole words
             pattern = (
                 r"\b("
                 + "|".join(re.escape(word) for word in self.matching_words)
@@ -442,9 +426,7 @@ class GuardianProcessor:
                     f"volume=enable='between(t,{start_s},{end_s})':volume=0"
                 )
 
-            audio_filter_graph = (
-                ",".join(filter_parts) if filter_parts else "anull"
-            )
+            audio_filter_graph = ",".join(filter_parts) if filter_parts else "anull"
 
         # Construct the FFmpeg command
         ffmpeg_command = [
@@ -476,15 +458,13 @@ class GuardianProcessor:
             logging.info(f"Successfully created censored video: {output_path}")
             return output_path
         except subprocess.CalledProcessError as e:
-            logging.error(
-                f"FFmpeg command failed. Return code: {e.returncode}"
-            )
+            logging.error(f"FFmpeg command failed. Return code: {e.returncode}")
             logging.error(f"FFmpeg stdout:\n{e.stdout}")
             logging.error(f"FFmpeg stderr:\n{e.stderr}")
             return None
         except FileNotFoundError:
             logging.error(
-                "ffmpeg not found. Please ensure FFmpeg is installed and in your system's PATH."
+                "Please ensure FFmpeg is installed and in your system's PATH."
             )
             return None
 

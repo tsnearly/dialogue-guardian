@@ -11,9 +11,7 @@ from typing import Optional
 from .core import GuardianProcessor
 
 
-def setup_logging(
-    log_file: Optional[str] = None, verbose: bool = False
-) -> None:
+def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> None:
     """
     Configure logging for the application.
 
@@ -78,9 +76,7 @@ def create_parser() -> argparse.ArgumentParser:
         help="Path to ffprobe executable (default: ffprobe)",
     )
 
-    parser.add_argument(
-        "--version", action="version", version="%(prog)s 1.1.0"
-    )
+    parser.add_argument("--version", action="version", version="%(prog)s 1.1.0")
 
     return parser
 
@@ -97,9 +93,7 @@ def validate_args(args: argparse.Namespace) -> bool:
     """
     # Check if video file exists
     if not os.path.exists(args.video_file):
-        print(
-            f"Error: Video file not found: {args.video_file}", file=sys.stderr
-        )
+        print(f"Error: Video file not found: {args.video_file}", file=sys.stderr)
         return False
 
     # Validate output path if provided

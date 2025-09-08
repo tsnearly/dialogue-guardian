@@ -90,12 +90,13 @@ class TestGuardianProcessor(unittest.TestCase):
 
     @patch("subprocess.check_output")
     @patch("json.loads")
-    def test_extract_embedded_srt_success(
-        self, mock_json_loads, mock_check_output
-    ):
+    def test_extract_embedded_srt_success(self, mock_json_loads, mock_check_output):
         """Test successful SRT extraction"""
         # Mock ffprobe response
-        mock_check_output.return_value = '{"streams": [{"index": 2, "codec_name": "subrip", "disposition": {"default": 1}}]}'
+        mock_check_output.return_value = (
+            '{"streams": [{"index": 2, "codec_name": "subrip", '
+            '"disposition": {"default": 1}}]}'
+        )
         mock_json_loads.return_value = {
             "streams": [
                 {
@@ -108,9 +109,7 @@ class TestGuardianProcessor(unittest.TestCase):
 
         # Mock successful ffmpeg extraction
         with patch("subprocess.run") as mock_run:
-            mock_run.return_value = MagicMock(
-                returncode=0, stdout="Success", stderr=""
-            )
+            mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
 
             result = self.processor.extract_embedded_srt(
                 self.test_video_path, self.test_srt_path
@@ -166,9 +165,7 @@ class TestGuardianProcessor(unittest.TestCase):
         mock_srt_parse.return_value = [mock_subtitle]
 
         # Mock successful ffmpeg execution
-        mock_run.return_value = MagicMock(
-            returncode=0, stdout="Success", stderr=""
-        )
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
 
         result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -202,9 +199,7 @@ class TestGuardianProcessor(unittest.TestCase):
         mock_srt_parse.return_value = [mock_subtitle]
 
         # Mock successful ffmpeg execution
-        mock_run.return_value = MagicMock(
-            returncode=0, stdout="Success", stderr=""
-        )
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
 
         custom_output = "/custom/output.mp4"
         result = self.processor.censor_audio_with_ffmpeg(
@@ -218,14 +213,10 @@ class TestGuardianProcessor(unittest.TestCase):
         """Test when no SRT file is found"""
         mock_exists.return_value = False
 
-        with patch.object(
-            self.processor, "extract_embedded_srt"
-        ) as mock_extract:
+        with patch.object(self.processor, "extract_embedded_srt") as mock_extract:
             mock_extract.return_value = False
 
-            result = self.processor.censor_audio_with_ffmpeg(
-                self.test_video_path
-            )
+            result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
         self.assertIsNone(result)
 
@@ -246,9 +237,7 @@ class TestGuardianProcessor(unittest.TestCase):
         mock_srt_parse.return_value = [mock_subtitle]
 
         # Mock successful ffmpeg execution
-        mock_run.return_value = MagicMock(
-            returncode=0, stdout="Success", stderr=""
-        )
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
 
         result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -278,9 +267,7 @@ class TestGuardianProcessor(unittest.TestCase):
             mock_subtitle.index = 1
             mock_srt_parse.return_value = [mock_subtitle]
 
-            result = self.processor.censor_audio_with_ffmpeg(
-                self.test_video_path
-            )
+            result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
         self.assertIsNone(result)
 
@@ -329,9 +316,7 @@ class TestGuardianProcessor(unittest.TestCase):
 
         pattern = (
             r"\b("
-            + "|".join(
-                re.escape(word) for word in self.processor.matching_words
-            )
+            + "|".join(re.escape(word) for word in self.processor.matching_words)
             + r")\b"
         )
         compiled_pattern = re.compile(pattern, re.IGNORECASE)
@@ -347,9 +332,7 @@ class TestGuardianProcessor(unittest.TestCase):
 
         for text, should_match in test_cases:
             match = compiled_pattern.search(text.lower())
-            self.assertEqual(
-                bool(match), should_match, f"Failed for text: {text}"
-            )
+            self.assertEqual(bool(match), should_match, f"Failed for text: {text}")
 
 
 if __name__ == "__main__":

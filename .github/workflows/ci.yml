@@ -83,8 +83,8 @@ jobs:
     - name: Run linting
       run: |
         cd dialogue-guardian
-        flake8 src/ tests/
-        black --check src/ tests/
+        flake8 src/ tests/ --config .flake8
+        black --check src/ tests/ --line-length=88
         isort --check-only src/ tests/
 
   build:
