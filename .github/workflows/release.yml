@@ -72,11 +72,20 @@ jobs:
         
         # Bump version
         bump2version ${{ github.event.inputs.version_type }}
-        
-        # Get the new version
-        NEW_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d' ' -f3)
-        echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
-        echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+    
+    - name: Get new version
+      id: get_version
+      working-directory: dialogue-guardian
+      run: |
+        # Extract version using Python to avoid shell parsing issues
+        NEW_VERSION=$(python -c "
+        import configparser
+        config = configparser.ConfigParser()
+        config.read('.bumpversion.cfg')
+        print(config['bumpversion']['current_version'])
+        ")
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
     
     - name: Build package
       working-directory: dialogue-guardian
@@ -87,7 +96,7 @@ jobs:
       working-directory: dialogue-guardian
       run: |
         # Simple changelog generation
-        echo "## Version ${{ env.NEW_VERSION }}" > CHANGELOG_ENTRY.md
+        echo "## Version $NEW_VERSION" > CHANGELOG_ENTRY.md
         echo "" >> CHANGELOG_ENTRY.md
         echo "### Changes" >> CHANGELOG_ENTRY.md
         git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG_ENTRY.md || echo "- Initial release" >> CHANGELOG_ENTRY.md

@@ -1,15 +1,15 @@
 # Dialogue Guardian
 
-[![CI/CD Pipeline](https://github.com/yourusername/dialogue-guardian/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/ci.yml)
-[![PyPI Package](https://github.com/yourusername/dialogue-guardian/actions/workflows/publish.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/publish.yml)
-[![Tests](https://github.com/yourusername/dialogue-guardian/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/test.yml)
-[![Coverage](https://codecov.io/gh/yourusername/dialogue-guardian/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/dialogue-guardian)
+[![CI/CD Pipeline](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml)
+[![PyPI Package](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml)
+[![Tests](https://github.com/tsnearly/dialogue-guardian/actions/workflows/test.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/tsnearly/dialogue-guardian/branch/main/graph/badge.svg)](https://codecov.io/gh/tsnearly/dialogue-guardian)
 [![PyPI version](https://img.shields.io/pypi/v/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Python versions](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Downloads](https://img.shields.io/pypi/dm/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
-[![License](https://img.shields.io/github/license/yourusername/dialogue-guardian.svg)](https://github.com/yourusername/dialogue-guardian/blob/main/LICENSE)
-[![Code Quality](https://github.com/yourusername/dialogue-guardian/actions/workflows/quality.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/quality.yml)
-[![Security Scan](https://github.com/yourusername/dialogue-guardian/actions/workflows/security.yml/badge.svg)](https://github.com/yourusername/dialogue-guardian/actions/workflows/security.yml)
+[![License](https://img.shields.io/github/license/tsnearly/dialogue-guardian.svg)](https://github.com/tsnearly/dialogue-guardian/blob/main/LICENSE)
+[![Code Quality](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml)
+[![Security Scan](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml)
 
 <p align="center">
   <img src="logo.png" alt="Dialogue Guardian Logo" width="200">
@@ -47,20 +47,23 @@ guardian movie.mp4
 ## 🛠️ Installation
 
 ### From PyPI (Recommended)
+
 ```bash
 pip install dialogue-guardian
 ```
 
 ### From Source
+
 ```bash
-git clone https://github.com/yourusername/dialogue-guardian.git
+git clone https://github.com/tsnearly/dialogue-guardian.git
 cd dialogue-guardian
 pip install -e .
 ```
 
 ### Development Installation
+
 ```bash
-git clone https://github.com/yourusername/dialogue-guardian.git
+git clone https://github.com/tsnearly/dialogue-guardian.git
 cd dialogue-guardian
 make install-dev
 ```
@@ -117,7 +120,7 @@ pytest tests/test_guardian_core.py -v
 
 ```bash
 # Clone and setup
-git clone https://github.com/yourusername/dialogue-guardian.git
+git clone https://github.com/tsnearly/dialogue-guardian.git
 cd dialogue-guardian
 make install-dev
 
