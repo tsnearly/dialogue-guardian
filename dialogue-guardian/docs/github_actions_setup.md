@@ -46,6 +46,77 @@ To use the publishing workflows, you need to configure these secrets in your Git
    - Follow same process as above on test.pypi.org
    - Add as `TEST_PYPI_API_TOKEN` secret
 
+### Codecov Setup (Optional - For Coverage Reports)
+
+Codecov provides detailed code coverage reports and integrates with GitHub to show coverage changes in pull requests.
+
+1. **Sign up for Codecov**
+   - Go to https://codecov.io/
+   - Sign in with your GitHub account
+   - Authorize Codecov to access your repositories
+
+2. **Add Your Repository**
+   - Click "Add new repository" or go to https://codecov.io/gh/yourusername
+   - Find your `dialogue-guardian` repository
+   - Click on it to set it up
+
+3. **Get Repository Token (For Private Repos)**
+   - If your repository is private, you'll need a token
+   - In Codecov, go to your repository settings
+   - Copy the "Repository Upload Token"
+   - Add it as a GitHub secret named `CODECOV_TOKEN`
+
+4. **For Public Repositories**
+   - No token needed! Codecov works automatically with public repos
+   - The workflows are already configured to upload coverage
+
+5. **Configure Codecov (Optional)**
+   
+   Create a `.codecov.yml` file in your repository root:
+   
+   ```yaml
+   # .codecov.yml
+   coverage:
+     status:
+       project:
+         default:
+           target: 80%          # Target coverage percentage
+           threshold: 1%        # Allow 1% decrease
+       patch:
+         default:
+           target: 80%          # New code should have 80% coverage
+   
+   comment:
+     layout: "reach,diff,flags,tree"
+     behavior: default
+     require_changes: false
+   
+   ignore:
+     - "tests/"              # Ignore test files from coverage
+     - "setup.py"
+     - "docs/"
+   ```
+
+6. **Verify Coverage Upload**
+   - Push a commit to trigger the CI workflow
+   - Check the "Coverage" job in GitHub Actions
+   - Visit your Codecov dashboard to see the report
+   - Coverage reports will appear on pull requests
+
+7. **Add Coverage Badge to README**
+   
+   Get the badge from Codecov and add to your README.md:
+   
+   ```markdown
+   [![Coverage Status](https://codecov.io/gh/yourusername/dialogue-guardian/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/dialogue-guardian)
+   ```
+
+**Troubleshooting Codecov:**
+
+- **Coverage not uploading**: Check that `pytest-cov` is installed and `--cov` flag is used
+- **Token issues**: Ensure `CODECOV_TOKEN` secret is set correctly for private repos
+- **Low coverage**: Review which files are being tested and add more tests
+
 ## Workflow Configuration
 
 ### 1. CI Workflow (`.github/workflows/ci.yml`)
