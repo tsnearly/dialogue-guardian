@@ -10,8 +10,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: 
+      name: pypi
+      url: https://pypi.org/project/dialogue-guardian/
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Debug workflow trigger
+      run: |
+        echo "Event name: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "Repository: ${{ github.repository }}"
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -50,6 +59,14 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
         cd dialogue-guardian
+        echo "Publishing to PyPI..."
+        echo "Event: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        if [ -z "${{ secrets.PYPI_API_TOKEN }}" ]; then
+          echo "ERROR: PYPI_API_TOKEN secret is not set!"
+          echo "Please add your PyPI API token as a repository secret."
+          exit 1
+        fi
         twine upload dist/*
 
   test-install:
