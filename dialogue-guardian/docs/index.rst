@@ -1,6 +1,8 @@
 Dialogue Guardian Documentation
 ================================
 
+<div align="right"><img src="logo.png" alt="Dialogue Guardian Logo" width="200"></div>
+
 **Dialogue Guardian** is a universal media censor that automatically detects and censors profane language in video files by processing SRT subtitle files.
 
 .. image:: https://img.shields.io/badge/python-3.7+-blue.svg
