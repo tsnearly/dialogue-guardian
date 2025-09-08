@@ -23,7 +23,7 @@ setup(
     description="Universal Media Censor - Automatically detect and censor profane language in video files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/dialogue-guardian",  # Update with actual URL
+    url="https://github.com/tsnearly/dialogue-guardian",  # Update with actual URL
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
@@ -51,7 +51,7 @@ setup(
     },
     keywords="video, audio, censoring, subtitles, ffmpeg, profanity, media",
     project_urls={
-        "Bug Reports": "https://github.com/yourusername/dialogue-guardian/issues",
-        "Source": "https://github.com/yourusername/dialogue-guardian",
+        "Bug Reports": "https://github.com/tsnearly/dialogue-guardian/issues",
+        "Source": "https://github.com/tsnearly/dialogue-guardian",
     },
 )

@@ -1,7 +1,7 @@
 Changelog
 =========
 
-For the complete changelog, see the `CHANGELOG.md <https://github.com/yourusername/dialogue-guardian/blob/main/dialogue-guardian/CHANGELOG.md>`_ file in the repository.
+For the complete changelog, see the `CHANGELOG.md <https://github.com/tsnearly/dialogue-guardian/blob/main/dialogue-guardian/CHANGELOG.md>`_ file in the repository.
 
 Recent Changes
 --------------

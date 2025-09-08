@@ -32,9 +32,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/dialogue-guardian"
-"Bug Reports" = "https://github.com/yourusername/dialogue-guardian/issues"
-"Source" = "https://github.com/yourusername/dialogue-guardian"
+Homepage = "https://github.com/tsnearly/dialogue-guardian"
+"Bug Reports" = "https://github.com/tsnearly/dialogue-guardian/issues"
+"Source" = "https://github.com/tsnearly/dialogue-guardian"
 
 [project.scripts]
 guardian = "guardian.cli:main"

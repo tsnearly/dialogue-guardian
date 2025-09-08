@@ -44,7 +44,7 @@ From Source
 
 .. code-block:: bash
 
-   git clone https://github.com/yourusername/dialogue-guardian.git
+   git clone https://github.com/tsnearly/dialogue-guardian.git
    cd dialogue-guardian
    pip install -e .
 
@@ -55,7 +55,7 @@ For development work:
 
 .. code-block:: bash
 
-   git clone https://github.com/yourusername/dialogue-guardian.git
+   git clone https://github.com/tsnearly/dialogue-guardian.git
    cd dialogue-guardian
    pip install -e .
    pip install -r dev-requirements.txt

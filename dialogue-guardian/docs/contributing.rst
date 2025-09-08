@@ -12,7 +12,7 @@ Getting Started
    
    .. code-block:: bash
    
-      git clone https://github.com/yourusername/dialogue-guardian.git
+      git clone https://github.com/tsnearly/dialogue-guardian.git
       cd dialogue-guardian
 
 2. **Set Up Development Environment**
