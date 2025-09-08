@@ -1,7 +1,7 @@
 Dialogue Guardian Documentation
 ================================
 
-.. image:: ../logo.png
+.. image:: /logo.png
    :height: 200px
    :width: 200px
    :scale: 100%
