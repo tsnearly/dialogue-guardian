@@ -101,7 +101,7 @@ class GuardianProcessor:
             Dictionary containing video duration, audio codec, sample rate,
             channels, video width, height, and frame rate.
         """
-        details = {}
+        details: Dict[str, Any] = {}
         logging.debug(f"Getting video details for: {filename}")
 
         try:
