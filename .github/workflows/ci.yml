@@ -46,13 +46,12 @@ jobs:
         python -m pip install --upgrade pip
         cd dialogue-guardian
         pip install -r dev-requirements.txt
-        pip install -e .
+        pip install -e . -v
     
     - name: Run tests with coverage
       run: |
-        cd dialogue-guardian
-        export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
-        pytest --cov=guardian --cov-report=xml --cov-report=html
+        cd dialogue-guardian/src
+        python -m pytest ../tests/ --cov=guardian --cov-report=xml --cov-report=html
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -79,12 +78,11 @@ jobs:
         python -m pip install --upgrade pip
         cd dialogue-guardian
         pip install -r dev-requirements.txt
-        pip install -e .
+        pip install -e . -v
     
     - name: Run linting
       run: |
         cd dialogue-guardian
-        export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
         flake8 src/ tests/
         black --check src/ tests/
         isort --check-only src/ tests/
