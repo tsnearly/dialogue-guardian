@@ -14,9 +14,18 @@ on:
       - 'dialogue-guardian/src/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     
     steps:
     - uses: actions/checkout@v4
@@ -44,9 +53,17 @@ jobs:
         name: documentation
         path: dialogue-guardian/docs/_build/html/
     
+    - name: Setup Pages
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      uses: actions/configure-pages@v4
+    
+    - name: Upload to GitHub Pages
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: dialogue-guardian/docs/_build/html/
+    
     - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: dialogue-guardian/docs/_build/html
+      id: deployment
+      uses: actions/deploy-pages@v4
