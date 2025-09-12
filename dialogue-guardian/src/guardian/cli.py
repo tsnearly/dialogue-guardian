@@ -9,9 +9,10 @@ import sys
 from typing import Optional, List
 
 from .core import GuardianProcessor
+from . import __version__
 
 
-def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> None:
+def setup_logging(log_file: Optional[str] = None, debug: bool = False) -> None:
     """
     Configure logging for the application.
 
@@ -19,14 +20,14 @@ def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> None
         log_file: Optional path to log file. If None, uses script name.
         verbose: If True, sets DEBUG level, otherwise INFO.
     """
-    level = logging.DEBUG if verbose else logging.INFO
+    level = logging.DEBUG if debug else logging.INFO
 
     if log_file is None:
         log_file = "dialogue-guardian.log"
 
     # Configure logging handlers
     handlers: List[logging.Handler] = [logging.StreamHandler()]
-    
+
     # Try to add file handler, fall back gracefully if it fails
     try:
         handlers.append(logging.FileHandler(log_file, mode="w"))
@@ -43,7 +44,9 @@ def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> None
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """Create and configure the argument parser."""
+    """
+    Create and configure the argument parser.
+    """
     parser = argparse.ArgumentParser(
         prog="guardian",
         description="Dialogue Guardian: Universal Media Censor - "
@@ -51,39 +54,57 @@ def create_parser() -> argparse.ArgumentParser:
         epilog="Example: guardian movie.mp4",
     )
 
-    parser.add_argument("video_file", help="Path to the video file to process")
-
     parser.add_argument(
-        "-o",
-        "--output",
-        help="Output path for the censored video file. "
-        'If not specified, creates a file with "_censored" suffix.',
+        "--input",
+        "-i",
+        dest="inputfile",
+        nargs="*",
+        required=True,
+        help="Path of the video file to process",
     )
 
     parser.add_argument(
-        "-v",
-        "--verbose",
+        "--output",
+        "-o",
+        dest="outputfile",
+        help="Output path for the censored video file. "
+        "If not specified, creates a file with '_censored' suffix.",
+    )
+
+    parser.add_argument(
+        "--log-file",
+        "-l",
+        dest="logfile",
+        nargs="*",
+        help="Path to log file (default: dialogue-guardian.log)",
+    )
+
+    parser.add_argument(
+        "--debug",
+        "-d",
         action="store_true",
         help="Enable verbose logging (DEBUG level)",
     )
 
     parser.add_argument(
-        "--log-file", help="Path to log file (default: guardian_by_ffmpeg.log)"
-    )
-
-    parser.add_argument(
         "--ffmpeg-path",
+        "-m",
+        dest="ffmpeg",
         default="ffmpeg",
         help="Path to ffmpeg executable (default: ffmpeg)",
     )
 
     parser.add_argument(
         "--ffprobe-path",
+        "-p",
+        dest="ffprobe",
         default="ffprobe",
         help="Path to ffprobe executable (default: ffprobe)",
     )
 
-    parser.add_argument("--version", action="version", version="%(prog)s 1.1.0")
+    parser.add_argument(
+        "--version", "-ver", help="Show version", action="version", version=__version__
+    )
 
     return parser
 
@@ -99,8 +120,8 @@ def validate_args(args: argparse.Namespace) -> bool:
         True if arguments are valid, False otherwise.
     """
     # Check if video file exists
-    if not os.path.exists(args.video_file):
-        print(f"Error: Video file not found: {args.video_file}", file=sys.stderr)
+    if not os.path.exists(args.inputfile):
+        print(f"Error: Input video file not found: {args.inputfile}", file=sys.stderr)
         return False
 
     # Validate output path if provided
@@ -131,10 +152,10 @@ def main() -> int:
         return 1
 
     # Setup logging
-    setup_logging(args.log_file, args.verbose)
+    setup_logging(args.log_file, args.debug)
 
     # Get absolute path for the video file
-    video_path = os.path.abspath(args.video_file)
+    video_path = os.path.abspath(args.inputfile)
     logging.info(f"Processing file: {video_path}")
 
     try:

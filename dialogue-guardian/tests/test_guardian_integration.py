@@ -25,6 +25,7 @@ class TestGuardianIntegration(unittest.TestCase):
     def tearDown(self):
         """Clean up test fixtures"""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     @patch("subprocess.check_output")
@@ -77,7 +78,9 @@ class TestGuardianIntegration(unittest.TestCase):
 
     @patch("subprocess.check_output")
     @patch("json.loads")
-    def test_extract_embedded_srt_multiple_streams(self, mock_json_loads, mock_check_output):
+    def test_extract_embedded_srt_multiple_streams(
+        self, mock_json_loads, mock_check_output
+    ):
         """Test SRT extraction with multiple subtitle streams"""
         mock_check_output.return_value = '{"streams": []}'
         mock_json_loads.return_value = {
@@ -109,7 +112,9 @@ class TestGuardianIntegration(unittest.TestCase):
 
     @patch("subprocess.check_output")
     @patch("json.loads")
-    def test_extract_embedded_srt_no_default_stream(self, mock_json_loads, mock_check_output):
+    def test_extract_embedded_srt_no_default_stream(
+        self, mock_json_loads, mock_check_output
+    ):
         """Test SRT extraction when no default stream is available"""
         mock_check_output.return_value = '{"streams": []}'
         mock_json_loads.return_value = {
@@ -142,7 +147,9 @@ class TestGuardianIntegration(unittest.TestCase):
     @patch("subprocess.run")
     def test_extract_embedded_srt_ffmpeg_failure(self, mock_run):
         """Test SRT extraction when ffmpeg fails"""
-        with patch("subprocess.check_output") as mock_check_output, patch("json.loads") as mock_json:
+        with patch("subprocess.check_output") as mock_check_output, patch(
+            "json.loads"
+        ) as mock_json:
             mock_check_output.return_value = '{"streams": []}'
             mock_json.return_value = {
                 "streams": [
@@ -154,6 +161,7 @@ class TestGuardianIntegration(unittest.TestCase):
                 ]
             }
             import subprocess
+
             mock_run.side_effect = subprocess.CalledProcessError(
                 1, "ffmpeg", "Extraction failed"
             )
@@ -167,12 +175,15 @@ class TestGuardianIntegration(unittest.TestCase):
     @patch("os.path.exists")
     @patch("builtins.open", new_callable=mock_open)
     @patch("srt.parse")
-    def test_censor_audio_language_specific_srt(self, mock_srt_parse, mock_file, mock_exists):
+    def test_censor_audio_language_specific_srt(
+        self, mock_srt_parse, mock_file, mock_exists
+    ):
         """Test audio censoring with language-specific SRT files"""
+
         # Mock file existence - main SRT doesn't exist, but English one does
         def exists_side_effect(path):
             return path.endswith(".en.srt")
-        
+
         mock_exists.side_effect = exists_side_effect
 
         # Mock SRT parsing
@@ -193,7 +204,9 @@ class TestGuardianIntegration(unittest.TestCase):
     @patch("os.path.exists")
     @patch("builtins.open", new_callable=mock_open)
     @patch("srt.parse")
-    def test_censor_audio_srt_parsing_error(self, mock_srt_parse, mock_file, mock_exists):
+    def test_censor_audio_srt_parsing_error(
+        self, mock_srt_parse, mock_file, mock_exists
+    ):
         """Test audio censoring when SRT parsing fails"""
         mock_exists.return_value = True
         mock_srt_parse.side_effect = Exception("Parsing failed")
@@ -213,21 +226,22 @@ class TestGuardianIntegration(unittest.TestCase):
     ):
         """Test fallback to embedded SRT when external SRT has errors"""
         mock_exists.return_value = True
-        
+
         # First call (external SRT) fails, second call (extracted SRT) succeeds
         mock_subtitle = MagicMock()
         mock_subtitle.start.total_seconds.return_value = 10.0
         mock_subtitle.end.total_seconds.return_value = 15.0
         mock_subtitle.content = "This is fucking bad"
         mock_subtitle.index = 1
-        
+
         mock_srt_parse.side_effect = [
             Exception("External SRT parsing failed"),
-            [mock_subtitle]
+            [mock_subtitle],
         ]
 
-        with patch.object(self.processor, "extract_embedded_srt") as mock_extract, \
-             patch("subprocess.run") as mock_run:
+        with patch.object(
+            self.processor, "extract_embedded_srt"
+        ) as mock_extract, patch("subprocess.run") as mock_run:
             mock_extract.return_value = True
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
 
@@ -257,19 +271,24 @@ class TestGuardianIntegration(unittest.TestCase):
     @patch("os.path.exists")
     @patch("builtins.open", new_callable=mock_open)
     @patch("srt.parse")
-    def test_censor_audio_complex_profanity_patterns(self, mock_srt_parse, mock_file, mock_exists):
+    def test_censor_audio_complex_profanity_patterns(
+        self, mock_srt_parse, mock_file, mock_exists
+    ):
         """Test audio censoring with complex profanity patterns"""
         mock_exists.return_value = True
 
         # Create subtitles with various profanity patterns
         subtitles = []
-        for i, content in enumerate([
-            "This is fucking terrible!",  # Basic profanity
-            "What the hell is going on?",  # Common phrase
-            "Jesus Christ, that's bad",  # Religious profanity
-            "You're such a smartass",  # Compound word
-            "Clean content here",  # No profanity
-        ], 1):
+        for i, content in enumerate(
+            [
+                "This is fucking terrible!",  # Basic profanity
+                "What the hell is going on?",  # Common phrase
+                "Jesus Christ, that's bad",  # Religious profanity
+                "You're such a smartass",  # Compound word
+                "Clean content here",  # No profanity
+            ],
+            1,
+        ):
             mock_subtitle = MagicMock()
             mock_subtitle.start.total_seconds.return_value = i * 10.0
             mock_subtitle.end.total_seconds.return_value = i * 10.0 + 5.0
@@ -299,17 +318,18 @@ class TestGuardianIntegration(unittest.TestCase):
         """Test processor with custom matching words"""
         custom_words = ["badword", "anotherbad"]
         processor = GuardianProcessor(matching_words=custom_words)
-        
+
         self.assertEqual(processor.matching_words, custom_words)
-        self.assertNotEqual(processor.matching_words, GuardianProcessor.DEFAULT_MATCHING_WORDS)
+        self.assertNotEqual(
+            processor.matching_words, GuardianProcessor.DEFAULT_MATCHING_WORDS
+        )
 
     def test_custom_ffmpeg_paths(self):
         """Test processor with custom FFmpeg paths"""
         processor = GuardianProcessor(
-            ffmpeg_cmd="/custom/ffmpeg",
-            ffprobe_cmd="/custom/ffprobe"
+            ffmpeg_cmd="/custom/ffmpeg", ffprobe_cmd="/custom/ffprobe"
         )
-        
+
         self.assertEqual(processor.ffmpeg_cmd, "/custom/ffmpeg")
         self.assertEqual(processor.ffprobe_cmd, "/custom/ffprobe")
 

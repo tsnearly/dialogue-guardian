@@ -3,7 +3,7 @@
 [![CI/CD Pipeline](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml)
 [![PyPI Package](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml)
 [![Tests](https://github.com/tsnearly/dialogue-guardian/actions/workflows/test.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/test.yml)
-[![Coverage](https://codecov.io/gh/tsnearly/dialogue-guardian/branch/main/graph/badge.svg)](https://codecov.io/gh/tsnearly/dialogue-guardian)
+[![codecov](https://codecov.io/gh/tsnearly/dialogue-guardian/graph/badge.svg?token=0XIMSERI3U)](https://codecov.io/gh/tsnearly/dialogue-guardian)
 [![PyPI version](https://img.shields.io/pypi/v/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Python versions](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Downloads](https://img.shields.io/pypi/dm/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
@@ -113,6 +113,10 @@ make test-coverage
 # Run specific test
 pytest tests/test_guardian_core.py -v
 ```
+
+### 📈 Current code coverage
+
+[![CoverageGraph](https://codecov.io/gh/tsnearly/dialogue-guardian/graphs/icicle.svg?token=0XIMSERI3U)](https://codecov.io/gh/tsnearly/dialogue-guardian)
 
 ## 🏗️ Development
 

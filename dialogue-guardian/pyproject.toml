@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Universal Media Censor - Automatically detect and censor profane language in video files"
 readme = "README.md"
-license = {text = "OSL-3.0"}
+license = "OSL-3.0"
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -33,8 +33,10 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/tsnearly/dialogue-guardian"
-"Bug Reports" = "https://github.com/tsnearly/dialogue-guardian/issues"
-"Source" = "https://github.com/tsnearly/dialogue-guardian"
+Documentation = "https://tsnearly.github.io/dialogue-guardian/"
+Repository = "https://github.com/tsnearly/dialogue-guardian.git"
+Issues = "https://github.com/tsnearly/dialogue-guardian/issues"
+Changelog = "https://tsnearly.github.io/dialogue-guardian/changelog.html"
 
 [project.scripts]
 guardian = "guardian.cli:main"
