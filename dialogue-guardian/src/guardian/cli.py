@@ -6,7 +6,7 @@ import argparse
 import logging
 import os
 import sys
-from typing import Optional
+from typing import Optional, List
 
 from .core import GuardianProcessor
 
@@ -22,10 +22,10 @@ def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> None
     level = logging.DEBUG if verbose else logging.INFO
 
     if log_file is None:
-        log_file = "guardian_by_ffmpeg.log"
+        log_file = "dialogue-guardian.log"
 
     # Configure logging handlers
-    handlers = [logging.StreamHandler()]
+    handlers: List[logging.Handler] = [logging.StreamHandler()]
     
     # Try to add file handler, fall back gracefully if it fails
     try:

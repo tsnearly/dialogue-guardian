@@ -86,7 +86,11 @@ class GuardianProcessor:
             ffmpeg_cmd: Path to ffmpeg executable.
             ffprobe_cmd: Path to ffprobe executable.
         """
-        self.matching_words = matching_words if matching_words is not None else self.DEFAULT_MATCHING_WORDS
+        self.matching_words = (
+            matching_words 
+            if matching_words is not None 
+            else self.DEFAULT_MATCHING_WORDS
+        )
         self.ffmpeg_cmd = ffmpeg_cmd
         self.ffprobe_cmd = ffprobe_cmd
 
