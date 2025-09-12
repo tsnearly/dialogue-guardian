@@ -10,5 +10,13 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
-    "kiroAgent.configureMCP": "Disabled"
+    "kiroAgent.configureMCP": "Disabled",
+    "github.copilot.chat.agent.thinkingTool": true,
+    "github.copilot.chat.generateTests.codeLens": true,
+    "python.analysis.extraPaths": [
+        "./src",
+        "./libs"
+    ],
+    "python.analysis.inlayHints.callArgumentNames": "partial",
+    "python.analysis.inlayHints.pytestParameters": true
 }

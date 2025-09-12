@@ -20,8 +20,8 @@ matching_words = [
 ]
 
 # Assume ffmpeg and ffprobe are in the system's PATH
-ffprobe_cmd = 'ffprobe'
-ffmpeg_cmd = 'ffmpeg'
+ffprobe_cmd = '/Users/Shared/FFmpegTools/ffprobe'
+ffmpeg_cmd = '/Users/Shared/FFmpegTools/ffmpeg'
 
 def get_video_details(filename):
     """

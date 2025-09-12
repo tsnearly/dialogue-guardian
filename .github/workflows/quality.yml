@@ -2,100 +2,112 @@ name: Code Quality
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        cd dialogue-guardian
-        pip install -e .
-        pip install -r dev-requirements.txt
-    
-    - name: Run flake8
-      run: |
-        cd dialogue-guardian
-        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 src/ tests/ --count --exit-zero --max-complexity=10 --config .flake8
-    
-    - name: Run black
-      run: |
-        cd dialogue-guardian
-        black --check --diff src/ tests/
-    
-    - name: Run isort
-      run: |
-        cd dialogue-guardian
-        isort --check-only --diff src/ tests/
-    
-    - name: Run mypy
-      run: |
-        cd dialogue-guardian
-        mypy src/guardian/ --ignore-missing-imports
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Get pip cache directory
+        id: pip-cache
+        run: echo "PIP_CACHE_DIR=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/dev-requirements.txt') }}-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd dialogue-guardian
+          pip install -e .
+          pip install -r dev-requirements.txt
+
+      - name: Run flake8
+        run: |
+          cd dialogue-guardian
+          flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 src/ tests/ --count --exit-zero --max-complexity=10 --config .flake8
+
+      - name: Run black
+        run: |
+          cd dialogue-guardian
+          black --check --diff src/ tests/
+
+      - name: Run isort
+        run: |
+          cd dialogue-guardian
+          isort --check-only --diff src/ tests/
+
+      - name: Run mypy
+        run: |
+          cd dialogue-guardian
+          mypy src/guardian/ --ignore-missing-imports
 
   security:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install bandit safety
-        cd dialogue-guardian
-        pip install -e .
-    
-    - name: Run bandit security linter
-      run: |
-        cd dialogue-guardian
-        bandit -r src/guardian/ -f json -o bandit-report.json || true
-        bandit -r src/guardian/ || echo "No security issues found"
-    
-    - name: Run safety check
-      run: |
-        cd dialogue-guardian
-        safety check --output json > safety-report.json || echo "No safety issues found"
-        safety check || echo "No safety issues found"
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+          cd dialogue-guardian
+          pip install -e .
+
+      - name: Run bandit security linter
+        run: |
+          cd dialogue-guardian
+          bandit -r src/guardian/ -f json -o bandit-report.json || true
+          bandit -r src/guardian/ || echo "No security issues found"
+
+      - name: Run safety check
+        run: |
+          cd dialogue-guardian
+          safety check --output json > safety-report.json || echo "No safety issues found"
+          safety check || echo "No safety issues found"
 
   complexity:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install radon xenon
-    
-    - name: Run radon complexity analysis
-      run: |
-        cd dialogue-guardian
-        radon cc src/guardian/ -a -nb || echo "No complexity issues found"
-        radon mi src/guardian/ -nb || echo "No maintainability issues found"
-    
-    - name: Run xenon complexity check
-      run: |
-        cd dialogue-guardian
-        xenon --max-absolute B --max-modules A --max-average A src/guardian/ || echo "No complexity issues found"
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install radon xenon
+
+      - name: Run radon complexity analysis
+        run: |
+          cd dialogue-guardian
+          radon cc src/guardian/ -a -nb || echo "No complexity issues found"
+          radon mi src/guardian/ -nb || echo "No maintainability issues found"
+
+      - name: Run xenon complexity check
+        run: |
+          cd dialogue-guardian
+          xenon --max-absolute B --max-modules A --max-average A src/guardian/ || echo "No complexity issues found"

@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Universal Media Censor - Automatically detect and censor profane language in video files"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "OSL-3.0"}
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 4 - Beta",
