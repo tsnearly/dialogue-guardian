@@ -179,7 +179,7 @@ This project includes a full suite of unit tests. For detailed instructions on h
 
 ## License
 
-This project is provided as-is, without warranty. You may modify and distribute as needed.
+This project is licensed under the Open Software License version 3.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
 

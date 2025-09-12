@@ -86,7 +86,7 @@ class GuardianProcessor:
             ffmpeg_cmd: Path to ffmpeg executable.
             ffprobe_cmd: Path to ffprobe executable.
         """
-        self.matching_words = matching_words or self.DEFAULT_MATCHING_WORDS
+        self.matching_words = matching_words if matching_words is not None else self.DEFAULT_MATCHING_WORDS
         self.ffmpeg_cmd = ffmpeg_cmd
         self.ffprobe_cmd = ffprobe_cmd
 
@@ -180,8 +180,12 @@ class GuardianProcessor:
             if framerate_str and "/" in framerate_str:
                 numerator, denominator = map(int, framerate_str.split("/"))
                 details["framerate"] = framerate_str
-                details["fps"] = "{:.3f}".format(numerator / denominator)
-                details["frameduration"] = f"{denominator}/{numerator}"
+                if denominator != 0:
+                    details["fps"] = "{:.3f}".format(numerator / denominator)
+                    details["frameduration"] = f"{denominator}/{numerator}"
+                else:
+                    details["fps"] = None
+                    details["frameduration"] = None
             elif framerate_str is not None:
                 fps_float = float(framerate_str)
                 details["fps"] = f"{fps_float:.3f}"

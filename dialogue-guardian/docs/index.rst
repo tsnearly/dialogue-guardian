@@ -1,7 +1,7 @@
 Dialogue Guardian Documentation
 ================================
 
-.. image:: /logo.png
+.. image:: /_static/logo.png
    :height: 200px
    :width: 200px
    :scale: 100%
@@ -15,8 +15,8 @@ Dialogue Guardian Documentation
    :target: https://www.python.org/downloads/
    :alt: Python Version
 
-.. image:: https://img.shields.io/badge/license-MIT-green.svg
-   :target: https://opensource.org/licenses/MIT
+.. image:: https://img.shields.io/badge/license-OSL--3.0-blue.svg
+   :target: https://github.com/tsnearly/dialogue-guardian/blob/main/dialogue-guardian/LICENSE
    :alt: License
 
 Features

@@ -24,14 +24,21 @@ def setup_logging(log_file: Optional[str] = None, verbose: bool = False) -> None
     if log_file is None:
         log_file = "guardian_by_ffmpeg.log"
 
+    # Configure logging handlers
+    handlers = [logging.StreamHandler()]
+    
+    # Try to add file handler, fall back gracefully if it fails
+    try:
+        handlers.append(logging.FileHandler(log_file, mode="w"))
+    except (PermissionError, OSError, IOError) as e:
+        # If file handler fails, just use console logging
+        print(f"Warning: Could not create log file '{log_file}': {e}", file=sys.stderr)
+
     # Configure logging to file and console
     logging.basicConfig(
         level=level,
         format="%(asctime)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file, mode="w"),
-            logging.StreamHandler(),
-        ],
+        handlers=handlers,
     )
 
 

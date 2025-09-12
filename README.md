@@ -7,7 +7,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Python versions](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Downloads](https://img.shields.io/pypi/dm/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
-[![License](https://img.shields.io/github/license/tsnearly/dialogue-guardian.svg)](https://github.com/tsnearly/dialogue-guardian/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-OSL--3.0-blue.svg)](https://github.com/tsnearly/dialogue-guardian/blob/main/dialogue-guardian/LICENSE)
 [![Code Quality](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml)
 [![Security Scan](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml)
 
@@ -142,6 +142,7 @@ make upload
 
 ## 📚 Documentation
 
+- **[📖 Full Documentation](https://tsnearly.github.io/dialogue-guardian/)** - Complete documentation on GitHub Pages
 - [Development Guide](dialogue-guardian/DEVELOPMENT.md)
 - [Testing Documentation](dialogue-guardian/TESTING.md)
 - [Migration Summary](dialogue-guardian/MIGRATION_SUMMARY.md)
@@ -157,7 +158,7 @@ make upload
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](dialogue-guardian/LICENSE) file for details.
+This project is licensed under the Open Software License version 3.0 - see the [LICENSE](dialogue-guardian/LICENSE) file for details.
 
 ## 👨‍💻 Author
 
