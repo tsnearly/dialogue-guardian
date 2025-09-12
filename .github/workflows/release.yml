@@ -39,7 +39,13 @@ jobs:
 
       - name: Get pip cache directory
         id: pip-cache
-        run: echo "PIP_CACHE_DIR=$(pip cache dir)" >> $GITHUB_OUTPUT
+        shell: python
+        run: |
+          import subprocess
+          import os
+          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
 
       - name: Cache pip dependencies
         uses: actions/cache@v4

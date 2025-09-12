@@ -31,30 +31,21 @@ jobs:
 
       - name: Get pip cache directory
         id: pip-cache
+        shell: python
         run: |
-          echo "PIP_CACHE_DIR=$(pip cache dir)" >> $GITHUB_OUTPUT
+          import subprocess
+          import os
+          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
 
       - name: Cache pip dependencies
         uses: actions/cache@v4
-        if: runner.os != 'Windows'
         with:
           path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
           key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
-      - name: Cache pip dependencies (Windows)
-        uses: actions/cache@v4
-        if: runner.os == 'Windows'
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      - name: Print cache key (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          echo "Cache key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}"
 
       - name: Install FFmpeg (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -113,6 +104,24 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+
+      - name: Get pip cache directory
+        id: pip-cache
+        shell: python
+        run: |
+          import subprocess
+          import os
+          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install FFmpeg
         run: |
