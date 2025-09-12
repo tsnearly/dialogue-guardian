@@ -64,27 +64,10 @@ jobs:
         id: bump
         working-directory: dialogue-guardian
         run: |
-          # Create .bumpversion.cfg if it doesn't exist
+          # Verify .bumpversion.cfg exists
           if [ ! -f .bumpversion.cfg ]; then
-            cat > .bumpversion.cfg << 'EOF'
-          [bumpversion]
-          current_version = 1.1.0
-          commit = True
-          tag = True
-          tag_name = v{new_version}
-
-          [bumpversion:file:setup.py]
-          search = version="{current_version}"
-          replace = version="{new_version}"
-
-          [bumpversion:file:pyproject.toml]
-          search = version = "{current_version}"
-          replace = version = "{new_version}"
-
-          [bumpversion:file:src/guardian/__init__.py]
-          search = __version__ = "{current_version}"
-          replace = __version__ = "{new_version}"
-          EOF
+            echo "Error: .bumpversion.cfg not found!"
+            exit 1
           fi
 
           # Check what version we would bump to
@@ -104,6 +87,17 @@ jobs:
 
           # Now bump version (this will commit and tag)
           bump2version ${{ github.event.inputs.version_type }}
+          
+          # Get the new version that was just set
+          NEW_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d' ' -f3)
+          
+          # Manually update docs/conf.py since bumpversion can't handle multiple patterns in same file
+          sed -i "s/release = '[0-9]\+\.[0-9]\+\.[0-9]\+'/release = '$NEW_VERSION'/g" docs/conf.py
+          sed -i "s/version = '[0-9]\+\.[0-9]\+\.[0-9]\+'/version = '$NEW_VERSION'/g" docs/conf.py
+          
+          # Commit the additional docs changes
+          git add docs/conf.py
+          git commit --amend --no-edit
 
           # Push the version bump commit
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
@@ -131,17 +125,99 @@ jobs:
       - name: Generate changelog
         working-directory: dialogue-guardian
         run: |
-          # Simple changelog generation
+          # Get current date
+          CURRENT_DATE=$(date +%Y-%m-%d)
+          
+          # Generate changelog entry for GitHub release
           echo "## Version $NEW_VERSION" > CHANGELOG_ENTRY.md
           echo "" >> CHANGELOG_ENTRY.md
           echo "### Changes" >> CHANGELOG_ENTRY.md
-          git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG_ENTRY.md || echo "- Initial release" >> CHANGELOG_ENTRY.md
+          # Get commits since last tag, or all commits if no previous tag
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            git log --oneline --pretty=format:"- %s" ${LAST_TAG}..HEAD >> CHANGELOG_ENTRY.md
+          else
+            echo "- Initial release with version $NEW_VERSION" >> CHANGELOG_ENTRY.md
+          fi
+          
+          # Update the actual CHANGELOG.md file
+          # Create a temporary file with the new entry
+          echo "# Changelog" > CHANGELOG_NEW.md
+          echo "" >> CHANGELOG_NEW.md
+          echo "All notable changes to this project will be documented in this file." >> CHANGELOG_NEW.md
+          echo "" >> CHANGELOG_NEW.md
+          echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)," >> CHANGELOG_NEW.md
+          echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)." >> CHANGELOG_NEW.md
+          echo "" >> CHANGELOG_NEW.md
+          echo "## [$NEW_VERSION] - $CURRENT_DATE" >> CHANGELOG_NEW.md
+          echo "" >> CHANGELOG_NEW.md
+          echo "### Changes" >> CHANGELOG_NEW.md
+          # Get commits since last tag, or all commits if no previous tag
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            git log --oneline --pretty=format:"- %s" ${LAST_TAG}..HEAD >> CHANGELOG_NEW.md
+          else
+            echo "- Initial release with version $NEW_VERSION" >> CHANGELOG_NEW.md
+          fi
+          echo "" >> CHANGELOG_NEW.md
+          
+          # Append existing changelog content (skip the header)
+          if [ -f CHANGELOG.md ]; then
+            # Skip the first 7 lines (header) and append the rest
+            tail -n +8 CHANGELOG.md >> CHANGELOG_NEW.md
+          fi
+          
+          # Replace the old changelog with the new one
+          mv CHANGELOG_NEW.md CHANGELOG.md
+          
+          # Update the docs changelog.rst file as well
+          echo "Changelog" > docs/changelog_new.rst
+          echo "=========" >> docs/changelog_new.rst
+          echo "" >> docs/changelog_new.rst
+          echo "For the complete changelog, see the \`CHANGELOG.md <https://github.com/tsnearly/dialogue-guardian/blob/main/dialogue-guardian/CHANGELOG.md>\`_ file in the repository." >> docs/changelog_new.rst
+          echo "" >> docs/changelog_new.rst
+          echo "Recent Changes" >> docs/changelog_new.rst
+          echo "--------------" >> docs/changelog_new.rst
+          echo "" >> docs/changelog_new.rst
+          echo "Version $NEW_VERSION ($CURRENT_DATE)" >> docs/changelog_new.rst
+          echo "$(printf '~%.0s' $(seq 1 $((${#NEW_VERSION} + ${#CURRENT_DATE} + 11))))" >> docs/changelog_new.rst
+          echo "" >> docs/changelog_new.rst
+          echo "**Changes:**" >> docs/changelog_new.rst
+          echo "" >> docs/changelog_new.rst
+          # Get commits since last tag, or all commits if no previous tag
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            git log --oneline --pretty=format:"- %s" ${LAST_TAG}..HEAD >> docs/changelog_new.rst
+          else
+            echo "- Initial release with version $NEW_VERSION" >> docs/changelog_new.rst
+          fi
+          echo "" >> docs/changelog_new.rst
+          echo "" >> docs/changelog_new.rst
+          
+          # Append existing changelog content (skip the recent changes section)
+          if [ -f docs/changelog.rst ]; then
+            # Find the line number where "Version 1.1.0" starts and append from there
+            LINE_NUM=$(grep -n "Version 1\.1\.0" docs/changelog.rst | head -1 | cut -d: -f1)
+            if [ ! -z "$LINE_NUM" ]; then
+              tail -n +$LINE_NUM docs/changelog.rst >> docs/changelog_new.rst
+            fi
+          fi
+          
+          # Replace the old changelog with the new one
+          mv docs/changelog_new.rst docs/changelog.rst
+          
+          # Commit the changelog updates
+          git add CHANGELOG.md docs/changelog.rst
+          git commit -m "Update CHANGELOG.md and docs/changelog.rst for version $NEW_VERSION" || echo "No changelog changes to commit"
 
-      - name: Push tag (to trigger publish workflow)
+      - name: Push changelog and tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          # Push the changelog commit first
+          git push origin main || echo "No changelog commit to push"
+          # Then push the tag to trigger publish workflow
           git push origin v${{ env.NEW_VERSION }}
 
       - name: Create GitHub Release
