@@ -15,11 +15,17 @@ sys.path.insert(0, os.path.abspath('../src'))
 project = 'Dialogue Guardian'
 copyright = '2025, Tony Snearly'
 author = 'Tony Snearly'
-release = '1.1.5
+release = '1.2.0
 version="{current_version}"
 version
 __version__'
-version = '1.1.5
+version="{current_version}"
+version
+__version__'
+version = '1.2.0
+version="{current_version}"
+version
+__version__'
 version="{current_version}"
 version
 __version__'
