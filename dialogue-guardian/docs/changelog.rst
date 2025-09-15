@@ -6,11 +6,14 @@ For the complete changelog, see the `CHANGELOG.md <https://github.com/tsnearly/d
 Recent Changes
 --------------
 
-Version 1.1.5 (2025-09-15)
+Version 1.2.0 (2025-09-15)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Changes:**
 
+- Bump version: 1.1.5 → 1.2.0
+- Workflow is now self-contained and will handle publishing to PyPI or TestPyPI, eliminating the new for a separate publish workflow.
+- Update CHANGELOG.md and docs/changelog.rst for version 1.1.5
 - Bump version: 1.1.4 → 1.1.5
 - Correct versioning numbering
 - Added license tag header
