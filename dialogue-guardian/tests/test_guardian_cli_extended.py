@@ -159,7 +159,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
             result = main()
 
             self.assertEqual(result, 0)
-            # Should have called setup_logging with log_file and verbose (positional args)
+            # Called setup_logging w/log_file and verbose (positional args)
             mock_setup_logging.assert_called_once_with("test.log", True)
 
     @patch("sys.argv", ["guardian", "test.mp4", "--ffmpeg-path", "/custom/ffmpeg"])

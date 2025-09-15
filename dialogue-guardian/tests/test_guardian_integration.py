@@ -3,7 +3,6 @@
 Integration tests for guardian functionality
 """
 
-import json
 import os
 import tempfile
 import unittest
