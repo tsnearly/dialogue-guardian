@@ -6,6 +6,32 @@ For the complete changelog, see the `CHANGELOG.md <https://github.com/tsnearly/d
 Recent Changes
 --------------
 
+Version 1.1.4 (2025-09-15)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Changes:**
+
+- Bump version: 1.1.3 → 1.1.4
+- Refactor version update process in release workflow to use a Python script for modifying docs/conf.py
+- "Removed bumpversion configuration for src/guardian/cli.py"
+- Addied a conditional setuptools installation
+- Minor Python 3.8 compatibility issues
+- Yet more minor code formatting issues that required adjustments
+- The tests were failing because they were written for an older version of the CLI interface but the actual CLI had evolved to use named arguments instead of positional ones. This is a common issue when CLI interfaces change but tests aren't updated accordingly.
+- Invalid dependency has been fixed
+- Correct minor source formatting issues
+- Shorten code lines that were too long
+- Tweak testcases
+- feat: update CLI argument handling to support multiple input files and change verbosity flag to debug
+- feat: add OSV-Scanner installation to security workflow
+- chore: update licensing information in pytest.ini and reorder imports in cli.py
+- Split development doc into contributing; move license file to root; reduce length of a handful of lines that were too long in formatting.
+- feat: optimize GitHub Actions workflows for 44% faster CI execution
+- Enhance README and improve CLI argument handling
+- Update release workflow to verify .bumpversion.cfg existence and enhance changelog generation
+- Refactor logging setup and improve code readability in cli.py and core.py
+- - Link to GitHub Pages documentation added - License reference corrected for consistency on upgrade; correction to project badges for license - Fix documentation for missing logo - Code coverage improved to nearly 95% by incorporating several test groups with many test cases
+
 Version 1.1.0 (2025-01-07)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
