@@ -39,7 +39,7 @@ class TestGuardianCLI(unittest.TestCase):
     def test_parser_required_arguments(self):
         """Test parser with required arguments"""
         parser = create_parser()
-        args = parser.parse_args([self.test_video])
+        args = parser.parse_args(["--input", self.test_video])
         self.assertEqual(args.inputfile, [self.test_video])
         self.assertFalse(args.debug)
         self.assertIsNone(args.outputfile)
@@ -49,6 +49,7 @@ class TestGuardianCLI(unittest.TestCase):
         parser = create_parser()
         args = parser.parse_args(
             [
+                "--input",
                 self.test_video,
                 "--output",
                 "/custom/output.mp4",
@@ -65,14 +66,14 @@ class TestGuardianCLI(unittest.TestCase):
         self.assertEqual(args.inputfile, [self.test_video])
         self.assertEqual(args.outputfile, "/custom/output.mp4")
         self.assertTrue(args.debug)
-        self.assertEqual(args.log_file, ["custom.log"])
-        self.assertEqual(args.ffmpeg_path, "/usr/bin/ffmpeg")
-        self.assertEqual(args.ffprobe_path, "/usr/bin/ffprobe")
+        self.assertEqual(args.logfile, ["custom.log"])
+        self.assertEqual(args.ffmpeg, "/usr/bin/ffmpeg")
+        self.assertEqual(args.ffprobe, "/usr/bin/ffprobe")
 
     def test_parser_short_arguments(self):
         """Test parser with short argument forms"""
         parser = create_parser()
-        args = parser.parse_args([self.test_video, "-o", "/output.mp4", "-d"])
+        args = parser.parse_args(["-i", self.test_video, "-o", "/output.mp4", "-d"])
 
         self.assertEqual(args.outputfile, "/output.mp4")
         self.assertTrue(args.debug)
@@ -91,7 +92,7 @@ class TestGuardianCLI(unittest.TestCase):
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
             self.assertFalse(result)
-            self.assertIn("Video file not found", mock_stderr.getvalue())
+            self.assertIn("Input video file not found", mock_stderr.getvalue())
 
     def test_validate_args_invalid_output_dir(self):
         """Test argument validation with invalid output directory"""
@@ -137,7 +138,7 @@ class TestGuardianCLI(unittest.TestCase):
 
         mock_basic_config.assert_called_once()
 
-    @patch("sys.argv", ["guardian", "test.mp4"])
+    @patch("sys.argv", ["guardian", "--input", "test.mp4"])
     def test_main_success(self):
         """Test successful main execution"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -166,7 +167,7 @@ class TestGuardianCLI(unittest.TestCase):
             self.assertIn("Censored video created", mock_print.call_args[0][0])
 
     @patch("guardian.cli.validate_args")
-    @patch("sys.argv", ["guardian", "nonexistent.mp4"])
+    @patch("sys.argv", ["guardian", "--input", "nonexistent.mp4"])
     def test_main_validation_failure(self, mock_validate):
         """Test main execution with validation failure"""
         mock_validate.return_value = False
@@ -175,7 +176,7 @@ class TestGuardianCLI(unittest.TestCase):
 
         self.assertEqual(result, 1)
 
-    @patch("sys.argv", ["guardian", "test.mp4"])
+    @patch("sys.argv", ["guardian", "--input", "test.mp4"])
     def test_main_processing_failure(self):
         """Test main execution with processing failure"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -203,7 +204,7 @@ class TestGuardianCLI(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertIn("Censoring process failed for file", mock_stderr.getvalue())
 
-    @patch("sys.argv", ["guardian", "test.mp4"])
+    @patch("sys.argv", ["guardian", "--input", "test.mp4"])
     def test_main_keyboard_interrupt(self):
         """Test main execution with keyboard interrupt"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -231,7 +232,7 @@ class TestGuardianCLI(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertIn("Process interrupted by user", mock_stderr.getvalue())
 
-    @patch("sys.argv", ["guardian", "test.mp4"])
+    @patch("sys.argv", ["guardian", "--input", "test.mp4"])
     def test_main_unexpected_error(self):
         """Test main execution with unexpected error"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -258,7 +259,7 @@ class TestGuardianCLI(unittest.TestCase):
 
             self.assertEqual(result, 1)
             self.assertIn(
-                "An unexpected error occurred processing file", mock_stderr.getvalue()
+                "An unexpected error occurred:", mock_stderr.getvalue()
             )
 
     @patch("sys.argv", ["guardian", "--version"])

@@ -45,6 +45,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         parser = create_parser()
         args = parser.parse_args(
             [
+                "--input",
                 self.test_video,
                 "--output",
                 "/custom/output.mp4",
@@ -62,8 +63,8 @@ class TestGuardianCLIExtended(unittest.TestCase):
         self.assertEqual(args.outputfile, "/custom/output.mp4")
         self.assertTrue(args.debug)
         self.assertEqual(args.logfile, ["custom.log"])
-        self.assertEqual(args.ffmpeg_path, "/usr/bin/ffmpeg")
-        self.assertEqual(args.ffprobe_path, "/usr/bin/ffprobe")
+        self.assertEqual(args.ffmpeg, "/usr/bin/ffmpeg")
+        self.assertEqual(args.ffprobe, "/usr/bin/ffprobe")
 
     def test_validate_args_with_relative_paths(self):
         """Test argument validation with relative paths"""
@@ -140,7 +141,10 @@ class TestGuardianCLIExtended(unittest.TestCase):
         # Help should exit with code 0
         self.assertEqual(cm.exception.code, 0)
 
-    @patch("sys.argv", ["guardian", "test.mp4", "--debug", "--log-file", "test.log"])
+    @patch(
+        "sys.argv",
+        ["guardian", "--input", "test.mp4", "--debug", "--log-file", "test.log"]
+    )
     def test_main_with_logging_options(self):
         """Test main execution with logging options"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -166,7 +170,10 @@ class TestGuardianCLIExtended(unittest.TestCase):
             # Called setup_logging w/log_file and verbose (positional args)
             mock_setup_logging.assert_called_once_with(["test.log"], True)
 
-    @patch("sys.argv", ["guardian", "test.mp4", "--ffmpeg-path", "/custom/ffmpeg"])
+    @patch(
+        "sys.argv",
+        ["guardian", "--input", "test.mp4", "--ffmpeg-path", "/custom/ffmpeg"]
+    )
     def test_main_with_custom_ffmpeg_path(self):
         """Test main execution with custom FFmpeg path"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -192,7 +199,10 @@ class TestGuardianCLIExtended(unittest.TestCase):
                 ffmpeg_cmd="/custom/ffmpeg", ffprobe_cmd="ffprobe"
             )
 
-    @patch("sys.argv", ["guardian", "test.mp4", "--ffprobe-path", "/custom/ffprobe"])
+    @patch(
+        "sys.argv",
+        ["guardian", "--input", "test.mp4", "--ffprobe-path", "/custom/ffprobe"]
+    )
     def test_main_with_custom_ffprobe_path(self):
         """Test main execution with custom FFprobe path"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -218,7 +228,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
                 ffmpeg_cmd="ffmpeg", ffprobe_cmd="/custom/ffprobe"
             )
 
-    @patch("sys.argv", ["guardian", "test.mp4"])
+    @patch("sys.argv", ["guardian", "--input", "test.mp4"])
     def test_main_with_exception_during_processing(self):
         """Test main execution when an exception occurs during processing"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -242,7 +252,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             self.assertEqual(result, 1)
             self.assertIn(
-                "An unexpected error occurred processing file", mock_stderr.getvalue()
+                "An unexpected error occurred:", mock_stderr.getvalue()
             )
             # The error message contains the exception message, not the type name
             self.assertIn("Invalid video format", mock_stderr.getvalue())
@@ -284,7 +294,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         # Should have several optional arguments
         self.assertGreater(len(optional_actions), 0)
 
-    @patch("sys.argv", ["guardian", "test.mp4", "--output", ""])
+    @patch("sys.argv", ["guardian", "--input", "test.mp4", "--output", ""])
     def test_main_with_empty_output_path(self):
         """Test main execution with empty output path"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -306,7 +316,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             self.assertEqual(result, 0)
             # Should pass empty string as output path
-            mock_processor.process_video.assert_called_once_with("/abs/test.mp4", None)
+            mock_processor.process_video.assert_called_once_with("/abs/test.mp4", "")
 
 
 if __name__ == "__main__":

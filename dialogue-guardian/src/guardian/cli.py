@@ -155,7 +155,7 @@ def main() -> int:
             return 1
 
         # Setup logging
-        setup_logging(args.log_file, args.debug)
+        setup_logging(args.logfile, args.debug)
 
         # Process each input file
         for input_file in args.inputfile:
@@ -164,7 +164,7 @@ def main() -> int:
 
             # Initialize the processor
             processor = GuardianProcessor(
-                ffmpeg_cmd=args.ffmpeg_path, ffprobe_cmd=args.ffprobe_path
+                ffmpeg_cmd=args.ffmpeg, ffprobe_cmd=args.ffprobe
             )
 
             # Process the video
