@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 name: Create Release
 
 on:
@@ -77,13 +79,13 @@ jobs:
 
           # Now bump version (this will commit and tag)
           bump2version ${{ github.event.inputs.version_type }}
-          
+
           # Get the new version that was just set
           NEW_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d' ' -f3)
-          
+
           # Manually update docs/conf.py using a Python script
           python scripts/update_conf_py.py "$NEW_VERSION"
-          
+
           # Commit the additional docs changes
           git add docs/conf.py
           git commit --amend --no-edit
@@ -116,7 +118,7 @@ jobs:
         run: |
           # Get current date
           CURRENT_DATE=$(date +%Y-%m-%d)
-          
+
           # Generate changelog entry for GitHub release
           echo "## Version $NEW_VERSION" > CHANGELOG_ENTRY.md
           echo "" >> CHANGELOG_ENTRY.md
@@ -128,7 +130,7 @@ jobs:
           else
             echo "- Initial release with version $NEW_VERSION" >> CHANGELOG_ENTRY.md
           fi
-          
+
           # Update the actual CHANGELOG.md file
           # Create a temporary file with the new entry
           echo "# Changelog" > CHANGELOG_NEW.md
@@ -149,16 +151,16 @@ jobs:
             echo "- Initial release with version $NEW_VERSION" >> CHANGELOG_NEW.md
           fi
           echo "" >> CHANGELOG_NEW.md
-          
+
           # Append existing changelog content (skip the header)
           if [ -f CHANGELOG.md ]; then
             # Skip the first 7 lines (header) and append the rest
             tail -n +8 CHANGELOG.md >> CHANGELOG_NEW.md
           fi
-          
+
           # Replace the old changelog with the new one
           mv CHANGELOG_NEW.md CHANGELOG.md
-          
+
           # Update the docs changelog.rst file as well
           echo "Changelog" > docs/changelog_new.rst
           echo "=========" >> docs/changelog_new.rst
@@ -182,7 +184,7 @@ jobs:
           fi
           echo "" >> docs/changelog_new.rst
           echo "" >> docs/changelog_new.rst
-          
+
           # Append existing changelog content (skip the recent changes section)
           if [ -f docs/changelog.rst ]; then
             # Find the line number where "Version 1.1.0" starts and append from there
@@ -191,10 +193,10 @@ jobs:
               tail -n +$LINE_NUM docs/changelog.rst >> docs/changelog_new.rst
             fi
           fi
-          
+
           # Replace the old changelog with the new one
           mv docs/changelog_new.rst docs/changelog.rst
-          
+
           # Commit the changelog updates
           git add CHANGELOG.md docs/changelog.rst
           git commit -m "Update CHANGELOG.md and docs/changelog.rst for version $NEW_VERSION" || echo "No changelog changes to commit"

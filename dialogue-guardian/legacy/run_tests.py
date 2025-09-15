@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 """
 Test runner for guardian-by-ffmpeg unit tests
 """

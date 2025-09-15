@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 .PHONY: help install install-dev test test-verbose clean build upload lint format check docs docs-serve docs-clean docs-build docs-auto
 
 help:

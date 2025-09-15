@@ -1,40 +1,46 @@
+<!--
+SPDX-FileCopyrightText: 2025 Tony Snearly
+
+SPDX-License-Identifier: OSL-3.0
+-->
+
 # Contributing Guide
 
 This guide covers everything you need to know about contributing to the Dialogue Guardian project.
 
-# 
+#
 
 ### Pull Request Process
 
 1. **Fork the repository**
 
 2. **Create a feature branch:**
-   
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 3. **Make your changes:**
-   
+
    - Write code following the style guide
    - Add tests for new functionality
    - Update documentation as needed
 
 4. **Run tests and linting:**
-   
+
    ```bash
    make test
    make lint
    ```
 
 5. **Commit your changes:**
-   
+
    ```bash
    git commit -m "Add feature: description of your feature"
    ```
 
 6. **Push to your fork:**
-   
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -67,31 +73,31 @@ test: add tests for CLI argument parsing
 ### Common Issues
 
 1. **FFmpeg not found:**
-   
+
    ```bash
    # Check if FFmpeg is installed
    ffmpeg -version
-   
+
    # Install FFmpeg (macOS)
    brew install ffmpeg
-   
+
    # Install FFmpeg (Ubuntu)
    sudo apt update && sudo apt install ffmpeg
    ```
 
 2. **Import errors:**
-   
+
    ```bash
    # Install package in development mode
    pip install -e .
    ```
 
 3. **Test failures:**
-   
+
    ```bash
    # Run tests with verbose output
    pytest -v -s
-   
+
    # Run specific failing test
    pytest tests/test_guardian_core.py::test_name -v -s
    ```
@@ -99,20 +105,20 @@ test: add tests for CLI argument parsing
 ### Debugging Tools
 
 - **pdb**: Python debugger
-  
+
   ```python
   import pdb; pdb.set_trace()
   ```
 
 - **pytest debugging:**
-  
+
   ```bash
   pytest --pdb  # Drop into debugger on failures
   pytest -s     # Don't capture output
   ```
 
 - **Logging:**
-  
+
   ```python
   import logging
   logging.basicConfig(level=logging.DEBUG)
@@ -164,7 +170,7 @@ detect-secrets scan
 ### Creating a Release
 
 1. **Update version and changelog:**
-   
+
    ```bash
    # Update CHANGELOG.md with new version info
    # Commit changes
@@ -173,14 +179,14 @@ detect-secrets scan
    ```
 
 2. **Create release via GitHub Actions:**
-   
+
    - Go to Actions tab in GitHub
    - Select "Create Release" workflow
    - Choose version bump type
    - Run workflow
 
 3. **Verify release:**
-   
+
    - Check GitHub releases page
    - Verify PyPI upload
    - Test installation: `pip install dialogue-guardian`
@@ -190,7 +196,7 @@ detect-secrets scan
 For urgent fixes:
 
 1. **Create hotfix branch from main:**
-   
+
    ```bash
    git checkout main
    git pull origin main
@@ -198,7 +204,7 @@ For urgent fixes:
    ```
 
 2. **Make minimal fix and test:**
-   
+
    ```bash
    # Make changes
    make test
@@ -207,7 +213,7 @@ For urgent fixes:
 3. **Create pull request and merge**
 
 4. **Create patch release:**
-   
+
    - Use release workflow with "patch" option
 
 ## Troubleshooting
@@ -215,7 +221,7 @@ For urgent fixes:
 ### Common Development Issues
 
 1. **Virtual environment issues:**
-   
+
    ```bash
    # Recreate virtual environment
    rm -rf venv
@@ -225,21 +231,21 @@ For urgent fixes:
    ```
 
 2. **Package import issues:**
-   
+
    ```bash
    # Check package installation
    pip list | grep dialogue-guardian
-   
+
    # Reinstall in development mode
    pip install -e .
    ```
 
 3. **Test environment issues:**
-   
+
    ```bash
    # Clear pytest cache
    rm -rf .pytest_cache
-   
+
    # Reinstall test dependencies
    pip install -r dev-requirements.txt
    ```

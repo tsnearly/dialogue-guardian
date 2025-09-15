@@ -1,8 +1,10 @@
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 name: Publish to PyPI
 
 on:
   release:
-    types: [published]
+    types: [published, created]
   push:
     tags:
       - "v*"

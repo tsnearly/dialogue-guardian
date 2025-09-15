@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Tony Snearly
+
+SPDX-License-Identifier: OSL-3.0
+-->
+
 # Guardian-by-FFmpeg Migration Summary
 
 ## Overview
@@ -7,6 +13,7 @@ Successfully restructured the guardian-by-ffmpeg project from a single-script so
 ## Changes Made
 
 ### 1. Package Structure
+
 - **Before**: Single `guardian_by_ffmpeg.py` script
 - **After**: Proper Python package structure:
   ```
@@ -17,6 +24,7 @@ Successfully restructured the guardian-by-ffmpeg project from a single-script so
   ```
 
 ### 2. Core Functionality (`guardian/core.py`)
+
 - Extracted all core logic into `GuardianProcessor` class
 - Made the processor configurable with custom word lists and FFmpeg paths
 - Maintained all original functionality:
@@ -26,6 +34,7 @@ Successfully restructured the guardian-by-ffmpeg project from a single-script so
   - Support for external and embedded subtitles
 
 ### 3. Command-Line Interface (`guardian/cli.py`)
+
 - Created comprehensive CLI with argparse
 - Added support for:
   - Custom output paths (`-o, --output`)
@@ -36,6 +45,7 @@ Successfully restructured the guardian-by-ffmpeg project from a single-script so
 - Proper error handling and user feedback
 
 ### 4. Packaging Configuration
+
 - **setup.py**: Traditional setuptools configuration
 - **pyproject.toml**: Modern Python packaging standard
 - **MANIFEST.in**: Controls which files are included in the package
@@ -44,6 +54,7 @@ Successfully restructured the guardian-by-ffmpeg project from a single-script so
   - `dialogue-guardian` command (alternative name)
 
 ### 5. Testing Infrastructure
+
 - Moved tests to `tests/` directory
 - Split tests into:
   - `test_guardian_core.py`: Tests for core functionality
@@ -52,6 +63,7 @@ Successfully restructured the guardian-by-ffmpeg project from a single-script so
 - All 34 tests passing
 
 ### 6. Development Tools
+
 - **Makefile**: Common development tasks (test, build, lint, format)
 - **dev-requirements.txt**: Development dependencies
 - **example_usage.py**: Usage examples for the package API
@@ -60,6 +72,7 @@ Successfully restructured the guardian-by-ffmpeg project from a single-script so
 ## Installation and Usage
 
 ### Installation
+
 ```bash
 # Development installation
 pip install -e .
@@ -69,6 +82,7 @@ pip install dist/dialogue_guardian-1.0.0-py3-none-any.whl
 ```
 
 ### Command Line Usage
+
 ```bash
 # Basic usage
 guardian movie.mp4
@@ -78,6 +92,7 @@ guardian movie.mp4 --output censored_movie.mp4 --verbose
 ```
 
 ### Python API Usage
+
 ```python
 from guardian import GuardianProcessor
 
@@ -104,6 +119,7 @@ result = processor.process_video("movie.mp4")
 ## Files Added/Modified
 
 ### New Files
+
 - `guardian/__init__.py`
 - `guardian/core.py`
 - `guardian/cli.py`
@@ -119,10 +135,12 @@ result = processor.process_video("movie.mp4")
 - `tests/__init__.py`
 
 ### Modified Files
+
 - `README.md` (updated with new usage instructions)
 - `pytest.ini` (updated test paths and coverage)
 
 ### Preserved Files
+
 - `guardian_by_ffmpeg.py` (original script, kept for reference)
 - `requirements.txt`
 - `TESTING.md`
@@ -139,6 +157,7 @@ result = processor.process_video("movie.mp4")
 ## Testing
 
 All tests pass successfully:
+
 ```bash
 source venv/bin/activate
 pytest tests/ -v
@@ -146,6 +165,7 @@ pytest tests/ -v
 ```
 
 Package builds successfully:
+
 ```bash
 python -m build
 # Creates dist/dialogue_guardian-1.0.0.tar.gz and .whl files

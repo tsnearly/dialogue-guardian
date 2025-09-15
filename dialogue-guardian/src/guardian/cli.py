@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 """
 Command-line interface for the Guardian media censoring system.
 """

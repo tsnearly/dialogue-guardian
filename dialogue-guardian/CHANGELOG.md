@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Tony Snearly
+
+SPDX-License-Identifier: OSL-3.0
+-->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -31,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2025-01-07
 
 ### Added
+
 - Complete project restructure into proper Python package
 - Comprehensive Sphinx documentation with API reference
 - GitHub Actions workflows for CI/CD, documentation, and publishing
@@ -45,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation deployment to GitHub Pages
 
 ### Changed
+
 - Moved from single script to modular package structure
 - Separated core functionality (`guardian.core`) from CLI (`guardian.cli`)
 - Updated all configuration files for new structure
@@ -53,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version bumped to 1.1.0 to reflect major restructuring
 
 ### Fixed
+
 - Package installation and distribution issues
 - Test imports and module paths
 - Documentation generation and serving
@@ -60,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2024-12-XX
 
 ### Added
+
 - Initial release with basic video censoring functionality
 - FFmpeg-based audio censoring
 - SRT subtitle processing

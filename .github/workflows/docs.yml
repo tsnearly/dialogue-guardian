@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 name: Build and Deploy Documentation
 
 on:
@@ -30,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 2  # Need history for change detection
+          fetch-depth: 2 # Need history for change detection
 
       - name: Check for documentation changes
         id: check-changes

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Tony Snearly
+
+SPDX-License-Identifier: OSL-3.0
+-->
+
 # Development Guide
 
 This guide covers everything you need to know about developing, testing, and contributing to the Dialogue Guardian project.
@@ -42,24 +48,28 @@ dialogue-guardian/
 ### Initial Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone <repository-url>
    cd dialogue-guardian
    ```
 
 2. **Create and activate virtual environment:**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. **Install development dependencies:**
+
    ```bash
    cd dialogue-guardian
    make install-dev
    ```
 
    Or manually:
+
    ```bash
    pip install -e .
    pip install -r dev-requirements.txt
@@ -157,6 +167,7 @@ python -m http.server 8000 -d _build/html
 ### Test Structure
 
 Tests are organized by module:
+
 - `test_guardian_core.py`: Tests for core functionality
 - `test_guardian_cli.py`: Tests for CLI interface
 
@@ -165,11 +176,13 @@ Tests are organized by module:
 Follow these guidelines when writing tests:
 
 1. **Use descriptive test names:**
+
    ```python
    def test_process_video_with_valid_file_succeeds(self):
    ```
 
 2. **Use fixtures for common setup:**
+
    ```python
    @pytest.fixture
    def sample_video_file(self):
@@ -177,6 +190,7 @@ Follow these guidelines when writing tests:
    ```
 
 3. **Mock external dependencies:**
+
    ```python
    @patch('guardian.core.subprocess.run')
    def test_ffmpeg_call(self, mock_run):
@@ -224,31 +238,31 @@ from guardian.core import GuardianProcessor
 
 class ExampleClass:
     """Class docstring describing the class purpose.
-    
+
     Args:
         param1: Description of parameter 1.
         param2: Description of parameter 2.
     """
-    
+
     def __init__(self, param1: str, param2: Optional[int] = None) -> None:
         self.param1 = param1
         self.param2 = param2
-    
+
     def example_method(self, input_data: List[str]) -> Union[str, None]:
         """Method docstring describing what the method does.
-        
+
         Args:
             input_data: List of input strings to process.
-            
+
         Returns:
             Processed string or None if processing fails.
-            
+
         Raises:
             ValueError: If input_data is empty.
         """
         if not input_data:
             raise ValueError("Input data cannot be empty")
-        
+
         return " ".join(input_data)
 ```
 
@@ -293,6 +307,7 @@ twine upload dist/*
 The project includes several optimized GitHub Actions workflows:
 
 ### CI/CD Pipeline (`.github/workflows/ci.yml`)
+
 - **Consolidated workflow** combining testing, quality checks, and building
 - Runs on every push and pull request
 - Tests on multiple Python versions (3.8-3.12) and operating systems
@@ -303,6 +318,7 @@ The project includes several optimized GitHub Actions workflows:
 - Builds and validates package
 
 ### Code Quality Analysis (`.github/workflows/quality.yml`)
+
 - **Advanced quality analysis** beyond basic CI checks
 - Runs complexity analysis, dead code detection
 - **Path-based triggering** - only runs when relevant code changes
@@ -310,18 +326,21 @@ The project includes several optimized GitHub Actions workflows:
 - Scheduled weekly runs for ongoing quality assurance
 
 ### Security Scanning (`.github/workflows/security.yml`)
+
 - **Focused dependency security analysis**
 - Multiple security tools: Safety, pip-audit, OSV scanner, CodeQL
 - **Intelligent triggering** on dependency-related changes
 - Comprehensive vulnerability detection and reporting
 
 ### Documentation (`.github/workflows/docs.yml`)
+
 - Builds and deploys Sphinx documentation to GitHub Pages
 - **Smart change detection** - only rebuilds when needed
 - **Enhanced caching** for both dependencies and build artifacts
 - Supports incremental builds for faster execution
 
 ### Publishing (`.github/workflows/publish.yml`)
+
 - Publishes package to PyPI and Test PyPI
 - **Optimized validation** with reduced test matrix
 - Runs on releases or manual trigger
@@ -329,6 +348,7 @@ The project includes several optimized GitHub Actions workflows:
 - Post-publish validation for releases
 
 ### Release Automation (`.github/workflows/release.yml`)
+
 - Automates version bumping and release creation
 - Manual trigger with version bump selection
 - Creates GitHub releases with auto-generated changelogs
@@ -341,27 +361,32 @@ The project includes several optimized GitHub Actions workflows:
 
 1. **Fork the repository**
 2. **Create a feature branch:**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 3. **Make your changes:**
+
    - Write code following the style guide
    - Add tests for new functionality
    - Update documentation as needed
 
 4. **Run tests and linting:**
+
    ```bash
    make test
    make lint
    ```
 
 5. **Commit your changes:**
+
    ```bash
    git commit -m "Add feature: description of your feature"
    ```
 
 6. **Push to your fork:**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -381,6 +406,7 @@ Use conventional commit messages:
 - `chore:` Maintenance tasks
 
 Examples:
+
 ```
 feat: add support for WebVTT subtitle format
 fix: handle missing subtitle files gracefully
@@ -393,28 +419,31 @@ test: add tests for CLI argument parsing
 ### Common Issues
 
 1. **FFmpeg not found:**
+
    ```bash
    # Check if FFmpeg is installed
    ffmpeg -version
-   
+
    # Install FFmpeg (macOS)
    brew install ffmpeg
-   
+
    # Install FFmpeg (Ubuntu)
    sudo apt update && sudo apt install ffmpeg
    ```
 
 2. **Import errors:**
+
    ```bash
    # Install package in development mode
    pip install -e .
    ```
 
 3. **Test failures:**
+
    ```bash
    # Run tests with verbose output
    pytest -v -s
-   
+
    # Run specific failing test
    pytest tests/test_guardian_core.py::test_name -v -s
    ```
@@ -422,11 +451,13 @@ test: add tests for CLI argument parsing
 ### Debugging Tools
 
 - **pdb**: Python debugger
+
   ```python
   import pdb; pdb.set_trace()
   ```
 
 - **pytest debugging:**
+
   ```bash
   pytest --pdb  # Drop into debugger on failures
   pytest -s     # Don't capture output
@@ -484,6 +515,7 @@ detect-secrets scan
 ### Creating a Release
 
 1. **Update version and changelog:**
+
    ```bash
    # Update CHANGELOG.md with new version info
    # Commit changes
@@ -492,6 +524,7 @@ detect-secrets scan
    ```
 
 2. **Create release via GitHub Actions:**
+
    - Go to Actions tab in GitHub
    - Select "Create Release" workflow
    - Choose version bump type
@@ -507,6 +540,7 @@ detect-secrets scan
 For urgent fixes:
 
 1. **Create hotfix branch from main:**
+
    ```bash
    git checkout main
    git pull origin main
@@ -514,6 +548,7 @@ For urgent fixes:
    ```
 
 2. **Make minimal fix and test:**
+
    ```bash
    # Make changes
    make test
@@ -529,6 +564,7 @@ For urgent fixes:
 ### Common Development Issues
 
 1. **Virtual environment issues:**
+
    ```bash
    # Recreate virtual environment
    rm -rf venv
@@ -538,19 +574,21 @@ For urgent fixes:
    ```
 
 2. **Package import issues:**
+
    ```bash
    # Check package installation
    pip list | grep dialogue-guardian
-   
+
    # Reinstall in development mode
    pip install -e .
    ```
 
 3. **Test environment issues:**
+
    ```bash
    # Clear pytest cache
    rm -rf .pytest_cache
-   
+
    # Reinstall test dependencies
    pip install -r dev-requirements.txt
    ```

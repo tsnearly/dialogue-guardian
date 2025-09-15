@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Tony Snearly
+
+SPDX-License-Identifier: OSL-3.0
+-->
+
 # Testing Guide for Dialogue Guardian
 
 This document provides instructions for running and developing unit tests for the Dialogue Guardian project.
@@ -14,6 +20,7 @@ The test suite is organized into the following components:
 ### Option 1: Using Python's built-in unittest
 
 Run all tests using the provided script:
+
 ```bash
 python run_tests.py
 ```
@@ -21,22 +28,26 @@ python run_tests.py
 ### Option 2: Using pytest (recommended)
 
 First, install the test dependencies:
+
 ```bash
 pip install -r test_requirements.txt
 ```
 
 Run all tests:
+
 ```bash
 pytest
 ```
 
 Run tests for a specific file:
+
 ```bash
 pytest test_guardian.py
 pytest test_guardian_by_ffmpeg.py
 ```
 
 Run with coverage for both scripts:
+
 ```bash
 pytest --cov=guardian --cov=guardian_by_ffmpeg
 ```
@@ -67,11 +78,13 @@ python -m unittest test_guardian_by_ffmpeg.py
 ## Mocking Strategy
 
 The tests use extensive mocking to:
+
 - Avoid actual FFmpeg/ffprobe operations during testing.
 - Simulate various error conditions.
 - Test edge cases without requiring actual video/SRT files.
 
 ### Key Mock Objects
+
 - **`subprocess.Popen` / `subprocess.run`**: Mocks ffprobe/ffmpeg execution.
 - **`os.path.exists`**: Mocks file system checks.
 - **`builtins.open`**: Mocks file I/O operations.
@@ -80,6 +93,7 @@ The tests use extensive mocking to:
 ## Test Dependencies
 
 Install test-specific dependencies:
+
 ```bash
 pip install -r test_requirements.txt
 ```
@@ -87,6 +101,7 @@ pip install -r test_requirements.txt
 ## Coverage Report
 
 After running tests with pytest, view the coverage report:
+
 - **Console**: `pytest --cov=guardian --cov=guardian_by_ffmpeg`
 - **HTML**: Open `htmlcov/index.html` in your browser after running `pytest --cov-report html`.
 

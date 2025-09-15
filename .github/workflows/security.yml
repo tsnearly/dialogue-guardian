@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 name: Security Scan
 
 # Focused security scanning workflow
@@ -7,15 +9,15 @@ on:
   push:
     branches: [main]
     paths:
-      - 'dialogue-guardian/src/**'
-      - 'dialogue-guardian/requirements*.txt'
-      - 'dialogue-guardian/pyproject.toml'
+      - "dialogue-guardian/src/**"
+      - "dialogue-guardian/requirements*.txt"
+      - "dialogue-guardian/pyproject.toml"
   pull_request:
     branches: [main]
     paths:
-      - 'dialogue-guardian/src/**'
-      - 'dialogue-guardian/requirements*.txt' 
-      - 'dialogue-guardian/pyproject.toml'
+      - "dialogue-guardian/src/**"
+      - "dialogue-guardian/requirements*.txt"
+      - "dialogue-guardian/pyproject.toml"
   schedule:
     - cron: "0 2 * * 1" # Weekly on Monday at 2 AM UTC
   workflow_dispatch:
@@ -25,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -54,11 +56,11 @@ jobs:
           echo "=== Safety Check ==="
           safety check --json --output safety-report.json || true
           safety check || echo "Safety vulnerabilities found"
-          
+
           echo "=== Pip Audit ==="
           pip-audit --format=json --output=pip-audit-report.json || true
           pip-audit || echo "Pip audit vulnerabilities found"
-          
+
           echo "=== OSV Scanner ===" 
           osv-scanner --format json --output osv-report.json . || echo "OSV vulnerabilities found"
 

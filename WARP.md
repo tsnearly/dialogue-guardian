@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Tony Snearly
+
+SPDX-License-Identifier: OSL-3.0
+-->
+
 # WARP.md
 
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
@@ -30,6 +36,7 @@ Dialogue Guardian is a Universal Media Censor that automatically detects and cen
 ## Essential Commands
 
 ### Development Setup
+
 ```bash
 # Navigate to package directory
 cd dialogue-guardian
@@ -42,6 +49,7 @@ make install-dev
 ```
 
 ### Testing
+
 ```bash
 # Run all tests
 make test
@@ -60,6 +68,7 @@ pytest --cov=guardian --cov-report=html
 ```
 
 ### Code Quality
+
 ```bash
 # Run linting
 make lint
@@ -77,6 +86,7 @@ make check
 ```
 
 ### Documentation
+
 ```bash
 # Build documentation
 make docs
@@ -92,6 +102,7 @@ make docs-clean
 ```
 
 ### Package Management
+
 ```bash
 # Clean build artifacts
 make clean
@@ -120,6 +131,7 @@ dialogue-guardian/                    # Root repository
 ## Testing Strategy
 
 ### Test Organization
+
 - `test_guardian_core.py`: Core functionality tests with mocked FFmpeg calls
 - `test_guardian_cli.py`: CLI interface tests
 - `test_guardian_cli_extended.py`: Extended CLI scenarios
@@ -127,6 +139,7 @@ dialogue-guardian/                    # Root repository
 - `test_guardian_integration.py`: Integration tests
 
 ### Testing Notes
+
 - Tests extensively mock FFmpeg/FFprobe subprocess calls since they require external binary
 - Sample files are used for testing subtitle parsing
 - CI runs tests across Python 3.8-3.12 on Ubuntu, Windows, and macOS
@@ -135,22 +148,26 @@ dialogue-guardian/                    # Root repository
 ## Key Development Considerations
 
 ### FFmpeg Integration
+
 - All video processing relies on FFmpeg subprocess calls
 - Commands must be constructed carefully to avoid shell injection
 - FFmpeg availability is verified before processing
 - Error handling includes FFmpeg-specific error codes and messages
 
 ### Cross-Platform Compatibility
+
 - Code runs on Windows, macOS, and Linux
 - Path handling uses pathlib for cross-platform compatibility
 - FFmpeg installation varies by platform (handled in CI)
 
 ### Profanity Detection
+
 - Configurable word list in `GuardianProcessor.DEFAULT_MATCHING_WORDS`
 - Case-insensitive matching with word boundary detection
 - Custom word lists can be provided via constructor
 
 ### Non-Destructive Processing
+
 - Original files are never modified
 - Output files use `_censored` suffix by default
 - Video streams are copied without re-encoding to maintain quality
@@ -159,6 +176,7 @@ dialogue-guardian/                    # Root repository
 ## Entry Points
 
 The package provides two CLI entry points:
+
 - `guardian` - Primary command
 - `dialogue-guardian` - Alternative command name
 
@@ -167,12 +185,14 @@ Both execute `guardian.cli:main` function.
 ## GitHub Actions Workflows
 
 **Important**: The workflows have been extensively optimized for efficiency:
+
 - **Consolidated CI/CD**: Single `ci.yml` combines testing, quality checks, and building
 - **Smart Caching**: Multi-layered caching for dependencies, FFmpeg binaries, and build tools
 - **Conditional Execution**: Workflows only run when relevant files change
 - **Performance**: ~44% faster execution, ~52% bandwidth reduction, ~75% fewer redundant jobs
 
 Key workflows:
+
 - `ci.yml` - Main CI/CD pipeline with fail-fast quality checks
 - `quality.yml` - Advanced code analysis and security scanning
 - `security.yml` - Comprehensive dependency vulnerability detection
@@ -183,18 +203,21 @@ Key workflows:
 ## Project Rules
 
 ### Code Style
+
 - Uses Black formatter with 88-character line length
 - PEP 8 compliance enforced via Flake8
 - Type hints required for public APIs
 - Google-style docstrings
 
 ### Testing Requirements
+
 - New features require corresponding tests
 - Mock external dependencies (FFmpeg, file system operations)
 - Aim for high test coverage (tracked via Codecov)
 - Test both success and failure scenarios
 
 ### Documentation
+
 - Sphinx-based documentation in `docs/`
 - API documentation auto-generated from docstrings
 - README provides quick start and usage examples

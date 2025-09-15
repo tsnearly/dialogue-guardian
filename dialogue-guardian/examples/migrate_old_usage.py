@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
 """
 Migration script to help users transition from the old guardian_by_ffmpeg.py
 to the new package structure.
