@@ -12,7 +12,7 @@ from . import __version__
 from .core import GuardianProcessor
 
 
-def setup_logging(log_file: Optional[str] = None, debug: bool = False) -> None:
+def setup_logging(log_file: Optional[List[str]] = None, debug: bool = False) -> None:
     """
     Configure logging for the application.
 
@@ -22,18 +22,19 @@ def setup_logging(log_file: Optional[str] = None, debug: bool = False) -> None:
     """
     level = logging.DEBUG if debug else logging.INFO
 
-    if log_file is None:
-        log_file = "dialogue-guardian.log"
+    log_path = "dialogue-guardian.log"
+    if log_file:
+        log_path = log_file[0]
 
     # Configure logging handlers
     handlers: List[logging.Handler] = [logging.StreamHandler()]
 
     # Try to add file handler, fall back gracefully if it fails
     try:
-        handlers.append(logging.FileHandler(log_file, mode="w"))
+        handlers.append(logging.FileHandler(log_path, mode="w"))
     except (PermissionError, OSError, IOError) as e:
         # If file handler fails, just use console logging
-        print(f"Warning: Could not create log file '{log_file}': {e}", file=sys.stderr)
+        print(f"Warning: Could not create log file '{log_path}': {e}", file=sys.stderr)
 
     # Configure logging to file and console
     logging.basicConfig(
@@ -126,8 +127,8 @@ def validate_args(args: argparse.Namespace) -> bool:
             return False
 
     # Validate output path if provided
-    if args.output:
-        output_dir = os.path.dirname(os.path.abspath(args.output))
+    if args.outputfile:
+        output_dir = os.path.dirname(os.path.abspath(args.outputfile))
         if not os.path.exists(output_dir):
             print(
                 f"Error: Output directory does not exist: {output_dir}",
@@ -167,7 +168,7 @@ def main() -> int:
             )
 
             # Process the video
-            censored_file = processor.process_video(video_path, args.output)
+            censored_file = processor.process_video(video_path, args.outputfile)
 
             if censored_file:
                 logging.info("Censoring process a success.")

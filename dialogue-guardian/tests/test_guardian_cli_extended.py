@@ -36,7 +36,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         help_text = parser.format_help()
 
         self.assertIn("Guardian", help_text)
-        self.assertIn("inputfile", help_text)
+        self.assertIn("INPUTFILE", help_text)
         self.assertIn("--output", help_text)
         self.assertIn("--debug", help_text)
 
@@ -58,10 +58,10 @@ class TestGuardianCLIExtended(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(args.inputfile, self.test_video)
+        self.assertEqual(args.inputfile, [self.test_video])
         self.assertEqual(args.outputfile, "/custom/output.mp4")
         self.assertTrue(args.debug)
-        self.assertEqual(args.logfile, "custom.log")
+        self.assertEqual(args.logfile, ["custom.log"])
         self.assertEqual(args.ffmpeg_path, "/usr/bin/ffmpeg")
         self.assertEqual(args.ffprobe_path, "/usr/bin/ffprobe")
 
@@ -77,13 +77,13 @@ class TestGuardianCLIExtended(unittest.TestCase):
             self.skipTest("Temp directory is on a different drive.")
             return
 
-        args = argparse.Namespace(inputfile=rel_video, output=rel_output)
+        args = argparse.Namespace(inputfile=[rel_video], outputfile=rel_output)
         result = validate_args(args)
         self.assertTrue(result)
 
     def test_validate_args_output_same_as_input(self):
         """Test argument validation when output is same as input"""
-        args = argparse.Namespace(inputfile=self.test_video, output=self.test_video)
+        args = argparse.Namespace(inputfile=[self.test_video], outputfile=self.test_video)
 
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
@@ -94,7 +94,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         """Test that output directory validation works correctly"""
         # Test with a path in an existing directory
         output_in_temp = os.path.join(self.temp_dir, "subdir", "output.mp4")
-        args = argparse.Namespace(inputfile=self.test_video, output=output_in_temp)
+        args = argparse.Namespace(inputfile=[self.test_video], outputfile=output_in_temp)
 
         with patch("sys.stderr", new_callable=io.StringIO):
             result = validate_args(args)
@@ -111,7 +111,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         mock_file_handler.side_effect = PermissionError("Cannot create log file")
 
         # Should not raise exception, should fall back gracefully
-        setup_logging(log_file="/invalid/path/test.log")
+        setup_logging(log_file=["/invalid/path/test.log"])
 
         # Should still call basicConfig
         mock_basic_config.assert_called()
@@ -146,7 +146,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         ) as mock_processor_class, patch(
             "os.path.exists", return_value=True
         ), patch(
-            "os.path.abspath", return_value="/abs/test.mp4"
+            "os.path.abspath", side_effect=lambda x: "/abs/" + os.path.basename(x)
         ), patch(
             "builtins.print"
         ):
@@ -160,7 +160,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             self.assertEqual(result, 0)
             # Called setup_logging w/log_file and verbose (positional args)
-            mock_setup_logging.assert_called_once_with("test.log", True)
+            mock_setup_logging.assert_called_once_with(["test.log"], True)
 
     @patch("sys.argv", ["guardian", "test.mp4", "--ffmpeg-path", "/custom/ffmpeg"])
     def test_main_with_custom_ffmpeg_path(self):
@@ -170,7 +170,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         ), patch("guardian.cli.GuardianProcessor") as mock_processor_class, patch(
             "os.path.exists", return_value=True
         ), patch(
-            "os.path.abspath", return_value="/abs/test.mp4"
+            "os.path.abspath", side_effect=lambda x: "/abs/" + os.path.basename(x)
         ), patch(
             "builtins.print"
         ):
@@ -196,7 +196,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         ), patch("guardian.cli.GuardianProcessor") as mock_processor_class, patch(
             "os.path.exists", return_value=True
         ), patch(
-            "os.path.abspath", return_value="/abs/test.mp4"
+            "os.path.abspath", side_effect=lambda x: "/abs/" + os.path.basename(x)
         ), patch(
             "builtins.print"
         ):
@@ -222,7 +222,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         ), patch("guardian.cli.GuardianProcessor") as mock_processor_class, patch(
             "os.path.exists", return_value=True
         ), patch(
-            "os.path.abspath", return_value="/abs/test.mp4"
+            "os.path.abspath", side_effect=lambda x: "/abs/" + os.path.basename(x)
         ), patch(
             "sys.stderr", new_callable=io.StringIO
         ) as mock_stderr:
@@ -237,20 +237,20 @@ class TestGuardianCLIExtended(unittest.TestCase):
             result = main()
 
             self.assertEqual(result, 1)
-            self.assertIn("An unexpected error occurred", mock_stderr.getvalue())
+            self.assertIn("An unexpected error occurred processing file", mock_stderr.getvalue())
             # The error message contains the exception message, not the type name
             self.assertIn("Invalid video format", mock_stderr.getvalue())
 
     def test_validate_args_edge_case_paths(self):
         """Test argument validation with edge case paths"""
         # Test with empty string path
-        args = argparse.Namespace(inputfile="", output=None)
+        args = argparse.Namespace(inputfile=[""], outputfile=None)
         with patch("sys.stderr", new_callable=io.StringIO):
             result = validate_args(args)
             self.assertFalse(result)
 
         # Test with None path (shouldn't happen in normal usage)
-        args = argparse.Namespace(inputfile=None, output=None)
+        args = argparse.Namespace(inputfile=[None], outputfile=None)
         with patch("sys.stderr", new_callable=io.StringIO):
             # This might raise an exception or handle gracefully
             try:
@@ -272,8 +272,9 @@ class TestGuardianCLIExtended(unittest.TestCase):
             if not action.required and action.dest != "help"
         ]
 
-        # Should have at least one required argument (video_file)
+        # Should have at least one required argument (inputfile)
         self.assertGreater(len(required_actions), 0)
+        self.assertEqual(required_actions[0].dest, "inputfile")
         # Should have several optional arguments
         self.assertGreater(len(optional_actions), 0)
 
@@ -285,7 +286,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         ), patch("guardian.cli.GuardianProcessor") as mock_processor_class, patch(
             "os.path.exists", return_value=True
         ), patch(
-            "os.path.abspath", return_value="/abs/test.mp4"
+            "os.path.abspath", side_effect=lambda x: "/abs/" + os.path.basename(x)
         ), patch(
             "builtins.print"
         ):
@@ -299,7 +300,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             self.assertEqual(result, 0)
             # Should pass empty string as output path
-            mock_processor.process_video.assert_called_once_with("/abs/test.mp4", "")
+            mock_processor.process_video.assert_called_once_with("/abs/test.mp4", None)
 
 
 if __name__ == "__main__":
