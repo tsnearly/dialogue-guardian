@@ -258,8 +258,7 @@ class TestGuardianCLI(unittest.TestCase):
 
             self.assertEqual(result, 1)
             self.assertIn(
-                "An unexpected error occurred processing file", 
-                mock_stderr.getvalue()
+                "An unexpected error occurred processing file", mock_stderr.getvalue()
             )
 
     @patch("sys.argv", ["guardian", "--version"])
