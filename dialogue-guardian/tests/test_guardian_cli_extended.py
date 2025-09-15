@@ -38,7 +38,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         self.assertIn("Guardian", help_text)
         self.assertIn("inputfile", help_text)
         self.assertIn("--output", help_text)
-        self.assertIn("--verbose", help_text)
+        self.assertIn("--debug", help_text)
 
     def test_parser_with_all_arguments(self):
         """Test parser with all possible arguments"""
@@ -48,7 +48,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
                 self.test_video,
                 "--output",
                 "/custom/output.mp4",
-                "--verbose",
+                "--debug",
                 "--log-file",
                 "custom.log",
                 "--ffmpeg-path",
@@ -77,13 +77,13 @@ class TestGuardianCLIExtended(unittest.TestCase):
             self.skipTest("Temp directory is on a different drive.")
             return
 
-        args = argparse.Namespace(video_file=rel_video, output=rel_output)
+        args = argparse.Namespace(inputfile=rel_video, output=rel_output)
         result = validate_args(args)
         self.assertTrue(result)
 
     def test_validate_args_output_same_as_input(self):
         """Test argument validation when output is same as input"""
-        args = argparse.Namespace(video_file=self.test_video, output=self.test_video)
+        args = argparse.Namespace(inputfile=self.test_video, output=self.test_video)
 
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
@@ -94,7 +94,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         """Test that output directory validation works correctly"""
         # Test with a path in an existing directory
         output_in_temp = os.path.join(self.temp_dir, "subdir", "output.mp4")
-        args = argparse.Namespace(video_file=self.test_video, output=output_in_temp)
+        args = argparse.Namespace(inputfile=self.test_video, output=output_in_temp)
 
         with patch("sys.stderr", new_callable=io.StringIO):
             result = validate_args(args)
@@ -136,7 +136,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         # Help should exit with code 0
         self.assertEqual(cm.exception.code, 0)
 
-    @patch("sys.argv", ["guardian", "test.mp4", "--verbose", "--log-file", "test.log"])
+    @patch("sys.argv", ["guardian", "test.mp4", "--debug", "--log-file", "test.log"])
     def test_main_with_logging_options(self):
         """Test main execution with logging options"""
         with patch("guardian.cli.validate_args") as mock_validate, patch(
@@ -244,13 +244,13 @@ class TestGuardianCLIExtended(unittest.TestCase):
     def test_validate_args_edge_case_paths(self):
         """Test argument validation with edge case paths"""
         # Test with empty string path
-        args = argparse.Namespace(video_file="", output=None)
+        args = argparse.Namespace(inputfile="", output=None)
         with patch("sys.stderr", new_callable=io.StringIO):
             result = validate_args(args)
             self.assertFalse(result)
 
         # Test with None path (shouldn't happen in normal usage)
-        args = argparse.Namespace(video_file=None, output=None)
+        args = argparse.Namespace(inputfile=None, output=None)
         with patch("sys.stderr", new_callable=io.StringIO):
             # This might raise an exception or handle gracefully
             try:

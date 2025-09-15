@@ -58,7 +58,7 @@ def create_parser() -> argparse.ArgumentParser:
         "--input",
         "-i",
         dest="inputfile",
-        nargs="*",
+        nargs="+",
         required=True,
         help="Path of the video file to process",
     )
@@ -119,10 +119,11 @@ def validate_args(args: argparse.Namespace) -> bool:
     Returns:
         True if arguments are valid, False otherwise.
     """
-    # Check if video file exists
-    if not os.path.exists(args.inputfile):
-        print(f"Error: Input video file not found: {args.inputfile}", file=sys.stderr)
-        return False
+    # Check if input files exist
+    for input_file in args.inputfile:
+        if not os.path.exists(input_file):
+            print(f"Error: Input video file not found: {input_file}", file=sys.stderr)
+            return False
 
     # Validate output path if provided
     if args.output:
@@ -144,41 +145,43 @@ def main() -> int:
     Returns:
         Exit code (0 for success, 1 for error).
     """
-    parser = create_parser()
-    args = parser.parse_args()
-
-    # Validate arguments
-    if not validate_args(args):
-        return 1
-
-    # Setup logging
-    setup_logging(args.log_file, args.debug)
-
-    # Get absolute path for the video file
-    video_path = os.path.abspath(args.inputfile)
-    logging.info(f"Processing file: {video_path}")
-
     try:
-        # Initialize the processor
-        processor = GuardianProcessor(
-            ffmpeg_cmd=args.ffmpeg_path, ffprobe_cmd=args.ffprobe_path
-        )
+        parser = create_parser()
+        args = parser.parse_args()
 
-        # Process the video
-        censored_file = processor.process_video(video_path, args.output)
-
-        if censored_file:
-            logging.info("Censoring process completed successfully.")
-            logging.info(f"Output file: {censored_file}")
-            print(f"Censored video created: {censored_file}")
-            return 0
-        else:
-            logging.error("Censoring process failed.")
-            print(
-                "Error: Censoring process failed. Check the log for details.",
-                file=sys.stderr,
-            )
+        # Validate arguments
+        if not validate_args(args):
             return 1
+
+        # Setup logging
+        setup_logging(args.log_file, args.debug)
+
+        # Process each input file
+        for input_file in args.inputfile:
+            video_path = os.path.abspath(input_file)
+            logging.info(f"Processing file: {video_path}")
+
+            # Initialize the processor
+            processor = GuardianProcessor(
+                ffmpeg_cmd=args.ffmpeg_path, ffprobe_cmd=args.ffprobe_path
+            )
+
+            # Process the video
+            censored_file = processor.process_video(video_path, args.output)
+
+            if censored_file:
+                logging.info("Censoring process a success.")
+                logging.info(f"Output file: {censored_file}")
+                print(f"Censored video created: {censored_file}")
+            else:
+                logging.error(f"Censoring process failed for file: {video_path}")
+                print(
+                    f"Error: Censoring process failed for file: {video_path}. "
+                    "See log for details.",
+                    file=sys.stderr,
+                )
+                return 1
+        return 0
 
     except KeyboardInterrupt:
         logging.info("Process interrupted by user.")
@@ -188,8 +191,7 @@ def main() -> int:
         logging.error(f"Unexpected error: {e}")
         print(f"Error: An unexpected error occurred: {e}", file=sys.stderr)
         return 1
-    finally:
-        logging.info("Script finished.")
+    logging.info("Script finished.")
 
 
 if __name__ == "__main__":

@@ -40,8 +40,8 @@ class TestGuardianCLI(unittest.TestCase):
         """Test parser with required arguments"""
         parser = create_parser()
         args = parser.parse_args([self.test_video])
-        self.assertEqual(args.video_file, self.test_video)
-        self.assertFalse(args.verbose)
+        self.assertEqual(args.inputfile, self.test_video)
+        self.assertFalse(args.debug)
         self.assertIsNone(args.output)
 
     def test_parser_optional_arguments(self):
@@ -52,7 +52,7 @@ class TestGuardianCLI(unittest.TestCase):
                 self.test_video,
                 "--output",
                 "/custom/output.mp4",
-                "--verbose",
+                "--debug",
                 "--log-file",
                 "custom.log",
                 "--ffmpeg-path",
@@ -62,9 +62,9 @@ class TestGuardianCLI(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(args.video_file, self.test_video)
+        self.assertEqual(args.inputfile, self.test_video)
         self.assertEqual(args.output, "/custom/output.mp4")
-        self.assertTrue(args.verbose)
+        self.assertTrue(args.debug)
         self.assertEqual(args.log_file, "custom.log")
         self.assertEqual(args.ffmpeg_path, "/usr/bin/ffmpeg")
         self.assertEqual(args.ffprobe_path, "/usr/bin/ffprobe")
@@ -72,21 +72,21 @@ class TestGuardianCLI(unittest.TestCase):
     def test_parser_short_arguments(self):
         """Test parser with short argument forms"""
         parser = create_parser()
-        args = parser.parse_args([self.test_video, "-o", "/output.mp4", "-v"])
+        args = parser.parse_args([self.test_video, "-o", "/output.mp4", "-d"])
 
         self.assertEqual(args.output, "/output.mp4")
-        self.assertTrue(args.verbose)
+        self.assertTrue(args.debug)
 
     def test_validate_args_valid_file(self):
         """Test argument validation with valid file"""
-        args = argparse.Namespace(video_file=self.test_video, output=None)
+        args = argparse.Namespace(inputfile=self.test_video, output=None)
 
         result = validate_args(args)
         self.assertTrue(result)
 
     def test_validate_args_invalid_file(self):
         """Test argument validation with non-existent file"""
-        args = argparse.Namespace(video_file="/nonexistent/file.mp4", output=None)
+        args = argparse.Namespace(inputfile="/nonexistent/file.mp4", output=None)
 
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
@@ -96,7 +96,7 @@ class TestGuardianCLI(unittest.TestCase):
     def test_validate_args_invalid_output_dir(self):
         """Test argument validation with invalid output directory"""
         args = argparse.Namespace(
-            video_file=self.test_video, output="/nonexistent/dir/output.mp4"
+            inputfile=self.test_video, output="/nonexistent/dir/output.mp4"
         )
 
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
@@ -107,7 +107,7 @@ class TestGuardianCLI(unittest.TestCase):
     def test_validate_args_valid_output_dir(self):
         """Test argument validation with valid output directory"""
         output_path = os.path.join(self.temp_dir, "output.mp4")
-        args = argparse.Namespace(video_file=self.test_video, output=output_path)
+        args = argparse.Namespace(inputfile=self.test_video, output=output_path)
 
         result = validate_args(args)
         self.assertTrue(result)
@@ -124,7 +124,7 @@ class TestGuardianCLI(unittest.TestCase):
     @patch("logging.basicConfig")
     def test_setup_logging_verbose(self, mock_basic_config):
         """Test logging setup with verbose mode"""
-        setup_logging(verbose=True)
+        setup_logging(debug=True)
 
         mock_basic_config.assert_called_once()
         call_args = mock_basic_config.call_args
