@@ -42,7 +42,11 @@ jobs:
       - name: Install security tools
         run: |
           python -m pip install --upgrade pip
-          pip install safety pip-audit osv-scanner
+          pip install safety pip-audit
+          echo "Installing OSV-Scanner"
+          curl -L "https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64" -o osv-scanner
+          chmod +x osv-scanner
+          sudo mv osv-scanner /usr/local/bin/
 
       - name: Run comprehensive dependency security scan
         run: |
