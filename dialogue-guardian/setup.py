@@ -20,7 +20,7 @@ if requirements_file.exists():
 
 setup(
     name="dialogue-guardian",
-    version="1.1.5",
+    version="1.2.0",
     author="Tony Snearly",
     description="Universal Media Censor - Automatically detect and censor profane language in video files",
     long_description=long_description,
