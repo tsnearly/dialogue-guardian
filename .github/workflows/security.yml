@@ -1,73 +1,73 @@
 name: Security Scan
 
+# Focused security scanning workflow
+# Note: Basic security checks are now handled in quality.yml
+# This workflow focuses on comprehensive security analysis and compliance
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
+    paths:
+      - 'dialogue-guardian/src/**'
+      - 'dialogue-guardian/requirements*.txt'
+      - 'dialogue-guardian/pyproject.toml'
   pull_request:
     branches: [main]
+    paths:
+      - 'dialogue-guardian/src/**'
+      - 'dialogue-guardian/requirements*.txt' 
+      - 'dialogue-guardian/pyproject.toml'
   schedule:
     - cron: "0 2 * * 1" # Weekly on Monday at 2 AM UTC
+  workflow_dispatch:
 
 jobs:
-  security-scan:
+  dependency-security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
+      
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
+      - name: Cache security tools
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-security-tools-v2
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-security-tools-
 
-      - name: Install dependencies
+      - name: Install security tools
         run: |
           python -m pip install --upgrade pip
-          pip install bandit safety semgrep
-          cd dialogue-guardian
-          pip install -e .
+          pip install safety pip-audit osv-scanner
 
-      - name: Run Bandit security scan
+      - name: Run comprehensive dependency security scan
         run: |
           cd dialogue-guardian
-          bandit -r src/guardian/ -f json -o bandit-report.json || echo "No security issues found"
+          echo "=== Safety Check ==="
+          safety check --json --output safety-report.json || true
+          safety check || echo "Safety vulnerabilities found"
+          
+          echo "=== Pip Audit ==="
+          pip-audit --format=json --output=pip-audit-report.json || true
+          pip-audit || echo "Pip audit vulnerabilities found"
+          
+          echo "=== OSV Scanner ===" 
+          osv-scanner --format json --output osv-report.json . || echo "OSV vulnerabilities found"
 
-      - name: Run Safety dependency check
-        run: |
-          cd dialogue-guardian
-          safety check --output json > safety-report.json || echo "No safety issues found"
-
-      - name: Run Semgrep security scan
-        run: |
-          cd dialogue-guardian
-          semgrep --config=auto src/guardian/ --json --output=semgrep-report.json || echo "No security issues found"
-
-      - name: Upload security reports
+      - name: Upload dependency security reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: security-reports
+          name: dependency-security-reports
           path: |
-            dialogue-guardian/bandit-report.json
             dialogue-guardian/safety-report.json
-            dialogue-guardian/semgrep-report.json
+            dialogue-guardian/pip-audit-report.json
+            dialogue-guardian/osv-report.json
+          retention-days: 30
 
   codeql:
     name: CodeQL Analysis

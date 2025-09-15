@@ -1,13 +1,29 @@
 name: Code Quality
 
+# This workflow runs additional quality checks beyond the basic CI
+# It's designed for periodic quality assurance and detailed analysis
 on:
   push:
     branches: [main, develop]
+    paths:
+      - 'dialogue-guardian/src/**'
+      - 'dialogue-guardian/tests/**'
+      - '.github/workflows/quality.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'dialogue-guardian/src/**' 
+      - 'dialogue-guardian/tests/**'
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM UTC
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
 
 jobs:
-  lint:
+  # Advanced code quality analysis
+  advanced-quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -15,141 +31,52 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
+      - name: Cache quality tools
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-quality-tools-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-quality-tools-
 
-      - name: Install dependencies
+      - name: Install quality analysis tools
         run: |
           python -m pip install --upgrade pip
-          cd dialogue-guardian
-          pip install -e .
-          pip install -r dev-requirements.txt
-
-      - name: Run flake8
-        run: |
-          cd dialogue-guardian
-          flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 src/ tests/ --count --exit-zero --max-complexity=10 --config .flake8
-
-      - name: Run black
-        run: |
-          cd dialogue-guardian
-          black --check --diff src/ tests/
-
-      - name: Run isort
-        run: |
-          cd dialogue-guardian
-          isort --check-only --diff src/ tests/
-
-      - name: Run mypy
-        run: |
-          cd dialogue-guardian
-          mypy src/guardian/ --ignore-missing-imports
-
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install bandit safety
+          pip install radon xenon vulture bandit safety semgrep
           cd dialogue-guardian
           pip install -e .
 
-      - name: Run bandit security linter
+      - name: Run complexity analysis
         run: |
           cd dialogue-guardian
+          echo "=== Code Complexity Analysis ==="
+          radon cc src/guardian/ -a -nb
+          radon mi src/guardian/ -nb
+          xenon --max-absolute B --max-modules A --max-average A src/guardian/ || echo "Complexity issues found"
+
+      - name: Find dead code
+        run: |
+          cd dialogue-guardian
+          echo "=== Dead Code Analysis ==="
+          vulture src/guardian/ --min-confidence 80 || echo "Potential dead code found"
+
+      - name: Security analysis
+        run: |
+          cd dialogue-guardian
+          echo "=== Security Analysis ==="
           bandit -r src/guardian/ -f json -o bandit-report.json || true
-          bandit -r src/guardian/ || echo "No security issues found"
+          bandit -r src/guardian/ || echo "Security issues found"
+          safety check || echo "Dependency vulnerabilities found"
+          semgrep --config=auto src/guardian/ --json --output=semgrep-report.json || echo "Semgrep issues found"
 
-      - name: Run safety check
-        run: |
-          cd dialogue-guardian
-          safety check --output json > safety-report.json || echo "No safety issues found"
-          safety check || echo "No safety issues found"
-
-  complexity:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v4
+        if: always()
         with:
-          python-version: "3.11"
-
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install radon xenon
-
-      - name: Run radon complexity analysis
-        run: |
-          cd dialogue-guardian
-          radon cc src/guardian/ -a -nb || echo "No complexity issues found"
-          radon mi src/guardian/ -nb || echo "No maintainability issues found"
-
-      - name: Run xenon complexity check
-        run: |
-          cd dialogue-guardian
-          xenon --max-absolute B --max-modules A --max-average A src/guardian/ || echo "No complexity issues found"
+          name: quality-analysis-reports
+          path: |
+            dialogue-guardian/bandit-report.json
+            dialogue-guardian/semgrep-report.json
+          retention-days: 30

@@ -290,28 +290,50 @@ twine upload dist/*
 
 ## GitHub Actions
 
-The project includes several GitHub Actions workflows:
+The project includes several optimized GitHub Actions workflows:
 
-### CI Workflow (`.github/workflows/ci.yml`)
+### CI/CD Pipeline (`.github/workflows/ci.yml`)
+- **Consolidated workflow** combining testing, quality checks, and building
 - Runs on every push and pull request
-- Tests on multiple Python versions and operating systems
-- Runs linting and tests
-- Uploads coverage reports
+- Tests on multiple Python versions (3.8-3.12) and operating systems
+- **Enhanced caching** for dependencies and FFmpeg binaries
+- **Fail-fast quality checks** run before expensive test matrix
+- Runs linting, type checking, and comprehensive tests
+- Uploads coverage reports to Codecov
+- Builds and validates package
 
-### Documentation Workflow (`.github/workflows/docs.yml`)
-- Builds and deploys documentation
-- Runs on documentation changes
-- Deploys to GitHub Pages
+### Code Quality Analysis (`.github/workflows/quality.yml`)
+- **Advanced quality analysis** beyond basic CI checks
+- Runs complexity analysis, dead code detection
+- **Path-based triggering** - only runs when relevant code changes
+- Includes comprehensive security scanning
+- Scheduled weekly runs for ongoing quality assurance
 
-### Publishing Workflow (`.github/workflows/publish.yml`)
-- Publishes package to PyPI
+### Security Scanning (`.github/workflows/security.yml`)
+- **Focused dependency security analysis**
+- Multiple security tools: Safety, pip-audit, OSV scanner, CodeQL
+- **Intelligent triggering** on dependency-related changes
+- Comprehensive vulnerability detection and reporting
+
+### Documentation (`.github/workflows/docs.yml`)
+- Builds and deploys Sphinx documentation to GitHub Pages
+- **Smart change detection** - only rebuilds when needed
+- **Enhanced caching** for both dependencies and build artifacts
+- Supports incremental builds for faster execution
+
+### Publishing (`.github/workflows/publish.yml`)
+- Publishes package to PyPI and Test PyPI
+- **Optimized validation** with reduced test matrix
 - Runs on releases or manual trigger
-- Supports both PyPI and Test PyPI
+- **Propagation delays** for reliable package validation
+- Post-publish validation for releases
 
-### Release Workflow (`.github/workflows/release.yml`)
+### Release Automation (`.github/workflows/release.yml`)
 - Automates version bumping and release creation
-- Manual trigger only
-- Creates GitHub releases with changelogs
+- Manual trigger with version bump selection
+- Creates GitHub releases with auto-generated changelogs
+- **Specialized caching** for release tools
+- Triggers publishing workflow automatically
 
 ## Contributing
 

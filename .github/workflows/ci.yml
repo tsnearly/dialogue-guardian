@@ -6,17 +6,76 @@ on:
   pull_request:
     branches: [main]
 
+# Global environment variables
+env:
+  PYTHONPATH: dialogue-guardian/src
+  PYTHON_VERSION: "3.11"
+
 jobs:
+  # Fast quality checks job - runs first to fail fast
+  quality:
+    runs-on: ubuntu-latest
+    outputs:
+      python-cache-key: ${{ steps.cache-key.outputs.key }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          echo "key=${{ runner.os }}-py${{ env.PYTHON_VERSION }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml', 'dialogue-guardian/dev-requirements.txt') }}" >> $GITHUB_OUTPUT
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            dialogue-guardian/.venv
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            ${{ runner.os }}-py${{ env.PYTHON_VERSION }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd dialogue-guardian
+          pip install -r dev-requirements.txt
+          pip install -e . -v
+
+      - name: Run quality checks
+        run: |
+          cd dialogue-guardian
+          # Linting
+          flake8 src/ tests/ --config .flake8
+          black --check src/ tests/ --line-length=88
+          isort --check-only src/ tests/
+          # Type checking
+          mypy src/guardian/ --ignore-missing-imports
+
+  # Test matrix - only runs after quality checks pass
   test:
-    name: Run unit tests on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    needs: quality
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-
-    env:
-      PYTHONPATH: dialogue-guardian/src
+        # Reduce matrix for non-main branches to save resources
+        exclude:
+          - os: windows-latest
+            python-version: "3.9"
+          - os: windows-latest 
+            python-version: "3.10"
+          - os: macos-latest
+            python-version: "3.9"
+          - os: macos-latest
+            python-version: "3.10"
 
     steps:
       - uses: actions/checkout@v5
@@ -26,41 +85,47 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
+      - name: Cache FFmpeg binaries
+        id: ffmpeg-cache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          path: |
+            ~/ffmpeg
+            /usr/local/bin/ffmpeg
+            /usr/local/bin/ffprobe
+            C:\ProgramData\chocolatey\lib\ffmpeg
+          key: ${{ runner.os }}-ffmpeg-v1
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-ffmpeg-
 
       - name: Install FFmpeg (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' && steps.ffmpeg-cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
       - name: Install FFmpeg (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && steps.ffmpeg-cache.outputs.cache-hit != 'true'
         run: |
           brew install ffmpeg
 
       - name: Install FFmpeg (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest' && steps.ffmpeg-cache.outputs.cache-hit != 'true'
         run: |
-          choco install ffmpeg
+          choco install ffmpeg -y
 
-      - name: Install dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/AppData/Local/pip/Cache
+            ~/Library/Caches/pip
+          key: ${{ runner.os }}-py${{ matrix.python-version }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml', 'dialogue-guardian/dev-requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-py${{ matrix.python-version }}-pip-
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           cd dialogue-guardian
@@ -70,9 +135,10 @@ jobs:
       - name: Run tests with coverage
         run: |
           cd dialogue-guardian/src
-          python -m pytest ../tests/ --cov=guardian --cov-report=xml --cov-report=html
+          python -m pytest ../tests/ --cov=guardian --cov-report=xml --cov-report=html --tb=short
 
       - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION
         uses: codecov/codecov-action@v5
         with:
           files: ./dialogue-guardian/coverage.xml
@@ -81,84 +147,26 @@ jobs:
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-  lint:
-    runs-on: ubuntu-latest
-    env:
-      PYTHONPATH: dialogue-guardian/src
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          cd dialogue-guardian
-          pip install -r dev-requirements.txt
-          pip install -e . -v
-
-      - name: Run linting
-        run: |
-          cd dialogue-guardian
-          flake8 src/ tests/ --config .flake8
-          black --check src/ tests/ --line-length=88
-          isort --check-only src/ tests/
-
+  # Build job - only runs on one platform after tests pass
   build:
-    needs: [test, lint]
+    needs: [quality, test]
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'main')
     steps:
       - uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
+      - name: Cache build dependencies
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-build-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-build-pip-
 
       - name: Install build dependencies
         run: |
@@ -175,8 +183,9 @@ jobs:
           cd dialogue-guardian
           twine check dist/*
 
-      - name: Upload artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: python-package-distributions
           path: dialogue-guardian/dist/
+          retention-days: 7

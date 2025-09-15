@@ -19,53 +19,73 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  PYTHON_VERSION: "3.11"
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-
+    outputs:
+      docs-changed: ${{ steps.check-changes.outputs.docs-changed }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2  # Need history for change detection
+
+      - name: Check for documentation changes
+        id: check-changes
+        run: |
+          if git diff --quiet HEAD~1..HEAD -- dialogue-guardian/docs/ dialogue-guardian/src/; then
+            echo "docs-changed=false" >> $GITHUB_OUTPUT
+            echo "No documentation-relevant changes detected"
+          else
+            echo "docs-changed=true" >> $GITHUB_OUTPUT
+            echo "Documentation changes detected"
+          fi
 
       - name: Set up Python
+        if: steps.check-changes.outputs.docs-changed == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Get pip cache directory
-        id: pip-cache
-        shell: python
-        run: |
-          import subprocess
-          import os
-          result = subprocess.run(["pip", "cache", "dir"], capture_output=True, text=True)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              fh.write(f"PIP_CACHE_DIR={result.stdout.strip()}\n")
-
-      - name: Cache pip dependencies
+      - name: Cache documentation dependencies
+        if: steps.check-changes.outputs.docs-changed == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pip-cache.outputs.PIP_CACHE_DIR }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          path: |
+            ~/.cache/pip
+            dialogue-guardian/docs/_build
+          key: ${{ runner.os }}-docs-${{ env.PYTHON_VERSION }}-${{ hashFiles('dialogue-guardian/docs/requirements.txt', 'dialogue-guardian/pyproject.toml') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-docs-${{ env.PYTHON_VERSION }}-
 
       - name: Install dependencies
+        if: steps.check-changes.outputs.docs-changed == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           python -m pip install --upgrade pip
           cd dialogue-guardian
           pip install -e .
-          pip install -r dev-requirements.txt
+          # Install docs-specific requirements if they exist
+          if [ -f docs/requirements.txt ]; then
+            pip install -r docs/requirements.txt
+          else
+            pip install -r dev-requirements.txt
+          fi
 
       - name: Build documentation
+        if: steps.check-changes.outputs.docs-changed == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           cd dialogue-guardian/docs
           make html
 
       - name: Upload documentation artifacts
+        if: steps.check-changes.outputs.docs-changed == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: documentation
           path: dialogue-guardian/docs/_build/html/
+          retention-days: 7
 
   pages:
     runs-on: ubuntu-latest

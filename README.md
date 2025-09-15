@@ -2,7 +2,6 @@
 
 [![CI/CD Pipeline](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml)
 [![PyPI Package](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml)
-[![Tests](https://github.com/tsnearly/dialogue-guardian/actions/workflows/test.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/tsnearly/dialogue-guardian/graph/badge.svg?token=0XIMSERI3U)](https://codecov.io/gh/tsnearly/dialogue-guardian)
 [![PyPI version](https://img.shields.io/pypi/v/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Python versions](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
