@@ -83,7 +83,10 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
     def test_validate_args_output_same_as_input(self):
         """Test argument validation when output is same as input"""
-        args = argparse.Namespace(inputfile=[self.test_video], outputfile=self.test_video)
+        args = argparse.Namespace(
+            inputfile=[self.test_video], 
+            outputfile=self.test_video
+        )
 
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
@@ -94,7 +97,10 @@ class TestGuardianCLIExtended(unittest.TestCase):
         """Test that output directory validation works correctly"""
         # Test with a path in an existing directory
         output_in_temp = os.path.join(self.temp_dir, "subdir", "output.mp4")
-        args = argparse.Namespace(inputfile=[self.test_video], outputfile=output_in_temp)
+        args = argparse.Namespace(
+            inputfile=[self.test_video], 
+            outputfile=output_in_temp
+        )
 
         with patch("sys.stderr", new_callable=io.StringIO):
             result = validate_args(args)
@@ -237,7 +243,10 @@ class TestGuardianCLIExtended(unittest.TestCase):
             result = main()
 
             self.assertEqual(result, 1)
-            self.assertIn("An unexpected error occurred processing file", mock_stderr.getvalue())
+            self.assertIn(
+                "An unexpected error occurred processing file", 
+                mock_stderr.getvalue()
+            )
             # The error message contains the exception message, not the type name
             self.assertIn("Invalid video format", mock_stderr.getvalue())
 
