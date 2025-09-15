@@ -126,6 +126,7 @@ jobs:
             ${{ runner.os }}-py${{ matrix.python-version }}-pip-
 
       - name: Install Python dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           # Explicitly install an older setuptools for Python 3.8 compatibility
