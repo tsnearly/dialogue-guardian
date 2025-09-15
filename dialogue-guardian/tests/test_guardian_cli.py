@@ -258,9 +258,7 @@ class TestGuardianCLI(unittest.TestCase):
             result = main()
 
             self.assertEqual(result, 1)
-            self.assertIn(
-                "An unexpected error occurred:", mock_stderr.getvalue()
-            )
+            self.assertIn("An unexpected error occurred:", mock_stderr.getvalue())
 
     @patch("sys.argv", ["guardian", "--version"])
     def test_version_argument(self):

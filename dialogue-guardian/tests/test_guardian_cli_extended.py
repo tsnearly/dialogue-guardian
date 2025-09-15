@@ -143,7 +143,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
     @patch(
         "sys.argv",
-        ["guardian", "--input", "test.mp4", "--debug", "--log-file", "test.log"]
+        ["guardian", "--input", "test.mp4", "--debug", "--log-file", "test.log"],
     )
     def test_main_with_logging_options(self):
         """Test main execution with logging options"""
@@ -172,7 +172,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
     @patch(
         "sys.argv",
-        ["guardian", "--input", "test.mp4", "--ffmpeg-path", "/custom/ffmpeg"]
+        ["guardian", "--input", "test.mp4", "--ffmpeg-path", "/custom/ffmpeg"],
     )
     def test_main_with_custom_ffmpeg_path(self):
         """Test main execution with custom FFmpeg path"""
@@ -201,7 +201,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
     @patch(
         "sys.argv",
-        ["guardian", "--input", "test.mp4", "--ffprobe-path", "/custom/ffprobe"]
+        ["guardian", "--input", "test.mp4", "--ffprobe-path", "/custom/ffprobe"],
     )
     def test_main_with_custom_ffprobe_path(self):
         """Test main execution with custom FFprobe path"""
@@ -251,9 +251,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
             result = main()
 
             self.assertEqual(result, 1)
-            self.assertIn(
-                "An unexpected error occurred:", mock_stderr.getvalue()
-            )
+            self.assertIn("An unexpected error occurred:", mock_stderr.getvalue())
             # The error message contains the exception message, not the type name
             self.assertIn("Invalid video format", mock_stderr.getvalue())
 
