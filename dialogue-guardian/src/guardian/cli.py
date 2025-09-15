@@ -6,10 +6,10 @@ import argparse
 import logging
 import os
 import sys
-from typing import Optional, List
+from typing import List, Optional
 
-from .core import GuardianProcessor
 from . import __version__
+from .core import GuardianProcessor
 
 
 def setup_logging(log_file: Optional[str] = None, debug: bool = False) -> None:
