@@ -6,11 +6,15 @@ For the complete changelog, see the `CHANGELOG.md <https://github.com/tsnearly/d
 Recent Changes
 --------------
 
-Version 1.1.4 (2025-09-15)
+Version 1.1.5 (2025-09-15)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Changes:**
 
+- Bump version: 1.1.4 → 1.1.5
+- Correct versioning numbering
+- Added license tag header
+- Update CHANGELOG.md and docs/changelog.rst for version 1.1.4
 - Bump version: 1.1.3 → 1.1.4
 - Refactor version update process in release workflow to use a Python script for modifying docs/conf.py
 - "Removed bumpversion configuration for src/guardian/cli.py"
