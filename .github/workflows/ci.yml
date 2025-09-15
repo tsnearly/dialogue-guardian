@@ -128,6 +128,13 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
+          # Explicitly install an older setuptools for Python 3.8 compatibility
+          # This is a workaround for setuptools versions that dropped Python 3.8 support
+          # while still being picked up by pip for older Python versions.
+          if python -c "import sys; exit(sys.version_info < (3, 9))"; then
+            echo "Installing setuptools==65.5.1 for Python 3.8"
+            pip install setuptools==65.5.1
+          fi
           cd dialogue-guardian
           pip install -r dev-requirements.txt
           pip install -e . -v
