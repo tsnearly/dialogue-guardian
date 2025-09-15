@@ -81,9 +81,8 @@ jobs:
           # Get the new version that was just set
           NEW_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d' ' -f3)
           
-          # Manually update docs/conf.py since bumpversion can't handle multiple patterns in same file
-          sed -i "s/release = '[0-9]\+\.[0-9]\+\.[0-9]\+'/release = '$NEW_VERSION'/g" docs/conf.py
-          sed -i "s/version = '[0-9]\+\.[0-9]\+\.[0-9]\+'/version = '$NEW_VERSION'/g" docs/conf.py
+          # Manually update docs/conf.py using a Python script
+          python scripts/update_conf_py.py "$NEW_VERSION"
           
           # Commit the additional docs changes
           git add docs/conf.py
