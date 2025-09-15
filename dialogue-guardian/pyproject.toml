@@ -28,7 +28,7 @@ classifiers = [
 ]
 keywords = ["video", "audio", "censoring", "subtitles", "ffmpeg", "profanity", "media"]
 dependencies = [
-    "srt2",
+    "srt",
 ]
 
 [project.urls]
