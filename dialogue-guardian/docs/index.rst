@@ -57,7 +57,6 @@ Contents
    installation
    quickstart
    cli_usage
-   python_api
 
 .. toctree::
    :maxdepth: 2

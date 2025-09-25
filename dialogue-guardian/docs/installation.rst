@@ -49,7 +49,7 @@ From Source
    pip install -e .
 
 Development Installation
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 For development work:
 

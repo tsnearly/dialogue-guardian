@@ -346,7 +346,7 @@ class GuardianProcessor:
 
     def _find_profane_segments(
         self, subs: List[srt.Subtitle]
-        ) -> List[tuple[float, float]]:
+    ) -> List[tuple[float, float]]:
         """Finds profane segments in a list of subtitles."""
         pattern = (
             r"\b("
@@ -367,8 +367,8 @@ class GuardianProcessor:
         return censor_segments
 
     def _construct_ffmpeg_command(
-        self, video_path: str, 
-        output_path: str, 
+        self, video_path: str,
+        output_path: str,
         censor_segments: List[tuple[float, float]]
     ) -> List[str]:
         """Constructs the FFmpeg command for censoring audio."""

@@ -1,5 +1,5 @@
 Guardian Package API
-===================
+====================
 
 This section contains the complete API reference for the Guardian package.
 
