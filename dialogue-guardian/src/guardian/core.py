@@ -349,27 +349,24 @@ class GuardianProcessor:
     ) -> List[tuple[float, float]]:
         """Finds profane segments in a list of subtitles."""
         pattern = (
-            r"\b("
-            + "|".join(re.escape(word) for word in self.matching_words)
-            + r")\b"
+            r"\b(" + "|".join(re.escape(word) for word in self.matching_words) + r")\b"
         )
         censor_pattern = re.compile(pattern, re.IGNORECASE)
         censor_segments = []
         for sub in subs:
             cleaned_text = re.sub(r"[^\w\s\']", "", sub.content).lower()
             if censor_pattern.search(cleaned_text):
-                logging.debug(
-                    f'Match found in subtitle #{sub.index}: "{cleaned_text}"'
-                )
+                logging.debug(f'Match found in subtitle #{sub.index}: "{cleaned_text}"')
                 start_s = sub.start.total_seconds()
                 end_s = sub.end.total_seconds()
                 censor_segments.append((start_s, end_s))
         return censor_segments
 
     def _construct_ffmpeg_command(
-        self, video_path: str,
+        self,
+        video_path: str,
         output_path: str,
-        censor_segments: List[tuple[float, float]]
+        censor_segments: List[tuple[float, float]],
     ) -> List[str]:
         """Constructs the FFmpeg command for censoring audio."""
         filter_parts = []

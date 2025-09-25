@@ -66,9 +66,7 @@ class TestGuardianIntegration(unittest.TestCase):
         # analyzing the audio stream to confirm silence.
         details = self.processor.get_video_details(output_path)
         self.assertIsNotNone(details)
-        self.assertAlmostEqual(
-            float(details["duration"]), 9.495, places=1
-        )
+        self.assertAlmostEqual(float(details["duration"]), 9.495, places=1)
 
     def test_get_video_details_complex_framerate(self):
         """Test video details with complex framerate calculations"""

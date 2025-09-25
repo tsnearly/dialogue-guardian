@@ -10,6 +10,7 @@ import unittest
 from unittest.mock import mock_open, patch
 
 import srt
+
 from guardian.core import GuardianProcessor
 
 
