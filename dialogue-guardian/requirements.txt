@@ -1,3 +1,1 @@
-# ffprobe is a part of the ffmpeg package, which is used for video processing.
-# Ensure ffmpeg is installed on your system to use this code.
-srt2
+srt>=3.5.0
