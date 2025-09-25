@@ -365,12 +365,19 @@ class TestGuardianIntegration(unittest.TestCase):
 
     def test_custom_ffmpeg_paths(self):
         """Test processor with custom FFmpeg paths"""
-        processor = GuardianProcessor(
+        # Test with custom paths
+        processor_custom = GuardianProcessor(
             ffmpeg_cmd="/custom/ffmpeg", ffprobe_cmd="/custom/ffprobe"
         )
+        self.assertEqual(processor_custom.ffmpeg_cmd, "/custom/ffmpeg")
+        self.assertEqual(processor_custom.ffprobe_cmd, "/custom/ffprobe")
 
-        self.assertEqual(processor.ffmpeg_cmd, "/custom/ffmpeg")
-        self.assertEqual(processor.ffprobe_cmd, "/custom/ffprobe")
+        # Test that it falls back to system path if local is not found
+        # and no custom path is provided.
+        with patch("pathlib.Path.is_file", return_value=False):
+            processor_default = GuardianProcessor(ffmpeg_cmd=None, ffprobe_cmd=None)
+            self.assertEqual(processor_default.ffmpeg_cmd, "ffmpeg")
+            self.assertEqual(processor_default.ffprobe_cmd, "ffprobe")
 
 
 if __name__ == "__main__":

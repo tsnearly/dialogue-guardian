@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import subprocess
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import srt
@@ -77,25 +78,43 @@ class GuardianProcessor:
     def __init__(
         self,
         matching_words: Optional[List[str]] = None,
-        ffmpeg_cmd: str = "ffmpeg",
-        ffprobe_cmd: str = "ffprobe",
+        ffmpeg_cmd: Optional[str] = None,
+        ffprobe_cmd: Optional[str] = None,
     ):
         """
         Initialize the GuardianProcessor.
-
         Args:
-            matching_words: Custom list of words to censor. Uses default if
-            None.
-            ffmpeg_cmd: Path to ffmpeg executable.
-            ffprobe_cmd: Path to ffprobe executable.
+            matching_words: Custom list of words to censor. Uses default if None.
+            ffmpeg_cmd: Path to ffmpeg executable. Defaults to checking local 'bin' dir.
+            ffprobe_cmd: Path to ffprobe executable. Defaults to checking local 'bin' dir.
         """
         self.matching_words = (
             matching_words
             if matching_words is not None
             else self.DEFAULT_MATCHING_WORDS
         )
-        self.ffmpeg_cmd = ffmpeg_cmd
-        self.ffprobe_cmd = ffprobe_cmd
+        self.ffmpeg_cmd = ffmpeg_cmd or self._get_local_ffmpeg_cmd("ffmpeg")
+        self.ffprobe_cmd = ffprobe_cmd or self._get_local_ffmpeg_cmd("ffprobe")
+
+    def _get_local_ffmpeg_cmd(self, cmd_name: str) -> str:
+        """
+        Checks for a local FFmpeg command and returns its path if it exists,
+        otherwise returns the command name for system PATH resolution.
+        """
+        executable_name = (
+            f"{cmd_name}.exe" if platform.system() == "Windows" else cmd_name
+        )
+        # Assumes this script is in src/guardian/core.py
+        bin_dir = Path(__file__).parent.parent.parent / "bin"
+        local_path = bin_dir / executable_name
+        if local_path.is_file():
+            logging.debug(f"Using local executable: {local_path}")
+            return str(local_path)
+        logging.debug(
+            f"Local executable not found at {local_path}. "
+            f"Falling back to system PATH for '{cmd_name}'."
+        )
+        return cmd_name
 
     def get_video_details(self, filename: str) -> Optional[Dict[str, Any]]:
         """
