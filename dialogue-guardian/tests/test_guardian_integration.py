@@ -348,10 +348,10 @@ class TestGuardianIntegration(unittest.TestCase):
         af_index = call_args.index("-af")
         filter_string = call_args[af_index + 1]
         # Should contain multiple volume filters
-        self.assertIn("volume=enable=", filter_string)
+        self.assertIn("volume=0:enable=", filter_string)
         # Should have commas separating multiple filters
-        volume_count = filter_string.count("volume=enable=")
-        self.assertGreater(volume_count, 1)
+        volume_count = filter_string.count("volume=0:enable=")
+        self.assertEqual(volume_count, 4)
 
     def test_custom_matching_words(self):
         """Test processor with custom matching words"""

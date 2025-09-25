@@ -10,22 +10,17 @@ This document provides instructions for running and developing unit tests for th
 
 ## Test Structure
 
-The test suite is organized into the following components:
+The test suite is organized into the following files located in the `tests/` directory:
 
-- **`test_guardian.py`**: Unit tests for `guardian.py` (FCPXML generation).
-- **`test_guardian_by_ffmpeg.py`**: Unit tests for `guardian_by_ffmpeg.py` (FFmpeg-based censoring).
+-   **`test_guardian_cli.py`**: Unit tests for the command-line interface (CLI) argument parsing and main execution flow.
+-   **`test_guardian_cli_extended.py`**: Extended tests for the CLI, covering more edge cases and argument combinations.
+-   **`test_guardian_core.py`**: Unit tests for the core processing logic in `guardian/core.py`.
+-   **`test_guardian_edge_cases.py`**: Tests for specific edge cases in the core logic, such as malformed data and unexpected failures.
+-   **`test_guardian_integration.py`**: Integration tests that verify the interaction between different components and with `ffmpeg`/`ffprobe` (using mocks).
 
 ## Running Tests
 
-### Option 1: Using Python's built-in unittest
-
-Run all tests using the provided script:
-
-```bash
-python run_tests.py
-```
-
-### Option 2: Using pytest (recommended)
+### Using pytest (Recommended)
 
 First, install the test dependencies:
 
@@ -33,62 +28,85 @@ First, install the test dependencies:
 pip install -r test_requirements.txt
 ```
 
-Run all tests:
+Run all tests from the `dialogue-guardian` directory:
 
 ```bash
 pytest
 ```
 
+Or more explicitly:
+```bash
+python3 -m pytest tests/
+```
+
 Run tests for a specific file:
 
 ```bash
-pytest test_guardian.py
-pytest test_guardian_by_ffmpeg.py
+pytest tests/test_guardian_core.py
 ```
 
-Run with coverage for both scripts:
+Run tests with coverage:
 
 ```bash
-pytest --cov=guardian --cov=guardian_by_ffmpeg
+pytest --cov=src/guardian
 ```
 
-### Option 3: Using unittest directly
+### Option 2: Using Makefile
+
+Convenience targets are available in the `Makefile`:
 
 ```bash
-python -m unittest test_guardian.py
-python -m unittest test_guardian_by_ffmpeg.py
+# Run all tests
+make test
+
+# Run tests with verbose output
+make test-verbose
 ```
 
 ## Test Categories
 
-### `guardian.py` Tests
+### CLI Tests (`test_guardian_cli.py`, `test_guardian_cli_extended.py`)
 
-- **`test_get_video_details_*`**: Tests for video metadata extraction using ffprobe.
-- **`test_create_fcpxml_*`**: Tests for FCPXML generation, including SRT parsing, profanity detection, and keyframe logic.
-- **`test_xml_structure`**: Tests the basic structure of the generated FCPXML.
+-   Tests for argument parsing (`--input`, `--output`, `--debug`, etc.).
+-   Validation of arguments (e.g., file existence).
+-   Main application entry point (`main()`) success and failure scenarios.
+-   Logging setup.
 
-### `guardian_by_ffmpeg.py` Tests
+### Core Logic Tests (`test_guardian_core.py`)
 
-- **`test_get_video_details_*`**: Tests for video metadata extraction.
-- **`test_extract_embedded_srt_*`**: Tests for SRT subtitle extraction.
-- **`test_censor_audio_with_ffmpeg_*`**: Tests for audio censoring functionality.
-- **`test_matching_words_list`**: Tests for profanity word list.
-- **`test_end_to_end_workflow`**: Tests complete workflow with mocked dependencies.
+-   Tests for `GuardianProcessor` initialization.
+-   SRT file finding and parsing logic.
+-   Profanity detection in subtitle segments.
+-   Construction of `ffmpeg` commands.
+
+### Edge Case Tests (`test_guardian_edge_cases.py`)
+
+-   Tests for handling malformed video metadata.
+-   Graceful failure on unexpected exceptions.
+-   Behavior with empty or specially-formatted profanity lists.
+
+### Integration Tests (`test_guardian_integration.py`)
+
+-   Tests the end-to-end workflow, from video processing to censoring.
+-   Interaction with `ffmpeg` and `ffprobe` (mocked).
+-   Extraction of embedded SRT files.
+-   Fallback mechanisms (e.g., from external to embedded SRT).
 
 ## Mocking Strategy
 
-The tests use extensive mocking to:
+The tests use extensive mocking via `unittest.mock` to:
 
-- Avoid actual FFmpeg/ffprobe operations during testing.
-- Simulate various error conditions.
-- Test edge cases without requiring actual video/SRT files.
+-   Avoid actual FFmpeg/ffprobe operations during unit testing, ensuring tests are fast and don't require external dependencies to be installed.
+-   Simulate various error conditions (e.g., `subprocess.CalledProcessError`, `FileNotFoundError`).
+-   Test edge cases without requiring actual video/SRT files.
 
 ### Key Mock Objects
 
-- **`subprocess.Popen` / `subprocess.run`**: Mocks ffprobe/ffmpeg execution.
-- **`os.path.exists`**: Mocks file system checks.
-- **`builtins.open`**: Mocks file I/O operations.
-- **`srt.parse`**: Mocks the parsing of SRT files.
+-   **`subprocess.run` / `subprocess.check_output`**: Mocks `ffprobe`/`ffmpeg` execution.
+-   **`os.path.exists`**: Mocks file system checks.
+-   **`builtins.open`**: Mocks file I/O operations.
+-   **`srt.parse`**: Mocks the parsing of SRT files.
+-   **`platform.system`**: Mocks the operating system check for cross-platform testing.
 
 ## Test Dependencies
 
@@ -102,13 +120,13 @@ pip install -r test_requirements.txt
 
 After running tests with pytest, view the coverage report:
 
-- **Console**: `pytest --cov=guardian --cov=guardian_by_ffmpeg`
-- **HTML**: Open `htmlcov/index.html` in your browser after running `pytest --cov-report html`.
+-   **Console**: `pytest --cov=src/guardian`
+-   **HTML**: Open `htmlcov/index.html` in your browser after running `pytest --cov-report html src/guardian`.
 
 ## Adding New Tests
 
-1. Add new test methods to the appropriate test class (`TestGuardian` or `TestGuardianByFFmpeg`).
-2. Follow the naming convention: `test_<function_name>_<scenario>`.
-3. Use mocking for external dependencies.
-4. Include both success and failure scenarios.
-5. Add docstrings explaining what each test verifies.
+1.  Add new test methods to the appropriate test class in the `tests/` directory.
+2.  Follow the naming convention: `test_<function_name>_<scenario>`.
+3.  Use mocking for external dependencies in unit tests.
+4.  Include both success and failure scenarios.
+5.  Add docstrings explaining what each test verifies.

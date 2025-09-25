@@ -196,7 +196,7 @@ class TestGuardianEdgeCases(unittest.TestCase):
         call_args = mock_run.call_args[0][0]
         af_index = call_args.index("-af")
         filter_string = call_args[af_index + 1]
-        volume_count = filter_string.count("volume=enable=")
+        volume_count = filter_string.count("volume=0:enable=")
         self.assertEqual(volume_count, 4)
 
     @patch("os.path.exists")
@@ -237,7 +237,7 @@ class TestGuardianEdgeCases(unittest.TestCase):
         call_args = mock_run.call_args[0][0]
         af_index = call_args.index("-af")
         filter_string = call_args[af_index + 1]
-        self.assertIn("volume=enable=", filter_string)
+        self.assertIn("volume=0:enable=", filter_string)
 
     @patch("os.path.exists")
     @patch("builtins.open")
