@@ -130,12 +130,22 @@ class TestGuardianProcessor(unittest.TestCase):
         self.assertEqual(len(segments), 1)
         self.assertEqual(segments[0], (1.0, 2.0))
 
-    def test_construct_ffmpeg_command(self):
+    @patch("platform.system")
+    def test_construct_ffmpeg_command(self, mock_system):
         """Test the _construct_ffmpeg_command method."""
+        # Test on Linux
+        mock_system.return_value = "Linux"
         command = self.processor._construct_ffmpeg_command(
             "/test/video.mp4", "/test/censored.mp4", [(1.0, 2.0)]
         )
-        self.assertIn("volume=enable='between(t,1.0,2.0)':volume=0", command)
+        self.assertIn("volume=0:enable='between(t,1.0,2.0)'", command)
+
+        # Test on Windows
+        mock_system.return_value = "Windows"
+        command = self.processor._construct_ffmpeg_command(
+            "/test/video.mp4", "/test/censored.mp4", [(1.0, 2.0)]
+        )
+        self.assertIn('volume=0:enable="between(t,1.0,2.0)"', command)
 
     def test_regex_pattern_compilation(self):
         """Test that the profanity regex pattern compiles correctly"""

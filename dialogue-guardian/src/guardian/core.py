@@ -7,9 +7,10 @@ Core functionality for the Guardian media censoring system.
 import json
 import logging
 import os
+import platform
 import re
 import subprocess
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import srt
 
@@ -346,7 +347,7 @@ class GuardianProcessor:
 
     def _find_profane_segments(
         self, subs: List[srt.Subtitle]
-    ) -> List[tuple[float, float]]:
+    ) -> List[Tuple[float, float]]:
         """Finds profane segments in a list of subtitles."""
         pattern = (
             r"\b(" + "|".join(re.escape(word) for word in self.matching_words) + r")\b"
@@ -366,13 +367,14 @@ class GuardianProcessor:
         self,
         video_path: str,
         output_path: str,
-        censor_segments: List[tuple[float, float]],
+        censor_segments: List[Tuple[float, float]],
     ) -> List[str]:
         """Constructs the FFmpeg command for censoring audio."""
         filter_parts = []
+        quote_char = '"' if platform.system() == "Windows" else "'"
         for start_s, end_s in censor_segments:
             filter_parts.append(
-                f"volume=enable='between(t,{start_s},{end_s})':volume=0"
+                f"volume=0:enable={quote_char}between(t,{start_s},{end_s}){quote_char}"
             )
         audio_filter_graph = ",".join(filter_parts) if filter_parts else "anull"
 
