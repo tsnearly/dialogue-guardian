@@ -212,15 +212,15 @@ jobs:
           # Push the changelog commit first
           git push origin main || echo "No changelog commit to push"
           # Then push the tag to trigger publish workflow
-          git push origin v${{ env.NEW_VERSION }}
+          git push origin v${{ steps.get_version.outputs.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ env.NEW_VERSION }}
-          name: Release v${{ env.NEW_VERSION }}
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
           body_path: dialogue-guardian/CHANGELOG_ENTRY.md
           draft: false
           prerelease: ${{ github.event.inputs.prerelease }}

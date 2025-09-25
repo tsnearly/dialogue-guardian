@@ -174,9 +174,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-build-pip-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          key: ${{ needs.quality.outputs.python-cache-key }}
           restore-keys: |
-            ${{ runner.os }}-build-pip-
+            ${{ runner.os }}-py${{ env.PYTHON_VERSION }}-pip-
 
       - name: Install build dependencies
         run: |
