@@ -20,8 +20,15 @@ class TestGuardianIntegration(unittest.TestCase):
         """Set up test fixtures"""
         self.processor = GuardianProcessor()
         self.temp_dir = tempfile.mkdtemp()
-        self.test_video_path = "samples/sample.mp4"
-        self.test_srt_path = "samples/sample.srt"
+
+        # Get the absolute path to the project's root directory
+        self.test_dir = os.path.dirname(os.path.abspath(__file__))
+        self.samples_dir = os.path.abspath(
+            os.path.join(self.test_dir, "..", "samples")
+        )
+
+        self.test_video_path = os.path.join(self.samples_dir, "sample.mp4")
+        self.test_srt_path = os.path.join(self.samples_dir, "sample.srt")
 
     def tearDown(self):
         """Clean up test fixtures"""
@@ -41,7 +48,7 @@ class TestGuardianIntegration(unittest.TestCase):
     def test_extract_embedded_srt_integration(self):
         """Test real SRT extraction from a video file."""
         output_srt_path = os.path.join(self.temp_dir, "extracted.srt")
-        video_with_srt = "samples/sample_with_srt.mp4"
+        video_with_srt = os.path.join(self.samples_dir, "sample_with_srt.mp4")
 
         result = self.processor.extract_embedded_srt(video_with_srt, output_srt_path)
 
