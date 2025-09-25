@@ -5,8 +5,10 @@
 Unit tests for guardian.core module
 """
 
+import platform
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import srt
@@ -36,8 +38,24 @@ class TestGuardianProcessor(unittest.TestCase):
         self.assertEqual(
             processor.matching_words, GuardianProcessor.DEFAULT_MATCHING_WORDS
         )
-        self.assertEqual(processor.ffmpeg_cmd, "ffmpeg")
-        self.assertEqual(processor.ffprobe_cmd, "ffprobe")
+
+        # Check if local binaries exist and adjust assertions accordingly
+        bin_dir = Path(__file__).parent.parent / "bin"
+        ffmpeg_exe = "ffmpeg.exe" if platform.system() == "Windows" else "ffmpeg"
+        ffprobe_exe = "ffprobe.exe" if platform.system() == "Windows" else "ffprobe"
+
+        local_ffmpeg_path = bin_dir / ffmpeg_exe
+        local_ffprobe_path = bin_dir / ffprobe_exe
+
+        if local_ffmpeg_path.is_file():
+            self.assertEqual(processor.ffmpeg_cmd, str(local_ffmpeg_path))
+        else:
+            self.assertEqual(processor.ffmpeg_cmd, "ffmpeg")
+
+        if local_ffprobe_path.is_file():
+            self.assertEqual(processor.ffprobe_cmd, str(local_ffprobe_path))
+        else:
+            self.assertEqual(processor.ffprobe_cmd, "ffprobe")
 
     def test_init_custom_values(self):
         """Test processor initialization with custom values"""

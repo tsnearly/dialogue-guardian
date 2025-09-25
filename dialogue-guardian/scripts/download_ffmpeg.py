@@ -1,0 +1,156 @@
+# SPDX-FileCopyrightText: 2025 Tony Snearly
+# SPDX-License-Identifier: OSL-3.0
+"""
+Script to download and extract FFmpeg for the current platform.
+"""
+import platform
+import shutil
+import sys
+import tarfile
+import zipfile
+from pathlib import Path
+
+import py7zr
+import requests
+
+# Define a common 'bin' directory at the project root
+ROOT_DIR = Path(__file__).parent.parent
+BIN_DIR = ROOT_DIR / "bin"
+FFMPEG_URLS = {
+    "Windows": "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z",
+    "Darwin": "https://evermeet.cx/ffmpeg/ffmpeg-113112-g5302586a07.zip",
+    "Linux": "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz",
+}
+CHUNK_SIZE = 8192
+
+
+def get_ffmpeg_urls():
+    """
+    Returns the appropriate FFmpeg download URL for the current OS.
+    """
+    system = platform.system()
+    return FFMPEG_URLS.get(system)
+
+
+def download_file(url, target_dir):
+    """
+    Downloads a file from a URL to a target directory.
+    """
+    local_filename = url.split("/")[-1]
+    download_path = target_dir / local_filename
+    print(f"Downloading {url} to {download_path}...")
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(download_path, "wb") as f:
+            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                f.write(chunk)
+    print("Download complete.")
+    return download_path
+
+
+def extract_archive(archive_path, extract_dir):
+    """
+    Extracts an archive to a specified directory.
+    """
+    print(f"Extracting {archive_path} to {extract_dir}...")
+    if archive_path.suffix == ".7z":
+        with py7zr.SevenZipFile(archive_path, "r") as archive:
+            archive.extractall(path=extract_dir)
+    elif archive_path.suffix == ".zip":
+        with zipfile.ZipFile(archive_path, "r") as zip_ref:
+            zip_ref.extractall(extract_dir)
+    elif archive_path.suffix == ".xz":
+        with tarfile.open(archive_path, "r:xz") as tar_ref:
+            tar_ref.extractall(extract_dir)
+    else:
+        raise ValueError(f"Unsupported archive format: {archive_path.suffix}")
+    print("Extraction complete.")
+
+
+def find_and_move_binaries(extract_dir, archive_path):
+    """
+    Finds and moves the ffmpeg and ffprobe binaries to the bin directory.
+    """
+    system = platform.system()
+    ffmpeg_bin_dir = None
+
+    if system == "Windows":
+        # The archive name is like 'ffmpeg-release-full', which matches the extracted folder name
+        ffmpeg_bin_dir = extract_dir / archive_path.stem / "bin"
+    elif system == "Darwin":
+        # The zip file extracts the binaries directly
+        ffmpeg_bin_dir = extract_dir
+    else:  # Linux
+        # The tarball extracts into a versioned directory
+        extracted_folders = [d for d in extract_dir.iterdir() if d.is_dir()]
+        if len(extracted_folders) == 1:
+            ffmpeg_bin_dir = extracted_folders[0]
+        else:
+            print(f"ERROR: Expected one directory in {extract_dir}, but found {len(extracted_folders)}.")
+            return False
+
+    print(f"Searching for binaries in {ffmpeg_bin_dir}...")
+    if not ffmpeg_bin_dir or not ffmpeg_bin_dir.exists():
+        print("ERROR: Binary directory not found.")
+        return False
+
+    moved_ffmpeg = False
+    moved_ffprobe = False
+    for f in ffmpeg_bin_dir.iterdir():
+        if f.is_file():
+            if f.name in ("ffmpeg", "ffmpeg.exe"):
+                print(f"Moving {f.name} to {BIN_DIR}")
+                shutil.move(str(f), str(BIN_DIR / f.name))
+                moved_ffmpeg = True
+            elif f.name in ("ffprobe", "ffprobe.exe"):
+                print(f"Moving {f.name} to {BIN_DIR}")
+                shutil.move(str(f), str(BIN_DIR / f.name))
+                moved_ffprobe = True
+
+    if not moved_ffmpeg or not moved_ffprobe:
+        print("ERROR: Failed to find both ffmpeg and ffprobe executables.")
+        return False
+
+    print("Successfully moved binaries.")
+    return True
+
+
+def main():
+    """
+    Main function to download and set up FFmpeg.
+    """
+    BIN_DIR.mkdir(exist_ok=True)
+
+    if any(f.name.startswith("ffmpeg") for f in BIN_DIR.iterdir()) and any(f.name.startswith("ffprobe") for f in BIN_DIR.iterdir()):
+        print("FFmpeg and ffprobe already found in bin directory. Skipping download.")
+        return
+
+    url = get_ffmpeg_urls()
+    if not url:
+        print(f"Unsupported OS: {platform.system()}")
+        sys.exit(1)
+
+    temp_dir = BIN_DIR / "temp"
+    if temp_dir.exists():
+        shutil.rmtree(temp_dir)
+    temp_dir.mkdir(exist_ok=True)
+
+    try:
+        archive_path = download_file(url, temp_dir)
+        extract_dir = temp_dir / "extracted"
+        extract_dir.mkdir(exist_ok=True)
+        extract_archive(archive_path, extract_dir)
+        success = find_and_move_binaries(extract_dir, archive_path)
+
+        if not success:
+            sys.exit(1)
+
+    finally:
+        print("Cleaning up temporary files...")
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        print("Done.")
+
+
+if __name__ == "__main__":
+    main()
