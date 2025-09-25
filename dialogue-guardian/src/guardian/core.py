@@ -344,7 +344,9 @@ class GuardianProcessor:
             logging.error(f"Error reading or parsing SRT file {srt_path}: {e}")
             return None
 
-    def _find_profane_segments(self, subs: List[srt.Subtitle]) -> List[tuple[float, float]]:
+    def _find_profane_segments(
+        self, subs: List[srt.Subtitle]
+        ) -> List[tuple[float, float]]:
         """Finds profane segments in a list of subtitles."""
         pattern = (
             r"\b("
@@ -365,7 +367,9 @@ class GuardianProcessor:
         return censor_segments
 
     def _construct_ffmpeg_command(
-        self, video_path: str, output_path: str, censor_segments: List[tuple[float, float]]
+        self, video_path: str, 
+        output_path: str, 
+        censor_segments: List[tuple[float, float]]
     ) -> List[str]:
         """Constructs the FFmpeg command for censoring audio."""
         filter_parts = []

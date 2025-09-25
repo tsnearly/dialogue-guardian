@@ -50,9 +50,6 @@ class TestGuardianProcessor(unittest.TestCase):
         self.assertEqual(processor.ffmpeg_cmd, "/usr/bin/ffmpeg")
         self.assertEqual(processor.ffprobe_cmd, "/usr/bin/ffprobe")
 
-
-
-
     @patch("os.path.exists")
     def test_process_video_file_not_found(self, mock_exists):
         """Test process_video with non-existent file"""
