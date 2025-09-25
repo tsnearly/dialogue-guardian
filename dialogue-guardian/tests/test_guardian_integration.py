@@ -23,9 +23,7 @@ class TestGuardianIntegration(unittest.TestCase):
 
         # Get the absolute path to the project's root directory
         self.test_dir = os.path.dirname(os.path.abspath(__file__))
-        self.samples_dir = os.path.abspath(
-            os.path.join(self.test_dir, "..", "samples")
-        )
+        self.samples_dir = os.path.abspath(os.path.join(self.test_dir, "..", "samples"))
 
         self.test_video_path = os.path.join(self.samples_dir, "sample.mp4")
         self.test_srt_path = os.path.join(self.samples_dir, "sample.srt")
