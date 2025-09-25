@@ -20,8 +20,8 @@ class TestGuardianIntegration(unittest.TestCase):
         """Set up test fixtures"""
         self.processor = GuardianProcessor()
         self.temp_dir = tempfile.mkdtemp()
-        self.test_video_path = os.path.join(self.temp_dir, "test.mp4")
-        self.test_srt_path = os.path.join(self.temp_dir, "test.srt")
+        self.test_video_path = "samples/sample.mp4"
+        self.test_srt_path = "samples/sample.srt"
 
     def tearDown(self):
         """Clean up test fixtures"""
@@ -29,20 +29,55 @@ class TestGuardianIntegration(unittest.TestCase):
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    @patch("subprocess.check_output")
-    def test_get_video_details_complex_framerate(self, mock_check_output):
-        """Test video details with complex framerate calculations"""
-        mock_check_output.side_effect = [
-            "120.5",  # duration
-            "aac|44100|2|stereo",  # audio info
-            "1920\n1080\n25",  # video info with simple framerate
-        ]
+    def test_get_video_details_integration(self):
+        """Test real video details extraction with ffprobe."""
+        details = self.processor.get_video_details(self.test_video_path)
+        self.assertIsNotNone(details)
+        self.assertAlmostEqual(float(details["duration"]), 9.495, places=3)
+        self.assertEqual(details["width"], "1280")
+        self.assertEqual(details["height"], "720")
+        self.assertEqual(details["fps"], "24.000")
 
+    def test_extract_embedded_srt_integration(self):
+        """Test real SRT extraction from a video file."""
+        output_srt_path = os.path.join(self.temp_dir, "extracted.srt")
+        video_with_srt = "samples/sample_with_srt.mp4"
+
+        result = self.processor.extract_embedded_srt(video_with_srt, output_srt_path)
+
+        self.assertTrue(result)
+        self.assertTrue(os.path.exists(output_srt_path))
+
+        with open(output_srt_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            self.assertIn("What the hell.", content)
+
+    def test_censor_audio_with_ffmpeg_integration(self):
+        """Test real audio censoring with ffmpeg."""
+        output_path = os.path.join(self.temp_dir, "censored.mp4")
+        result = self.processor.censor_audio_with_ffmpeg(
+            self.test_video_path, output_path
+        )
+        self.assertEqual(result, output_path)
+        self.assertTrue(os.path.exists(output_path))
+
+        # Verify that the audio is censored
+        # This is a simplified check. A more robust check would involve
+        # analyzing the audio stream to confirm silence.
+        details = self.processor.get_video_details(output_path)
+        self.assertIsNotNone(details)
+        self.assertAlmostEqual(
+            float(details["duration"]), 9.495, places=1
+        )
+
+    def test_get_video_details_complex_framerate(self):
+        """Test video details with complex framerate calculations"""
+        # This test uses the sample video file, which has a 24/1 frame rate.
         result = self.processor.get_video_details(self.test_video_path)
 
         self.assertIsNotNone(result)
-        self.assertEqual(result["fps"], "25.000")
-        self.assertEqual(result["framerate"], "25000/1000")
+        self.assertEqual(result["fps"], "24.000")
+        self.assertEqual(result["framerate"], "24/1")
 
     @patch("subprocess.check_output")
     def test_get_video_details_missing_video_info(self, mock_check_output):

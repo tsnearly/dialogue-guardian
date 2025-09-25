@@ -254,7 +254,7 @@ class GuardianProcessor:
 
             if "streams" in probe_output:
                 for stream in probe_output["streams"]:
-                    if stream.get("codec_name") == "subrip":
+                    if stream.get("codec_name") in ["subrip", "mov_text"]:
                         found_srt_streams.append(stream)
 
             if found_srt_streams:
@@ -320,122 +320,62 @@ class GuardianProcessor:
             logging.error(f"An unexpected error occurred during SRT extraction: {e}")
             return False
 
-    def censor_audio_with_ffmpeg(
-        self, video_path: str, output_path: Optional[str] = None
-    ) -> Optional[str]:
-        """
-        Censors profane audio segments in a video file using FFmpeg.
-
-        Args:
-            video_path: Path to the input video file.
-            output_path: Optional custom output path. If None, generates
-                default name.
-
-        Returns:
-            Path to the newly created censored video file, or None if an
-                error occurred.
-        """
-        if output_path is None:
-            output_path = f"{os.path.splitext(video_path)[0]}_censored.mp4"
-
+    def _find_srt_file(self, video_path: str) -> Optional[str]:
+        """Finds the SRT file for a video, checking for language-specific versions."""
         srt_path = os.path.splitext(video_path)[0] + ".srt"
-
-        # Check for language-specific SRT files if main one doesn't exist
-        if not os.path.exists(srt_path):
-            base_path = os.path.splitext(video_path)[0]
-            for lang in ["en", "fr", "es", "de", "it"]:
-                lang_srt_path = f"{base_path}.{lang}.srt"
-                if os.path.exists(lang_srt_path):
-                    srt_path = lang_srt_path
-                    logging.info(f"Found language-specific SRT file: {srt_path}")
-                    break
-
-        # Try to load external SRT first
-        subs = []
         if os.path.exists(srt_path):
-            logging.info(f"Found external SRT file: {srt_path}")
-            try:
-                with open(srt_path, "r", encoding="utf-8-sig") as f:
-                    srt_content = f.read()
-                subs = list(srt.parse(srt_content))
-            except Exception as e:
-                logging.error(
-                    f"Error reading or parsing external SRT file {srt_path}: {e}"
+            return srt_path
+
+        base_path = os.path.splitext(video_path)[0]
+        for lang in ["en", "fr", "es", "de", "it"]:
+            lang_srt_path = f"{base_path}.{lang}.srt"
+            if os.path.exists(lang_srt_path):
+                logging.info(f"Found language-specific SRT file: {lang_srt_path}")
+                return lang_srt_path
+        return None
+
+    def _parse_srt_file(self, srt_path: str) -> Optional[List[srt.Subtitle]]:
+        """Parses an SRT file and returns a list of subtitles."""
+        try:
+            with open(srt_path, "r", encoding="utf-8-sig") as f:
+                srt_content = f.read()
+            return list(srt.parse(srt_content))
+        except Exception as e:
+            logging.error(f"Error reading or parsing SRT file {srt_path}: {e}")
+            return None
+
+    def _find_profane_segments(self, subs: List[srt.Subtitle]) -> List[tuple[float, float]]:
+        """Finds profane segments in a list of subtitles."""
+        pattern = (
+            r"\b("
+            + "|".join(re.escape(word) for word in self.matching_words)
+            + r")\b"
+        )
+        censor_pattern = re.compile(pattern, re.IGNORECASE)
+        censor_segments = []
+        for sub in subs:
+            cleaned_text = re.sub(r"[^\w\s\']", "", sub.content).lower()
+            if censor_pattern.search(cleaned_text):
+                logging.debug(
+                    f'Match found in subtitle #{sub.index}: "{cleaned_text}"'
                 )
-                # If external SRT is problematic, try embedded
-                if self.extract_embedded_srt(video_path, srt_path):
-                    try:
-                        with open(srt_path, "r", encoding="utf-8-sig") as f:
-                            srt_content = f.read()
-                        subs = list(srt.parse(srt_content))
-                        logging.info(
-                            f"Successfully loaded extracted SRT from {srt_path}"
-                        )
-                    except Exception as e:
-                        logging.error(
-                            f"Error parsing extracted SRT file {srt_path}: {e}"
-                        )
-                        return None
-                else:
-                    logging.error("No valid SRT file found. Cannot censor audio.")
-                    return None
-        else:
-            logging.info(
-                f"External SRT not found: {srt_path}. Attempting video extraction."
+                start_s = sub.start.total_seconds()
+                end_s = sub.end.total_seconds()
+                censor_segments.append((start_s, end_s))
+        return censor_segments
+
+    def _construct_ffmpeg_command(
+        self, video_path: str, output_path: str, censor_segments: List[tuple[float, float]]
+    ) -> List[str]:
+        """Constructs the FFmpeg command for censoring audio."""
+        filter_parts = []
+        for start_s, end_s in censor_segments:
+            filter_parts.append(
+                f"volume=enable='between(t,{start_s},{end_s})':volume=0"
             )
-            # If external SRT not found, try to extract embedded SRT
-            if self.extract_embedded_srt(video_path, srt_path):
-                try:
-                    with open(srt_path, "r", encoding="utf-8-sig") as f:
-                        srt_content = f.read()
-                    subs = list(srt.parse(srt_content))
-                    logging.info(f"Successfully loaded extracted SRT from {srt_path}")
-                except Exception as e:
-                    logging.error(
-                        f"Error reading or parsing extracted SRT file {srt_path}: {e}"
-                    )
-                    return None
-            else:
-                logging.error("No SRT file found or extractable. Cannot censor audio.")
-                return None
+        audio_filter_graph = ",".join(filter_parts) if filter_parts else "anull"
 
-        if not subs:
-            logging.warning(
-                "No subtitles found in sources. No censoring will be applied."
-            )
-            audio_filter_graph = "anull"
-        else:
-            # Build a single regex pattern to find any phrases as whole words
-            pattern = (
-                r"\b("
-                + "|".join(re.escape(word) for word in self.matching_words)
-                + r")\b"
-            )
-            censor_pattern = re.compile(pattern, re.IGNORECASE)
-
-            censor_segments = []
-
-            for sub in subs:
-                cleaned_text = re.sub(r"[^\w\s\']", "", sub.content).lower()
-                if censor_pattern.search(cleaned_text):
-                    logging.debug(
-                        f'Match found in subtitle #{sub.index}: "{cleaned_text}"'
-                    )
-                    start_s = sub.start.total_seconds()
-                    end_s = sub.end.total_seconds()
-                    censor_segments.append((start_s, end_s))
-
-            # Construct the FFmpeg audio filter graph
-            filter_parts = []
-            for start_s, end_s in censor_segments:
-                filter_parts.append(
-                    f"volume=enable='between(t,{start_s},{end_s})':volume=0"
-                )
-
-            audio_filter_graph = ",".join(filter_parts) if filter_parts else "anull"
-
-        # Construct the FFmpeg command
-        ffmpeg_command = [
+        return [
             self.ffmpeg_cmd,
             "-i",
             video_path,
@@ -454,6 +394,41 @@ class GuardianProcessor:
             "-y",
             output_path,
         ]
+
+    def censor_audio_with_ffmpeg(
+        self, video_path: str, output_path: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        Censors profane audio segments in a video file using FFmpeg.
+        Args:
+            video_path: Path to the input video file.
+            output_path: Optional custom output path. If None, generates
+                default name.
+        Returns:
+            Path to the newly created censored video file, or None if an
+                error occurred.
+        """
+        if output_path is None:
+            output_path = f"{os.path.splitext(video_path)[0]}_censored.mp4"
+
+        srt_path = self._find_srt_file(video_path)
+        subs = None
+        if srt_path:
+            subs = self._parse_srt_file(srt_path)
+
+        if subs is None:
+            temp_srt_path = os.path.splitext(video_path)[0] + ".srt"
+            if self.extract_embedded_srt(video_path, temp_srt_path):
+                subs = self._parse_srt_file(temp_srt_path)
+
+        if subs is None:
+            logging.error("No valid SRT file found. Cannot censor audio.")
+            return None
+
+        censor_segments = self._find_profane_segments(subs)
+        ffmpeg_command = self._construct_ffmpeg_command(
+            video_path, output_path, censor_segments
+        )
 
         logging.info(f"Executing FFmpeg command: {' '.join(ffmpeg_command)}")
         try:
