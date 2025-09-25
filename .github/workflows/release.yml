@@ -86,8 +86,11 @@ jobs:
           # Manually update docs/conf.py using a Python script
           python scripts/update_conf_py.py "$NEW_VERSION"
 
+          # Update README download link
+          sed -i.bak "s/__VERSION__/$NEW_VERSION/g" ../README.md
+
           # Commit the additional docs changes
-          git add docs/conf.py
+          git add docs/conf.py ../README.md
           git commit --amend --no-edit
 
           # Push the version bump commit
@@ -221,7 +224,7 @@ jobs:
           body_path: dialogue-guardian/CHANGELOG_ENTRY.md
           draft: false
           prerelease: ${{ github.event.inputs.prerelease }}
-          files: dialogue-guardian/dist/*
+          files: dialogue-guardian/dist/*.tar.gz
           generate_release_notes: true
 
       - name: Publish to PyPI

@@ -1,14 +1,13 @@
 # Dialogue Guardian
 
-[![CI/CD Pipeline](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml)
-[![PyPI Package](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/publish.yml)
-[![codecov](https://codecov.io/gh/tsnearly/dialogue-guardian/graph/badge.svg?token=0XIMSERI3U)](https://codecov.io/gh/tsnearly/dialogue-guardian)
-[![PyPI version](https://img.shields.io/pypi/v/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tsnearly/dialogue-guardian/ci.yml?style=plastic)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/tsnearly/dialogue-guardian?token=0XIMSERI3U&style=plastic)](https://codecov.io/gh/tsnearly/dialogue-guardian)
+[![PyPI - Version](https://img.shields.io/pypi/v/dialogue-guardian?style=plastic)](https://pypi.org/project/dialogue-guardian/)
 [![Python versions](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![Downloads](https://img.shields.io/pypi/dm/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
 [![License](https://img.shields.io/badge/license-OSL--3.0-blue.svg)](https://github.com/tsnearly/dialogue-guardian/blob/main/dialogue-guardian/LICENSE)
-[![Code Quality](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml)
-[![Security Scan](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml/badge.svg)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tsnearly/dialogue-guardian/quality.yml?style=plastic&label=Code%20Quality)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tsnearly/dialogue-guardian/security.yml?style=plastic&label=Security%20Scan)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml)
 
 <p align="center">
   <img src="logo.png" alt="Dialogue Guardian Logo" width="200">
@@ -142,6 +141,11 @@ make build
 # Upload to PyPI
 make upload
 ```
+
+## Releases
+
+[![GitHub Release Date](https://img.shields.io/github/release-date/tsnearly/dialogue-guardian?display_date=published_at&style=plastic)](https://github.com/tsnearly/dialogue-guardian/releases)
+[![GitHub Downloads (specific asset, latest release)](https://img.shields.io/github/downloads/tsnearly/dialogue-guardian/v__VERSION__/dialogue-guardian-__VERSION__.tar.gz?sort=semver&style=plastic)](https://github.com/tsnearly/dialogue-guardian/releases/download/v__VERSION__/dialogue-guardian-__VERSION__.tar.gz)
 
 ## 📚 Documentation
 
