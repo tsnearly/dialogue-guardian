@@ -5,12 +5,9 @@
 Unit tests for guardian.core module
 """
 
-import json
-import os
-import subprocess
 import tempfile
 import unittest
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import mock_open, patch
 
 from guardian.core import GuardianProcessor
 
