@@ -85,8 +85,10 @@ class GuardianProcessor:
         Initialize the GuardianProcessor.
         Args:
             matching_words: Custom list of words to censor. Uses default if None.
-            ffmpeg_cmd: Path to ffmpeg executable. Defaults to checking local 'bin' dir.
-            ffprobe_cmd: Path to ffprobe executable. Defaults to checking local 'bin' dir.
+            ffmpeg_cmd: Path to ffmpeg executable.
+            Defaults to checking local 'bin' dir.
+            ffprobe_cmd: Path to ffprobe executable.
+            Defaults to checking local 'bin' dir.
         """
         self.matching_words = (
             matching_words
