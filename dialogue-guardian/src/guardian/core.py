@@ -84,7 +84,7 @@ class GuardianProcessor:
 
         Args:
             matching_words: Custom list of words to censor. Uses default if
-                None.
+            None.
             ffmpeg_cmd: Path to ffmpeg executable.
             ffprobe_cmd: Path to ffprobe executable.
         """
@@ -407,10 +407,10 @@ class GuardianProcessor:
         Args:
             video_path: Path to the input video file.
             output_path: Optional custom output path. If None, generates
-                default name.
+            default name.
         Returns:
             Path to the newly created censored video file, or None if an
-                error occurred.
+            error occurred.
         """
         if output_path is None:
             output_path = f"{os.path.splitext(video_path)[0]}_censored.mp4"
