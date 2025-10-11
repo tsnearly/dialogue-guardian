@@ -1180,7 +1180,8 @@ class GuardianProcessor:
         logging.info(f"Constructing FFmpeg filters for {len(censor_segments)} segments")
 
         filter_parts = []
-        quote_char = '"' if platform.system() == "Windows" else "'"
+        # Use single quotes for all platforms to avoid Windows parsing issues
+        quote_char = "'"
 
         # Log platform-specific quoting
         logging.debug(
