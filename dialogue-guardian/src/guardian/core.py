@@ -214,7 +214,11 @@ class GuardianProcessor:
 
         This function is extracted to be testable without mocking subprocess.
         """
-        framerate_info = {"framerate": None, "fps": None, "frameduration": None}
+        framerate_info: Dict[str, Optional[str]] = {
+            "framerate": None,
+            "fps": None,
+            "frameduration": None,
+        }
 
         if not framerate_str:
             return framerate_info
@@ -257,7 +261,7 @@ class GuardianProcessor:
         This function is extracted to be testable without mocking subprocess.
         """
         lines = ffprobe_output.split("\n")
-        video_info = {"width": None, "height": None}
+        video_info: Dict[str, Optional[str]] = {"width": None, "height": None}
 
         # Parse width (first line)
         if len(lines) >= 1 and lines[0]:
