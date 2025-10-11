@@ -26,19 +26,16 @@ def main():
     script_fullpath = sys.argv[0]
     script_filename = os.path.basename(script_fullpath)
     log_file = f"{os.path.splitext(script_filename)[0]}.log"
-    
+
     logging.basicConfig(
-        level=logging.DEBUG, 
-        format='%(asctime)s - %(levelname)s - %(message)s', 
-        handlers=[
-            logging.FileHandler(log_file, mode='w'),
-            logging.StreamHandler()
-        ]
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[logging.FileHandler(log_file, mode="w"), logging.StreamHandler()],
     )
-    
+
     filepath = os.path.abspath(sys.argv[1])
     logging.info(f"Processing file: {filepath}")
-    
+
     # Check if the video file exists
     if not os.path.exists(filepath):
         logging.error(f"Video file not found: {filepath}. Exiting.")
@@ -46,7 +43,7 @@ def main():
 
     # Use the new package API
     processor = GuardianProcessor()
-    
+
     # Get video details (for compatibility)
     video_info = processor.get_video_details(filepath)
     if not video_info:
@@ -55,7 +52,7 @@ def main():
 
     # Perform the audio censoring
     censored_file = processor.censor_audio_with_ffmpeg(filepath)
-    
+
     if censored_file:
         logging.info(f"Censoring process completed. Output file: {censored_file}")
     else:

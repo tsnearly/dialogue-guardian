@@ -70,7 +70,7 @@ jobs:
           echo "=== Security Analysis ==="
           bandit -r src/guardian/ -f json -o bandit-report.json || true
           bandit -r src/guardian/ || echo "Security issues found"
-          safety check || echo "Dependency vulnerabilities found"
+          safety scan || echo "Dependency vulnerabilities found"
           semgrep --config=auto src/guardian/ --json --output=semgrep-report.json || echo "Semgrep issues found"
 
       - name: Upload quality reports

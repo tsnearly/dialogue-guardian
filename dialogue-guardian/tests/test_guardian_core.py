@@ -162,9 +162,9 @@ class TestGuardianProcessor(unittest.TestCase):
 
         # Check for enhanced filter chain components
         self.assertIn("aformat=sample_fmts=s16:channel_layouts=stereo", audio_filter)
-        self.assertIn("volume=-inf:enable='between(t,1.0,2.0)'", audio_filter)
+        self.assertIn("volume=-80dB:enable='between(t,1.0,2.0)'", audio_filter)
         self.assertIn(
-            "acompand=attacks=0.1:decays=0.8:points=-90/-90|-60/-60|-30/-30|-20/-20",
+            "acompressor=threshold=-20dB:ratio=20:attack=5:release=50",
             audio_filter,
         )
 
@@ -179,9 +179,9 @@ class TestGuardianProcessor(unittest.TestCase):
 
         # Check for enhanced filter chain components with Windows quoting
         self.assertIn("aformat=sample_fmts=s16:channel_layouts=stereo", audio_filter)
-        self.assertIn('volume=-inf:enable="between(t,1.0,2.0)"', audio_filter)
+        self.assertIn("volume=-80dB:enable='between(t,1.0,2.0)'", audio_filter)
         self.assertIn(
-            "acompand=attacks=0.1:decays=0.8:points=-90/-90|-60/-60|-30/-30|-20/-20",
+            "acompressor=threshold=-20dB:ratio=20:attack=5:release=50",
             audio_filter,
         )
 

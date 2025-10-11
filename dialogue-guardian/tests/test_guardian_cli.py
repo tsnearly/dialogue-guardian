@@ -43,7 +43,7 @@ class TestGuardianCLI(unittest.TestCase):
         parser = create_parser()
         args = parser.parse_args(["--input", self.test_video])
         self.assertEqual(args.inputfile, [self.test_video])
-        self.assertFalse(args.debug)
+        self.assertFalse(args.verbose)
         self.assertIsNone(args.outputfile)
 
     def test_parser_optional_arguments(self):
@@ -55,7 +55,7 @@ class TestGuardianCLI(unittest.TestCase):
                 self.test_video,
                 "--output",
                 "/custom/output.mp4",
-                "--debug",
+                "--verbose",
                 "--log-file",
                 "custom.log",
                 "--ffmpeg-path",
@@ -67,7 +67,7 @@ class TestGuardianCLI(unittest.TestCase):
 
         self.assertEqual(args.inputfile, [self.test_video])
         self.assertEqual(args.outputfile, "/custom/output.mp4")
-        self.assertTrue(args.debug)
+        self.assertTrue(args.verbose)
         self.assertEqual(args.logfile, ["custom.log"])
         self.assertEqual(args.ffmpeg, "/usr/bin/ffmpeg")
         self.assertEqual(args.ffprobe, "/usr/bin/ffprobe")
@@ -75,10 +75,10 @@ class TestGuardianCLI(unittest.TestCase):
     def test_parser_short_arguments(self):
         """Test parser with short argument forms"""
         parser = create_parser()
-        args = parser.parse_args(["-i", self.test_video, "-o", "/output.mp4", "-d"])
+        args = parser.parse_args(["-i", self.test_video, "-o", "/output.mp4", "-v"])
 
         self.assertEqual(args.outputfile, "/output.mp4")
-        self.assertTrue(args.debug)
+        self.assertTrue(args.verbose)
 
     def test_validate_args_valid_file(self):
         """Test argument validation with valid file"""
@@ -127,7 +127,7 @@ class TestGuardianCLI(unittest.TestCase):
     @patch("logging.basicConfig")
     def test_setup_logging_verbose(self, mock_basic_config):
         """Test logging setup with verbose mode"""
-        setup_logging(debug=True)
+        setup_logging(verbose=True)
 
         mock_basic_config.assert_called_once()
         call_args = mock_basic_config.call_args

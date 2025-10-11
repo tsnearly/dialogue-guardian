@@ -40,7 +40,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
         self.assertIn("Guardian", help_text)
         self.assertIn("INPUTFILE", help_text)
         self.assertIn("--output", help_text)
-        self.assertIn("--debug", help_text)
+        self.assertIn("--verbose", help_text)
 
     def test_parser_with_all_arguments(self):
         """Test parser with all possible arguments"""
@@ -51,7 +51,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
                 self.test_video,
                 "--output",
                 "/custom/output.mp4",
-                "--debug",
+                "--verbose",
                 "--log-file",
                 "custom.log",
                 "--ffmpeg-path",
@@ -63,7 +63,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
         self.assertEqual(args.inputfile, [self.test_video])
         self.assertEqual(args.outputfile, "/custom/output.mp4")
-        self.assertTrue(args.debug)
+        self.assertTrue(args.verbose)
         self.assertEqual(args.logfile, ["custom.log"])
         self.assertEqual(args.ffmpeg, "/usr/bin/ffmpeg")
         self.assertEqual(args.ffprobe, "/usr/bin/ffprobe")
@@ -145,7 +145,7 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
     @patch(
         "sys.argv",
-        ["guardian", "--input", "test.mp4", "--debug", "--log-file", "test.log"],
+        ["guardian", "--input", "test.mp4", "--verbose", "--log-file", "test.log"],
     )
     def test_main_with_logging_options(self):
         """Test main execution with logging options"""

@@ -161,7 +161,7 @@ def main() -> int:
             return 1
 
         # Setup logging
-        setup_logging(args.logfile, args.debug)
+        setup_logging(args.logfile, args.verbose)
 
         # Process each input file
         for input_file in args.inputfile:
@@ -174,7 +174,7 @@ def main() -> int:
             )
 
             # Process the video
-            censored_file = processor.process_video(video_path, args.outputfile)
+            censored_file = processor.censor_audio_with_ffmpeg(video_path, args.outputfile)
 
             if censored_file:
                 logging.info("Censoring process a success.")
