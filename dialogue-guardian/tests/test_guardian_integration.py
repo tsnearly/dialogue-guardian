@@ -207,9 +207,9 @@ class TestGuardianIntegration(unittest.TestCase):
         result = self.processor.get_video_details(self.test_video_path)
 
         self.assertIsNotNone(result)
-        self.assertIsNone(result["width"])
-        self.assertIsNone(result["height"])
-        self.assertIsNone(result["fps"])
+        self.assertEqual(result["width"], "1920")  # Should extract width correctly
+        self.assertIsNone(result["height"])  # Height not provided
+        self.assertIsNone(result["fps"])  # Framerate not provided
 
     @patch("subprocess.check_output")
     def test_get_video_details_multiple_audio_streams(self, mock_check_output):
