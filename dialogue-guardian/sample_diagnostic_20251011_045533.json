@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-10-11T04:55:33.520295",
+  "input_video": "/Volumes/Expansion/dev/dialogue-guardian/dialogue-guardian/samples/sample.mp4",
+  "output_video": "/var/folders/kg/hjkys5ln2vlc78bntdl0v29w0000gn/T/tmpburil2ye/fallback_test.mp4",
+  "total_segments": 2,
+  "total_censored_duration": 3.5999999999999996,
+  "successful_segments": 2,
+  "failed_segments": 0,
+  "final_strategy_used": 3,
+  "fallback_attempts": 2,
+  "overall_success": true,
+  "segments": [
+    {
+      "segment_id": 1,
+      "start_time": 2.0,
+      "end_time": 4.8,
+      "duration": 2.8,
+      "target_rms_db": -50.0,
+      "actual_rms_db": -100.0,
+      "meets_threshold": true,
+      "strategy_used": 3,
+      "strategy_name": "Aggressive Null Mixing",
+      "filter_applied": "volume=0:enable='"
+    },
+    {
+      "segment_id": 2,
+      "start_time": 6.0,
+      "end_time": 6.8,
+      "duration": 0.7999999999999998,
+      "target_rms_db": -50.0,
+      "actual_rms_db": -100.0,
+      "meets_threshold": true,
+      "strategy_used": 3,
+      "strategy_name": "Aggressive Null Mixing",
+      "filter_applied": "volume=0:enable='"
+    }
+  ],
+  "error_messages": [],
+  "recommendations": [
+    "✓ All segments successfully censored. No action needed.",
+    "ℹ Aggressive filtering was required - input may have challenging audio"
+  ]
+}

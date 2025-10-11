@@ -198,7 +198,7 @@ class TestGuardianCLI(unittest.TestCase):
 
             # Mock processor failure
             mock_processor = MagicMock()
-            mock_processor.process_video.return_value = None
+            mock_processor.censor_audio_with_ffmpeg.return_value = None
             mock_processor_class.return_value = mock_processor
 
             result = main()
@@ -226,7 +226,7 @@ class TestGuardianCLI(unittest.TestCase):
 
             # Mock processor to raise KeyboardInterrupt
             mock_processor = MagicMock()
-            mock_processor.process_video.side_effect = KeyboardInterrupt()
+            mock_processor.censor_audio_with_ffmpeg.side_effect = KeyboardInterrupt()
             mock_processor_class.return_value = mock_processor
 
             result = main()
@@ -254,7 +254,7 @@ class TestGuardianCLI(unittest.TestCase):
 
             # Mock processor to raise unexpected error
             mock_processor = MagicMock()
-            mock_processor.process_video.side_effect = RuntimeError("Unexpected error")
+            mock_processor.censor_audio_with_ffmpeg.side_effect = RuntimeError("Unexpected error")
             mock_processor_class.return_value = mock_processor
 
             result = main()
