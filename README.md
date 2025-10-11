@@ -22,7 +22,7 @@
 pip install dialogue-guardian
 
 # Censor a video file
-guardian movie.mp4
+guardian --input movie.mp4
 
 # Output: movie_censored.mp4
 ```
@@ -30,12 +30,18 @@ guardian movie.mp4
 ## ✨ Features
 
 - **🎯 Direct Audio Censoring**: Uses FFmpeg to mute profane segments in video files
-- **🌍 Universal Compatibility**: Works on Windows, macOS, and Linux
-- **🔄 Automatic SRT Extraction**: Extracts embedded subtitles when external SRT files aren't available
-- **⚡ Efficient Processing**: Copies video streams without re-encoding to maintain quality
-- **🛡️ Non-Destructive**: Creates new censored files, leaving originals untouched
-- **📦 Easy Installation**: Available as a Python package with CLI and API interfaces
-- **🎬 FCPX Support**: Legacy support for Final Cut Pro XML generation
+- **🌍 Universal Compatibility**: Works on any OS with FFmpeg installed (Windows, macOS, Linux)
+- **🔄 Automatic SRT Extraction**: If an external SRT file isn't found, it automatically extracts embedded SRT tracks from the video
+- **🛡️ Non-Destructive**: Creates a new video file, leaving the original untouched
+- **📦 Package Structure**: Properly structured as a Python package for easy installation and distribution
+- **🎬 FCPX Support**: Legacy support available for Final Cut Pro XML generation, but does not require Final Cut Pro
+- **📹 Efficient Processing**: Copies video streams without re-encoding to maintain quality
+- **🎛 Enhanced Audio Censoring**: Advanced multi-strategy audio filtering system with progressive fallback mechanisms
+- **📡 Silence Verification**: Automated verification that censored segments achieve target silence levels (≤ -50 dB)
+- **🎚 Fallback Strategies**: Three-tier approach (Basic → Enhanced → Aggressive) ensures effective censoring
+- **🎙 Quality Preservation**: Maintains video quality while achieving effective audio silence
+- **🧰 Comprehensive Diagnostics**: Detailed logging and JSON diagnostic reports for troubleshooting
+- **🏷 Robust Error Handling**: Graceful handling of missing files, corrupted data, and processing failures
 
 ## 📋 Requirements
 
@@ -55,7 +61,7 @@ pip install dialogue-guardian
 ```bash
 git clone https://github.com/tsnearly/dialogue-guardian.git
 cd dialogue-guardian
-pip install -e .
+pip install -e .   or   uv sync
 ```
 
 ### Development Installation
@@ -63,7 +69,7 @@ pip install -e .
 ```bash
 git clone https://github.com/tsnearly/dialogue-guardian.git
 cd dialogue-guardian
-make install-dev
+make install-dev   or   uv sync --group dev
 ```
 
 ## 💻 Usage
@@ -72,16 +78,16 @@ make install-dev
 
 ```bash
 # Basic usage
-guardian movie.mp4
+guardian --input movie.mp4
 
 # Custom output path
-guardian movie.mp4 --output censored_movie.mp4
+guardian --input movie.mp4 --output censored_movie.mp4
 
 # Verbose logging
-guardian movie.mp4 --verbose
+guardian --input movie.mp4 --verbose
 
 # Custom FFmpeg paths
-guardian movie.mp4 --ffmpeg-path /usr/local/bin/ffmpeg
+guardian --input movie.mp4 --ffmpeg-path /usr/local/bin/ffmpeg
 ```
 
 ### Python API

@@ -1,53 +1,93 @@
-<p align="center"><img src="logo.png" alt="Dialogue Guardian Logo" width="200"></p>
+# Dialogue Guardian
 
-# Dialogue Guardian: Universal Media Censor
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tsnearly/dialogue-guardian/ci.yml?style=plastic)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/ci.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/tsnearly/dialogue-guardian?token=0XIMSERI3U&style=plastic)](https://codecov.io/gh/tsnearly/dialogue-guardian)
+[![PyPI - Version](https://img.shields.io/pypi/v/dialogue-guardian?style=plastic)](https://pypi.org/project/dialogue-guardian/)
+[![Python versions](https://img.shields.io/pypi/pyversions/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
+[![Downloads](https://img.shields.io/pypi/dm/dialogue-guardian.svg)](https://pypi.org/project/dialogue-guardian/)
+[![License](https://img.shields.io/badge/license-OSL--3.0-blue.svg)](https://github.com/tsnearly/dialogue-guardian/blob/main/dialogue-guardian/LICENSE)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tsnearly/dialogue-guardian/quality.yml?style=plastic&label=Code%20Quality)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/quality.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tsnearly/dialogue-guardian/security.yml?style=plastic&label=Security%20Scan)](https://github.com/tsnearly/dialogue-guardian/actions/workflows/security.yml)
 
-This project provides two Python scripts to automatically detect and censor profane language in video files by processing SRT subtitle files.
+<p align="center">
+  <img src="logo.png" alt="Dialogue Guardian Logo" width="200">
+</p>
 
-- **`guardian_by_ffmpeg.py` (Recommended)**: A standalone, cross-platform tool that directly censors audio using FFmpeg.
-- **`guardian.py` (Legacy)**: A tool that generates a Final Cut Pro XML (`.fcpxml`) file with volume keyframes to mute profane segments.
+**Universal Media Censor** - Automatically detect and censor profane language in video files using subtitle analysis and FFmpeg audio processing.
 
----
+## 🚀 Quick Start
 
-## Installation
+```bash
+# Install from PyPI
+pip install dialogue-guardian
 
-### From PyPI (when published)
-```sh
+# Censor a video file
+guardian --input movie.mp4
+
+# Output: movie_censored.mp4
+```
+
+## ✨ Features
+
+- **🎯 Direct Audio Censoring**: Uses FFmpeg to mute profane segments in video files
+- **🌍 Universal Compatibility**: Works on any OS with FFmpeg installed (Windows, macOS, Linux)
+- **🔄 Automatic SRT Extraction**: If an external SRT file isn't found, it automatically extracts embedded SRT tracks from the video
+- **🛡️ Non-Destructive**: Creates a new video file, leaving the original untouched
+- **📦 Package Structure**: Properly structured as a Python package for easy installation and distribution
+- **🎬 FCPX Support**: Legacy support available for Final Cut Pro XML generation, but does not require Final Cut Pro
+- **📹 Efficient Processing**: Copies video streams without re-encoding to maintain quality
+- **🎛 Enhanced Audio Censoring**: Advanced multi-strategy audio filtering system with progressive fallback mechanisms
+- **📡 Silence Verification**: Automated verification that censored segments achieve target silence levels (≤ -50 dB)
+- **🎚 Fallback Strategies**: Three-tier approach (Basic → Enhanced → Aggressive) ensures effective censoring
+- **🎙 Quality Preservation**: Maintains video quality while achieving effective audio silence
+- **🧰 Comprehensive Diagnostics**: Detailed logging and JSON diagnostic reports for troubleshooting
+- **🏷 Robust Error Handling**: Graceful handling of missing files, corrupted data, and processing failures
+
+## 📋 Requirements
+
+- **Python 3.7+**
+- **FFmpeg** (must be installed and accessible in PATH)
+
+## 🛠️ Installation
+
+### From PyPI (Recommended)
+
+```bash
 pip install dialogue-guardian
 ```
 
 ### From Source
-```sh
-git clone <repository-url>
+
+```bash
+git clone https://github.com/tsnearly/dialogue-guardian.git
 cd dialogue-guardian
-pip install -e .
+pip install -e .   or   uv sync
 ```
 
 ### Development Installation
-```sh
-git clone <repository-url>
+
+```bash
+git clone https://github.com/tsnearly/dialogue-guardian.git
 cd dialogue-guardian
-make install-dev
+make install-dev   or   uv sync --group dev
 ```
 
-## Usage
+## 💻 Usage
 
 ### Command Line Interface
 
-After installation, you can use the `guardian` command:
-
-```sh
+```bash
 # Basic usage
-guardian movie.mp4
+guardian --input movie.mp4
 
-# With custom output path
-guardian movie.mp4 --output censored_movie.mp4
+# Custom output path
+guardian --input movie.mp4 --output censored_movie.mp4
 
-# With verbose logging
-guardian movie.mp4 --verbose
+# Verbose logging
+guardian --input movie.mp4 --verbose
 
 # Custom FFmpeg paths
-guardian movie.mp4 --ffmpeg-path /usr/local/bin/ffmpeg --ffprobe-path /usr/local/bin/ffprobe
+guardian --input movie.mp4 --ffmpeg-path /usr/local/bin/ffmpeg
 ```
 
 ### Python API
@@ -55,149 +95,95 @@ guardian movie.mp4 --ffmpeg-path /usr/local/bin/ffmpeg --ffprobe-path /usr/local
 ```python
 from guardian import GuardianProcessor
 
-# Initialize the processor
+# Initialize processor
 processor = GuardianProcessor()
 
-# Process a video file with enhanced censoring
-censored_file = processor.censor_audio_with_ffmpeg("movie.mp4", "censored_movie.mp4")
+# Process video
+censored_file = processor.process_video("movie.mp4")
 
 if censored_file:
     print(f"Censored video created: {censored_file}")
-    
-    # Check diagnostic files for detailed results
-    import glob
-    diagnostic_files = glob.glob("*_diagnostic_*.json")
-    if diagnostic_files:
-        print(f"Diagnostic report: {diagnostic_files[-1]}")
-else:
-    print("Processing failed")
-
-# Custom configuration with enhanced features
-processor = GuardianProcessor(
-    matching_words=['custom', 'word', 'list'],
-    ffmpeg_cmd='/usr/local/bin/ffmpeg',
-    ffprobe_cmd='/usr/local/bin/ffprobe'
-)
-
-# Get video details
-details = processor.get_video_details("movie.mp4")
-print(f"Video duration: {details['duration']}s")
-print(f"Resolution: {details['width']}x{details['height']}")
 ```
 
-### Key Features
+## 🧪 Testing
 
-- **Enhanced Audio Censoring**: Advanced multi-strategy audio filtering system with progressive fallback mechanisms
-- **Silence Verification**: Automated verification that censored segments achieve target silence levels (≤ -50 dB)
-- **Fallback Strategies**: Three-tier approach (Basic → Enhanced → Aggressive) ensures effective censoring
-- **Universal Compatibility**: Works on any OS with FFmpeg installed (Windows, macOS, Linux)
-- **No FCPX Dependency**: Does not require Final Cut Pro
-- **Automatic SRT Extraction**: If an external SRT file isn't found, it automatically extracts embedded SRT tracks from the video
-- **Non-Destructive**: Creates a new video file, leaving the original untouched
-- **Quality Preservation**: Maintains video quality while achieving effective audio silence
-- **Comprehensive Diagnostics**: Detailed logging and JSON diagnostic reports for troubleshooting
-- **Robust Error Handling**: Graceful handling of missing files, corrupted data, and processing failures
-- **Package Structure**: Properly structured as a Python package for easy installation and distribution
-
-### Requirements
-
-- **Python 3.7+**
-- **FFmpeg**: Installed and accessible in your system's PATH.
-- **Python Packages**: Automatically installed with the package
-
----
-
-## `guardian.py` (Legacy FCPXML Workflow)
-
-This script is for users who want to import a censorship timeline into Apple's Final Cut Pro.
-
-### Features
-
-- **FCPXML Generation**: Outputs a ready-to-import XML file for Final Cut Pro with volume keyframes to mute profanity.
-- **Metadata Extraction**: Uses `ffprobe` to get video details for the FCPXML project.
-- **Subtitle Parsing**: Reads an external `.srt` file to find profane words.
-
-### Requirements
-
-- **Python 3.7+**
-- **ffprobe** (part of FFmpeg): The script defaults to `/Users/Shared/FFmpegTools/ffprobe`, but you can edit the path in the script.
-
-### Usage
-
-1. **Prepare your files:**
-   - Place your video file (e.g., `movie.mp4`) and its subtitle file (`movie.srt`) in the same directory.
-
-2. **Run the script:**
-   ```sh
-   python guardian.py <path_to_your_video_file>
-   ```
-   Example:
-   ```sh
-   python guardian.py movie.mp4
-   ```
-
-3. **Output:**
-   - A Final Cut Pro XML file (`movie.fcpxml`) will be generated.
-   - A log file (`guardian.log`) will be created.
-
----
-
-## Customization
-
-To customize the list of censored words, edit the `matching_words` list at the top of either `guardian.py` or `guardian_by_ffmpeg.py`.
-
----
-
-## Development
-
-### Running Tests
-
-```sh
+```bash
 # Run all tests
 make test
 
-# Run tests with verbose output
-make test-verbose
+# Run with coverage
+make test-coverage
 
-# Run specific test file
-pytest tests/test_guardian_core.py
+# Run specific test
+pytest tests/test_guardian_core.py -v
 ```
 
-### Code Quality
+### 📈 Current code coverage
 
-```sh
-# Format code
-make format
+[![CoverageGraph](https://codecov.io/gh/tsnearly/dialogue-guardian/graphs/icicle.svg?token=0XIMSERI3U)](https://codecov.io/gh/tsnearly/dialogue-guardian)
 
-# Run linting
+## 🏗️ Development
+
+### Setup Development Environment
+
+```bash
+# Clone and setup
+git clone https://github.com/tsnearly/dialogue-guardian.git
+cd dialogue-guardian
+make install-dev
+
+# Run quality checks
 make lint
-
-# Run all checks
+make format
 make check
 ```
 
 ### Building and Publishing
 
-```sh
-# Build the package
+```bash
+# Build package
 make build
 
-# Upload to PyPI (requires credentials)
+# Upload to PyPI
 make upload
 ```
 
-## Testing
+## Releases
 
-This project includes a full suite of unit tests. For detailed instructions on how to run the tests, please see [TESTING.md](TESTING.md).
+[![GitHub Release Date](https://img.shields.io/github/release-date/tsnearly/dialogue-guardian?display_date=published_at&style=plastic)](https://github.com/tsnearly/dialogue-guardian/releases)
+[![GitHub Downloads (specific asset, latest release)](https://img.shields.io/github/downloads/tsnearly/dialogue-guardian/v__VERSION__/dialogue-guardian-__VERSION__.tar.gz?sort=semver&style=plastic)](https://github.com/tsnearly/dialogue-guardian/releases/download/v__VERSION__/dialogue-guardian-__VERSION__.tar.gz)
+
+## 📚 Documentation
+
+- **[📖 Full Documentation](https://tsnearly.github.io/dialogue-guardian/)** - Complete documentation on GitHub Pages
+- [Development Guide](dialogue-guardian/DEVELOPMENT.md)
+- [Testing Documentation](dialogue-guardian/TESTING.md)
+- [Migration Summary](dialogue-guardian/MIGRATION_SUMMARY.md)
+- [Project Completion Summary](dialogue-guardian/PROJECT_COMPLETION_SUMMARY.md)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the Open Software License version 3.0 - see the [LICENSE](dialogue-guardian/LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Tony Snearly**
+
+## 🙏 Acknowledgments
+
+- FFmpeg team for the powerful multimedia framework
+- Python community for excellent tooling and libraries
 
 ---
 
-## License
-
-This project is licensed under the Open Software License version 3.0 - see the [LICENSE](LICENSE) file for details.
-
----
-
-## Author
-
-Created by Tony Snearly.
+<p align="center">
+  <strong>⭐ Star this repository if you find it helpful!</strong>
+</p>

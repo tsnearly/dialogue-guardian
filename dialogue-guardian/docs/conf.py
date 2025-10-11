@@ -16,7 +16,6 @@ project = 'Dialogue Guardian'
 copyright = '2025, Tony Snearly'
 author = 'Tony Snearly'
 release = '1.2.0'
-version="{current_version}"
 current_version = '1.2.0'
 
 # -- General configuration ---------------------------------------------------
