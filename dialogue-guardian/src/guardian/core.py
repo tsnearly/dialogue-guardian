@@ -1100,7 +1100,7 @@ class GuardianProcessor:
         logging.info("=== END DIAGNOSTIC REPORT ===")
 
     def _save_diagnostic_report(
-        self, diagnostic: CensoringDiagnostic, output_path: str | None = None
+        self, diagnostic: CensoringDiagnostic, output_path: Optional[str] = None
     ) -> str:
         """
         Saves diagnostic report to a JSON file.
