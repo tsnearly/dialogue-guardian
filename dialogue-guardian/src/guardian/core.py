@@ -158,13 +158,13 @@ class GuardianProcessor:
     def _parse_duration(self, duration_output: str) -> Dict[str, str]:
         """
         Parse duration output from ffprobe.
-        
+
         Args:
             duration_output: Raw duration output from ffprobe (e.g., "120.5")
-            
+
         Returns:
             Dictionary with duration
-            
+
         This function is extracted to be testable without mocking subprocess.
         """
         return {"duration": duration_output.strip()}
@@ -172,22 +172,22 @@ class GuardianProcessor:
     def _parse_audio_streams(self, ffprobe_output: str) -> Dict[str, str]:
         """
         Parse ffprobe audio stream output and select the best audio stream.
-        
+
         Args:
             ffprobe_output: Raw output from ffprobe audio stream query
-            
+
         Returns:
             Dictionary with codec, samplerate, channels, and audioconfig
-            
+
         This function is extracted to be testable without mocking subprocess.
         """
         best_audio = {"codec": "", "samplerate": "", "channels": "", "audioconfig": ""}
         save_channels = 0
-        
+
         for line in ffprobe_output.split("\n"):
             if not line.strip():
                 continue
-                
+
             parts = line.split("|")
             if len(parts) >= 3 and parts[2].isdigit():
                 test_channels = int(parts[2])
@@ -197,26 +197,28 @@ class GuardianProcessor:
                     best_audio["channels"] = parts[2]
                     best_audio["audioconfig"] = parts[3] if len(parts) > 3 else ""
                     save_channels = test_channels
-                    
+
         return best_audio
 
-    def _parse_framerate_info(self, framerate_str: Optional[str]) -> Dict[str, Optional[str]]:
+    def _parse_framerate_info(
+        self, framerate_str: Optional[str]
+    ) -> Dict[str, Optional[str]]:
         """
         Parse framerate string and calculate fps and frame duration.
-        
+
         Args:
             framerate_str: Framerate string from ffprobe (e.g., "30000/1001" or "24.0")
-            
+
         Returns:
             Dictionary with framerate, fps, and frameduration
-            
+
         This function is extracted to be testable without mocking subprocess.
         """
         framerate_info = {"framerate": None, "fps": None, "frameduration": None}
-        
+
         if not framerate_str:
             return framerate_info
-            
+
         if "/" in framerate_str:
             try:
                 numerator, denominator = map(int, framerate_str.split("/"))
@@ -237,57 +239,45 @@ class GuardianProcessor:
             except ValueError:
                 # Invalid framerate format, leave as None
                 pass
-                
+
         return framerate_info
 
-    def _parse_video_stream_output(self, ffprobe_output: str) -> Dict[str, Optional[str]]:
+    def _parse_video_stream_output(
+        self, ffprobe_output: str
+    ) -> Dict[str, Optional[str]]:
         """
         Parse ffprobe video stream output to extract width, height, and framerate.
-        
+
         Args:
             ffprobe_output: Raw output from ffprobe video stream query
-            
+
         Returns:
             Dictionary with width, height, and framerate info
-            
+
         This function is extracted to be testable without mocking subprocess.
         """
         lines = ffprobe_output.split("\n")
         video_info = {"width": None, "height": None}
-        
+
         # Parse width (first line)
         if len(lines) >= 1 and lines[0]:
             video_info["width"] = lines[0]
-            
+
         # Parse height (second line)
         if len(lines) >= 2 and lines[1]:
             video_info["height"] = lines[1]
-            
+
         # Parse framerate (third line)
         if len(lines) >= 3 and lines[2]:
             framerate_str = lines[2]
         else:
             framerate_str = None
-            
+
         # Parse framerate information
         framerate_info = self._parse_framerate_info(framerate_str)
         video_info.update(framerate_info)
-        
-        return video_info
 
-    def _parse_duration(self, duration_output: str) -> Dict[str, str]:
-        """
-        Parse duration output from ffprobe.
-        
-        Args:
-            duration_output: Raw duration string from ffprobe (e.g., "120.5")
-            
-        Returns:
-            Dictionary with duration
-            
-        This function is extracted to be testable without mocking subprocess.
-        """
-        return {"duration": duration_output.strip()}
+        return video_info
 
     def get_video_details(self, filename: str) -> Optional[Dict[str, Any]]:
         """
@@ -318,7 +308,7 @@ class GuardianProcessor:
             stdout_duration = subprocess.check_output(
                 cmd_duration, text=True, stderr=subprocess.PIPE
             ).strip()
-            
+
             # Parse duration using extracted function
             duration_info = self._parse_duration(stdout_duration)
             details.update(duration_info)
@@ -380,13 +370,13 @@ class GuardianProcessor:
     def _parse_ffprobe_streams(self, json_output: str) -> List[Dict[str, Any]]:
         """
         Parse ffprobe JSON output to extract stream information.
-        
+
         Args:
             json_output: Raw JSON output from ffprobe
-            
+
         Returns:
             List of stream dictionaries
-            
+
         This function is extracted to be testable without mocking subprocess.
         """
         try:
@@ -398,13 +388,13 @@ class GuardianProcessor:
     def _find_srt_streams(self, streams: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Filter streams to find SRT-compatible subtitle streams.
-        
+
         Args:
             streams: List of stream dictionaries from ffprobe
-            
+
         Returns:
             List of SRT-compatible streams
-            
+
         This function is extracted to be testable without mocking subprocess.
         """
         srt_streams = []
@@ -413,60 +403,62 @@ class GuardianProcessor:
                 srt_streams.append(stream)
         return srt_streams
 
-    def _select_best_srt_stream(self, srt_streams: List[Dict[str, Any]]) -> Optional[int]:
+    def _select_best_srt_stream(
+        self, srt_streams: List[Dict[str, Any]]
+    ) -> Optional[int]:
         """
         Select the best SRT stream from available options, prioritizing default streams.
-        
+
         Args:
             srt_streams: List of SRT-compatible streams
-            
+
         Returns:
             Stream index of the best SRT stream, or None if no streams available
-            
+
         This function is extracted to be testable without mocking subprocess.
         """
         if not srt_streams:
             return None
-            
+
         # Prioritize default SRT track
         for stream in srt_streams:
             if stream.get("disposition", {}).get("default") == 1:
                 return stream["index"]
-        
+
         # If no default, pick the first one
         return srt_streams[0]["index"]
 
     def _generate_srt_candidates(self, video_path: str) -> List[str]:
         """
         Generate list of possible SRT file paths for a video file.
-        
+
         Args:
             video_path: Path to the video file
-            
+
         Returns:
             List of possible SRT file paths in priority order
-            
+
         This function is extracted to be testable without mocking file system.
         """
         base_path = os.path.splitext(video_path)[0]
         candidates = [f"{base_path}.srt"]
-        
+
         # Add language-specific variants
         for lang in ["en", "fr", "es", "de", "it"]:
             candidates.append(f"{base_path}.{lang}.srt")
-            
+
         return candidates
 
     def _find_first_existing_file(self, candidates: List[str]) -> Optional[str]:
         """
         Find the first existing file from a list of candidates.
-        
+
         Args:
             candidates: List of file paths to check
-            
+
         Returns:
             Path to the first existing file, or None if none exist
-            
+
         This function separates I/O from logic for better testability.
         """
         for candidate in candidates:
@@ -507,25 +499,27 @@ class GuardianProcessor:
             probe_output_raw = subprocess.check_output(
                 cmd_probe_streams, text=True, stderr=subprocess.PIPE
             ).strip()
-            
+
             # Parse streams using extracted function
             streams = self._parse_ffprobe_streams(probe_output_raw)
-            
+
             # Find SRT-compatible streams using extracted function
             srt_streams = self._find_srt_streams(streams)
-            
+
             # Select best stream using extracted function
             srt_stream_index = self._select_best_srt_stream(srt_streams)
-            
+
             if srt_stream_index is not None:
                 # Log which stream was selected
                 is_default = any(
-                    stream.get("disposition", {}).get("default") == 1 
-                    for stream in srt_streams 
+                    stream.get("disposition", {}).get("default") == 1
+                    for stream in srt_streams
                     if stream["index"] == srt_stream_index
                 )
                 stream_type = "default" if is_default else "non-default"
-                logging.info(f"Found {stream_type} SRT stream at index: {srt_stream_index}")
+                logging.info(
+                    f"Found {stream_type} SRT stream at index: {srt_stream_index}"
+                )
 
             if srt_stream_index is not None:
                 # Use ffmpeg to extract the identified SRT stream
@@ -577,10 +571,10 @@ class GuardianProcessor:
         """Finds the SRT file for a video, checking for language-specific versions."""
         candidates = self._generate_srt_candidates(video_path)
         found_file = self._find_first_existing_file(candidates)
-        
+
         if found_file and found_file != candidates[0]:  # Not the default .srt file
             logging.info(f"Found language-specific SRT file: {found_file}")
-            
+
         return found_file
 
     def _parse_srt_file(self, srt_path: str) -> Optional[List[srt.Subtitle]]:
@@ -596,13 +590,13 @@ class GuardianProcessor:
     def _clean_subtitle_text(self, content: str) -> str:
         """
         Clean subtitle text by removing punctuation and converting to lowercase.
-        
+
         Args:
             content: Raw subtitle content
-            
+
         Returns:
             Cleaned text suitable for profanity matching
-            
+
         This function is extracted to be testable without mocking subtitles.
         """
         return re.sub(r"[^\w\s\']", "", content).lower()
@@ -610,33 +604,33 @@ class GuardianProcessor:
     def _build_profanity_pattern(self, words: List[str]) -> re.Pattern[str]:
         """
         Build compiled regex pattern for profanity detection.
-        
+
         Args:
             words: List of words to match
-            
+
         Returns:
             Compiled regex pattern
-            
+
         This function is extracted to be testable without mocking.
         """
         if not words:
             # Return pattern that matches nothing
             return re.compile(r"(?!.*)", re.IGNORECASE)
-            
+
         pattern = r"\b(" + "|".join(re.escape(word) for word in words) + r")\b"
         return re.compile(pattern, re.IGNORECASE)
 
     def _contains_profanity(self, text: str, pattern: re.Pattern[str]) -> bool:
         """
         Check if text contains profanity using the given pattern.
-        
+
         Args:
             text: Text to check (should be pre-cleaned)
             pattern: Compiled regex pattern for profanity
-            
+
         Returns:
             True if profanity is found, False otherwise
-            
+
         This function is extracted to be testable without mocking.
         """
         return bool(pattern.search(text))
@@ -647,7 +641,7 @@ class GuardianProcessor:
         """Finds profane segments in a list of subtitles."""
         censor_pattern = self._build_profanity_pattern(self.matching_words)
         censor_segments = []
-        
+
         for sub in subs:
             cleaned_text = self._clean_subtitle_text(sub.content)
             if self._contains_profanity(cleaned_text, censor_pattern):
@@ -655,7 +649,7 @@ class GuardianProcessor:
                 start_s = sub.start.total_seconds()
                 end_s = sub.end.total_seconds()
                 censor_segments.append((start_s, end_s))
-                
+
         return censor_segments
 
     def _verify_silence_level(
@@ -1399,19 +1393,23 @@ class GuardianProcessor:
             logging.error(f"Failed to save diagnostic report: {e}")
             return ""
 
-    def _build_volume_filters(self, segments: List[Tuple[float, float]], 
-                             volume_setting: str, quote_char: str = "'") -> List[str]:
+    def _build_volume_filters(
+        self,
+        segments: List[Tuple[float, float]],
+        volume_setting: str,
+        quote_char: str = "'",
+    ) -> List[str]:
         """
         Build volume filter strings for censored segments.
-        
+
         Args:
             segments: List of (start, end) time segments to censor
             volume_setting: Volume setting to apply (e.g., "volume=0")
             quote_char: Quote character to use for enable expressions
-            
+
         Returns:
             List of volume filter strings
-            
+
         This function is extracted to be testable without mocking FFmpeg.
         """
         volume_filters = []
@@ -1423,18 +1421,19 @@ class GuardianProcessor:
             volume_filters.append(volume_filter)
         return volume_filters
 
-    def _build_audio_filter_chain(self, segments: List[Tuple[float, float]], 
-                                 strategy_level: int) -> str:
+    def _build_audio_filter_chain(
+        self, segments: List[Tuple[float, float]], strategy_level: int
+    ) -> str:
         """
         Build complete audio filter chain for censoring.
-        
+
         Args:
             segments: List of (start, end) time segments to censor
             strategy_level: Strategy level (1=basic, 2=enhanced, 3=aggressive)
-            
+
         Returns:
             Complete audio filter graph string
-            
+
         This function is extracted to be testable without mocking FFmpeg.
         """
         strategy = self._get_filter_strategy(strategy_level)
@@ -1453,7 +1452,9 @@ class GuardianProcessor:
 
         # Add dynamic range compression filter if enabled
         if strategy["use_compression"]:
-            filter_parts.append("acompressor=threshold=-20dB:ratio=20:attack=5:release=50")
+            filter_parts.append(
+                "acompressor=threshold=-20dB:ratio=20:attack=5:release=50"
+            )
 
         # Add additional null mixing processing if enabled
         if strategy["use_null_mixing"]:
@@ -1466,19 +1467,20 @@ class GuardianProcessor:
 
         return ",".join(filter_parts) if filter_parts else "anull"
 
-    def _build_ffmpeg_base_command(self, video_path: str, output_path: str, 
-                                  audio_filter_graph: str) -> List[str]:
+    def _build_ffmpeg_base_command(
+        self, video_path: str, output_path: str, audio_filter_graph: str
+    ) -> List[str]:
         """
         Build base FFmpeg command with standard parameters.
-        
+
         Args:
             video_path: Input video file path
             output_path: Output video file path
             audio_filter_graph: Complete audio filter graph string
-            
+
         Returns:
             Complete FFmpeg command as list of strings
-            
+
         This function is extracted to be testable without mocking FFmpeg.
         """
         return [
@@ -1519,8 +1521,10 @@ class GuardianProcessor:
         logging.info(f"Constructing FFmpeg filters for {len(censor_segments)} segments")
 
         # Build audio filter chain using extracted function
-        audio_filter_graph = self._build_audio_filter_chain(censor_segments, strategy_level)
-        
+        audio_filter_graph = self._build_audio_filter_chain(
+            censor_segments, strategy_level
+        )
+
         # Log segment details
         logging.info("Adding volume filters for censored segments:")
         for i, (start_s, end_s) in enumerate(censor_segments, 1):
@@ -1533,8 +1537,10 @@ class GuardianProcessor:
         logging.info("=== END FILTER CONSTRUCTION ===")
 
         # Build complete command using extracted function
-        command = self._build_ffmpeg_base_command(video_path, output_path, audio_filter_graph)
-        
+        command = self._build_ffmpeg_base_command(
+            video_path, output_path, audio_filter_graph
+        )
+
         logging.debug(f"Complete FFmpeg command: {' '.join(command)}")
         return command
 
