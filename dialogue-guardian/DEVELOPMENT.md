@@ -170,6 +170,11 @@ Tests are organized by module:
 
 - `test_guardian_core.py`: Tests for core functionality
 - `test_guardian_cli.py`: Tests for CLI interface
+- `test_guardian_cli_extended.py`: Extended CLI tests with edge cases and argument combinations
+- `test_guardian_edge_cases.py`: Tests for edge cases, malformed data, and unexpected failures
+- `test_guardian_integration.py`: Integration tests with mocked dependencies
+- `test_integration_complete.py`: Comprehensive integration tests with real media files
+- `test_end_to_end_workflow.py`: End-to-end workflow validation tests
 
 ### Writing Tests
 

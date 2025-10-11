@@ -17,6 +17,8 @@ The test suite is organized into the following files located in the `tests/` dir
 -   **`test_guardian_core.py`**: Unit tests for the core processing logic in `guardian/core.py`.
 -   **`test_guardian_edge_cases.py`**: Tests for specific edge cases in the core logic, such as malformed data and unexpected failures.
 -   **`test_guardian_integration.py`**: Integration tests that verify the interaction between different components and with `ffmpeg`/`ffprobe` (using mocks).
+-   **`test_integration_complete.py`**: Comprehensive integration tests for the enhanced audio censoring system with sample media files.
+-   **`test_end_to_end_workflow.py`**: End-to-end workflow validation tests covering complete SRT parsing to output verification.
 
 ## Running Tests
 
@@ -91,6 +93,20 @@ make test-verbose
 -   Interaction with `ffmpeg` and `ffprobe` (mocked).
 -   Extraction of embedded SRT files.
 -   Fallback mechanisms (e.g., from external to embedded SRT).
+
+### Enhanced Integration Tests (`test_integration_complete.py`)
+
+-   Comprehensive testing of the enhanced audio censoring system.
+-   Sample media file validation with real video and SRT files.
+-   Profanity pattern variations and audio format compatibility testing.
+-   Silence verification and quality preservation validation.
+
+### End-to-End Workflow Tests (`test_end_to_end_workflow.py`)
+
+-   Complete workflow validation from SRT parsing to final output verification.
+-   Error handling and fallback mechanism testing.
+-   Logging and diagnostic system validation.
+-   Embedded SRT workflow testing.
 
 ## Mocking Strategy
 

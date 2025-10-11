@@ -58,31 +58,46 @@ from guardian import GuardianProcessor
 # Initialize the processor
 processor = GuardianProcessor()
 
-# Process a video file
-censored_file = processor.process_video("movie.mp4")
+# Process a video file with enhanced censoring
+censored_file = processor.censor_audio_with_ffmpeg("movie.mp4", "censored_movie.mp4")
 
 if censored_file:
     print(f"Censored video created: {censored_file}")
+    
+    # Check diagnostic files for detailed results
+    import glob
+    diagnostic_files = glob.glob("*_diagnostic_*.json")
+    if diagnostic_files:
+        print(f"Diagnostic report: {diagnostic_files[-1]}")
 else:
     print("Processing failed")
 
-# Custom configuration
+# Custom configuration with enhanced features
 processor = GuardianProcessor(
     matching_words=['custom', 'word', 'list'],
     ffmpeg_cmd='/usr/local/bin/ffmpeg',
     ffprobe_cmd='/usr/local/bin/ffprobe'
 )
+
+# Get video details
+details = processor.get_video_details("movie.mp4")
+print(f"Video duration: {details['duration']}s")
+print(f"Resolution: {details['width']}x{details['height']}")
 ```
 
 ### Key Features
 
-- **Direct Audio Censoring**: Uses FFmpeg's audio filters to mute profane segments and create a new, censored video file.
-- **Universal Compatibility**: Works on any OS with FFmpeg installed (Windows, macOS, Linux).
-- **No FCPX Dependency**: Does not require Final Cut Pro.
-- **Automatic SRT Extraction**: If an external SRT file isn't found, it automatically extracts embedded SRT tracks from the video.
-- **Non-Destructive**: Creates a new video file, leaving the original untouched.
-- **Efficient**: Copies the video stream without re-encoding to maintain quality, only re-encoding the audio.
-- **Package Structure**: Properly structured as a Python package for easy installation and distribution.
+- **Enhanced Audio Censoring**: Advanced multi-strategy audio filtering system with progressive fallback mechanisms
+- **Silence Verification**: Automated verification that censored segments achieve target silence levels (≤ -50 dB)
+- **Fallback Strategies**: Three-tier approach (Basic → Enhanced → Aggressive) ensures effective censoring
+- **Universal Compatibility**: Works on any OS with FFmpeg installed (Windows, macOS, Linux)
+- **No FCPX Dependency**: Does not require Final Cut Pro
+- **Automatic SRT Extraction**: If an external SRT file isn't found, it automatically extracts embedded SRT tracks from the video
+- **Non-Destructive**: Creates a new video file, leaving the original untouched
+- **Quality Preservation**: Maintains video quality while achieving effective audio silence
+- **Comprehensive Diagnostics**: Detailed logging and JSON diagnostic reports for troubleshooting
+- **Robust Error Handling**: Graceful handling of missing files, corrupted data, and processing failures
+- **Package Structure**: Properly structured as a Python package for easy installation and distribution
 
 ### Requirements
 

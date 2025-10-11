@@ -4,21 +4,24 @@
 Script to download and extract FFmpeg for the current platform.
 """
 import platform
+import re
 import shutil
 import sys
 import tarfile
 import zipfile
 from pathlib import Path
 
-import py7zr
 import requests
 
 # Define a common 'bin' directory at the project root
 ROOT_DIR = Path(__file__).parent.parent
 BIN_DIR = ROOT_DIR / "bin"
 FFMPEG_URLS = {
-    "Windows": "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z",
-    "Darwin": "https://evermeet.cx/ffmpeg/ffmpeg-113112-g5302586a07.zip",
+    "Windows": "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip",
+    "Darwin": [
+        "https://evermeet.cx/ffmpeg/get/zip",
+        "https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip",
+    ],
     "Linux": "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz",
 }
 CHUNK_SIZE = 8192
@@ -36,11 +39,31 @@ def download_file(url, target_dir):
     """
     Downloads a file from a URL to a target directory.
     """
-    local_filename = url.split("/")[-1]
-    download_path = target_dir / local_filename
-    print(f"Downloading {url} to {download_path}...")
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
+        content_disposition = r.headers.get("content-disposition")
+        filename_from_header = None
+        if content_disposition:
+            fname = re.findall("filename=(.+)", content_disposition)
+            if fname:
+                filename_from_header = fname[0].strip('"')
+
+        if filename_from_header:
+            local_filename = filename_from_header
+        else:
+            # Fallback to URL, with special handling for evermeet.cx
+            url_part = url.split("/")[-1]
+            if "evermeet.cx" in url and url_part == "zip":
+                if "ffprobe" in url:
+                    local_filename = "ffprobe.zip"
+                else:
+                    local_filename = "ffmpeg.zip"
+            else:
+                local_filename = url_part
+
+        download_path = target_dir / local_filename
+        print(f"Downloading {url} to {download_path}...")
+
         with open(download_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                 f.write(chunk)
@@ -53,10 +76,7 @@ def extract_archive(archive_path, extract_dir):
     Extracts an archive to a specified directory.
     """
     print(f"Extracting {archive_path} to {extract_dir}...")
-    if archive_path.suffix == ".7z":
-        with py7zr.SevenZipFile(archive_path, "r") as archive:
-            archive.extractall(path=extract_dir)
-    elif archive_path.suffix == ".zip":
+    if archive_path.suffix == ".zip":
         with zipfile.ZipFile(archive_path, "r") as zip_ref:
             zip_ref.extractall(extract_dir)
     elif archive_path.suffix == ".xz":
@@ -125,10 +145,13 @@ def main():
         print("FFmpeg and ffprobe already found in bin directory. Skipping download.")
         return
 
-    url = get_ffmpeg_urls()
-    if not url:
+    urls = get_ffmpeg_urls()
+    if not urls:
         print(f"Unsupported OS: {platform.system()}")
         sys.exit(1)
+
+    if isinstance(urls, str):
+        urls = [urls]
 
     temp_dir = BIN_DIR / "temp"
     if temp_dir.exists():
@@ -136,10 +159,14 @@ def main():
     temp_dir.mkdir(exist_ok=True)
 
     try:
-        archive_path = download_file(url, temp_dir)
+        archive_path = None
         extract_dir = temp_dir / "extracted"
         extract_dir.mkdir(exist_ok=True)
-        extract_archive(archive_path, extract_dir)
+
+        for url in urls:
+            archive_path = download_file(url, temp_dir)
+            extract_archive(archive_path, extract_dir)
+
         success = find_and_move_binaries(extract_dir, archive_path)
 
         if not success:

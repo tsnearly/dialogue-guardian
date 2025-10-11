@@ -33,6 +33,32 @@ dependencies = [
     "srt",
 ]
 
+[dependency-groups]
+dev = [
+    "requests",
+    "py7zr",
+    "black", # Code formatter
+    "flake8", # Linter
+    "isort", # Import sorter
+    "mypy",
+    "twine",
+    "safety",
+    "build",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinx-autodoc-typehints",
+    "sphinx-autobuild",
+    "detect-secrets>=1.5.0",
+]
+test = [
+    "pytest",     # Test runner
+    "pytest-cov", # Code coverage
+    "pytest-mock"
+]
+
 [project.urls]
 Homepage = "https://github.com/tsnearly/dialogue-guardian"
 Documentation = "https://tsnearly.github.io/dialogue-guardian/"

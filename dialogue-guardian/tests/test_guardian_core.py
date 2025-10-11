@@ -156,14 +156,28 @@ class TestGuardianProcessor(unittest.TestCase):
         command = self.processor._construct_ffmpeg_command(
             "/test/video.mp4", "/test/censored.mp4", [(1.0, 2.0)]
         )
-        self.assertIn("volume=0:enable='between(t,1.0,2.0)'", command)
+        # Get the audio filter string from the command
+        af_index = command.index("-af")
+        audio_filter = command[af_index + 1]
+        
+        # Check for enhanced filter chain components
+        self.assertIn("aformat=sample_fmts=s16:channel_layouts=stereo", audio_filter)
+        self.assertIn("volume=-inf:enable='between(t,1.0,2.0)'", audio_filter)
+        self.assertIn("acompand=attacks=0.1:decays=0.8:points=-90/-90|-60/-60|-30/-30|-20/-20", audio_filter)
 
         # Test on Windows
         mock_system.return_value = "Windows"
         command = self.processor._construct_ffmpeg_command(
             "/test/video.mp4", "/test/censored.mp4", [(1.0, 2.0)]
         )
-        self.assertIn('volume=0:enable="between(t,1.0,2.0)"', command)
+        # Get the audio filter string from the command
+        af_index = command.index("-af")
+        audio_filter = command[af_index + 1]
+        
+        # Check for enhanced filter chain components with Windows quoting
+        self.assertIn("aformat=sample_fmts=s16:channel_layouts=stereo", audio_filter)
+        self.assertIn('volume=-inf:enable="between(t,1.0,2.0)"', audio_filter)
+        self.assertIn("acompand=attacks=0.1:decays=0.8:points=-90/-90|-60/-60|-30/-30|-20/-20", audio_filter)
 
     def test_regex_pattern_compilation(self):
         """Test that the profanity regex pattern compiles correctly"""

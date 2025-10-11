@@ -14,7 +14,7 @@ from . import __version__
 from .core import GuardianProcessor
 
 
-def setup_logging(log_file: Optional[List[str]] = None, debug: bool = False) -> None:
+def setup_logging(log_file: Optional[List[str]] = None, verbose: bool = False) -> None:
     """
     Configure logging for the application.
 
@@ -22,7 +22,7 @@ def setup_logging(log_file: Optional[List[str]] = None, debug: bool = False) -> 
         log_file: Optional path to log file. If None, uses script name.
         verbose: If True, sets DEBUG level, otherwise INFO.
     """
-    level = logging.DEBUG if debug else logging.INFO
+    level = logging.DEBUG if verbose else logging.INFO
 
     log_path = "dialogue-guardian.log"
     if log_file:
@@ -83,8 +83,8 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--debug",
-        "-d",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Enable verbose logging (DEBUG level)",
     )
@@ -106,7 +106,11 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--version", "-ver", help="Show version", action="version", version=__version__
+        "--version",
+        "-ver",
+        help="Show version",
+        action="version",
+        version=__version__
     )
 
     return parser
