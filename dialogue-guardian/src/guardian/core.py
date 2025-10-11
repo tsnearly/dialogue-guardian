@@ -10,11 +10,12 @@ import os
 import platform
 import re
 import subprocess
-import srt  # type: ignore
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+import srt  # type: ignore
 
 
 @dataclass
