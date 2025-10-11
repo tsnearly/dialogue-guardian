@@ -14,11 +14,17 @@ This guide covers everything you need to know about developing, testing, and con
 dialogue-guardian/
 ├── src/guardian/              # Main package source
 │   ├── __init__.py           # Package initialization and exports
-│   ├── core.py               # Core functionality (GuardianProcessor)
+│   ├── core.py               # Core functionality (GuardianProcessor) - REFACTORED
 │   └── cli.py                # Command-line interface
-├── tests/                    # Test suite
+├── tests/                    # Test suite - ENHANCED
 │   ├── test_guardian_core.py # Core functionality tests
-│   └── test_guardian_cli.py  # CLI tests
+│   ├── test_guardian_pure_functions.py # NEW - Pure function tests (no mocks)
+│   ├── test_guardian_cli.py  # CLI tests
+│   ├── test_guardian_cli_extended.py # Extended CLI tests
+│   ├── test_guardian_edge_cases.py # Edge case tests
+│   ├── test_guardian_integration.py # Integration tests
+│   ├── test_integration_complete.py # Complete integration tests
+│   └── test_end_to_end_workflow.py # End-to-end workflow tests
 ├── docs/                     # Sphinx documentation
 │   ├── conf.py               # Sphinx configuration
 │   ├── index.rst             # Main documentation page
@@ -75,6 +81,59 @@ dialogue-guardian/
    pip install -r dev-requirements.txt
    ```
 
+## Code Architecture
+
+### Refactored Core Module
+
+The `core.py` module has been **significantly refactored** to improve testability and maintainability:
+
+#### Before Refactoring:
+- Large monolithic functions mixing I/O with business logic
+- Complex parsing logic buried inside subprocess calls
+- Difficult to test without extensive mocking
+- Hard to debug and maintain
+
+#### After Refactoring:
+- **Extracted pure functions** for all complex logic
+- **Separation of concerns**: I/O operations separate from parsing logic
+- **Highly testable**: Pure functions can be tested with real data
+- **Modular design**: Small, focused functions with single responsibilities
+
+#### Key Extracted Functions:
+
+```python
+# Video processing pure functions
+def _parse_duration(self, duration_output: str) -> Dict[str, str]:
+def _parse_audio_streams(self, ffprobe_output: str) -> Dict[str, str]:
+def _parse_framerate_info(self, framerate_str: Optional[str]) -> Dict[str, Optional[str]]:
+def _parse_video_stream_output(self, ffprobe_output: str) -> Dict[str, Optional[str]]:
+
+# SRT processing pure functions  
+def _parse_ffprobe_streams(self, json_output: str) -> List[Dict[str, Any]]:
+def _find_srt_streams(self, streams: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _select_best_srt_stream(self, srt_streams: List[Dict[str, Any]]) -> Optional[int]:
+def _generate_srt_candidates(self, video_path: str) -> List[str]:
+
+# Profanity detection pure functions
+def _clean_subtitle_text(self, content: str) -> str:
+def _build_profanity_pattern(self, words: List[str]) -> re.Pattern[str]:
+def _contains_profanity(self, text: str, pattern: re.Pattern[str]) -> bool:
+
+# FFmpeg command construction pure functions
+def _build_volume_filters(self, segments: List[Tuple[float, float]], volume_setting: str) -> List[str]:
+def _build_audio_filter_chain(self, segments: List[Tuple[float, float]], strategy_level: int) -> str:
+def _build_ffmpeg_base_command(self, video_path: str, output_path: str, audio_filter_graph: str) -> List[str]:
+```
+
+#### Benefits of the Refactored Architecture:
+
+1. **Better Testability**: Pure functions can be tested directly with real data
+2. **Improved Maintainability**: Small, focused functions are easier to understand and modify
+3. **Enhanced Debugging**: Issues can be isolated to specific functions
+4. **Reduced Complexity**: Complex operations broken down into manageable pieces
+5. **Better Code Reuse**: Pure functions can be reused in different contexts
+6. **Easier Feature Development**: New features can leverage existing pure functions
+
 ## Development Workflow
 
 ### Common Commands
@@ -122,11 +181,17 @@ pytest --cov=guardian --cov-report=html
 # Run specific test file
 pytest tests/test_guardian_core.py
 
+# Run pure function tests (no mocks - fast execution)
+pytest tests/test_guardian_pure_functions.py -v
+
 # Run specific test
 pytest tests/test_guardian_core.py::TestGuardianProcessor::test_init_default_values
 
 # Run tests with verbose output
 pytest -v
+
+# Run only pure function tests with coverage
+pytest tests/test_guardian_pure_functions.py --cov=src/guardian/core --cov-report=html
 ```
 
 ### Code Quality
@@ -171,10 +236,107 @@ Tests are organized by module:
 - `test_guardian_core.py`: Tests for core functionality
 - `test_guardian_cli.py`: Tests for CLI interface
 - `test_guardian_cli_extended.py`: Extended CLI tests with edge cases and argument combinations
+- `test_guardian_pure_functions.py`: **Pure function tests (34 tests) - no mocks, test actual logic**
 - `test_guardian_edge_cases.py`: Tests for edge cases, malformed data, and unexpected failures
 - `test_guardian_integration.py`: Integration tests with mocked dependencies
 - `test_integration_complete.py`: Comprehensive integration tests with real media files
 - `test_end_to_end_workflow.py`: End-to-end workflow validation tests
+
+### Pure Function Testing Architecture
+
+The project features a **hybrid testing approach** that combines traditional mocked tests with pure function tests:
+
+#### Pure Function Tests (`test_guardian_pure_functions.py`)
+
+**34 comprehensive tests** that validate actual business logic without mocks:
+
+```python
+# Example: Instead of mocking subprocess calls, test the actual parsing logic
+
+# BEFORE: Mock-heavy integration test
+@patch("subprocess.check_output")
+def test_get_video_details_multiple_audio_streams(self, mock_check_output):
+    mock_check_output.side_effect = [
+        "120.5",  # duration
+        "aac|44100|1|mono\naac|48000|6|5.1",  # audio streams  
+        "1920\n1080\n30000/1001",  # video info
+    ]
+    result = self.processor.get_video_details(self.test_video_path)
+    # Tests mock setup, not actual logic
+
+# AFTER: Pure function tests for each component
+def test_parse_audio_streams_multiple_streams(self):
+    """Test audio stream selection logic with real data"""
+    ffprobe_output = "aac|44100|1|mono\naac|48000|6|5.1"
+    result = self.processor._parse_audio_streams(ffprobe_output)
+    # Should pick the 6-channel stream
+    expected = {"codec": "aac", "samplerate": "48000", "channels": "6", "audioconfig": "5.1"}
+    self.assertEqual(result, expected)
+
+def test_parse_video_stream_output_complete(self):
+    """Test video dimension and framerate parsing with real data"""
+    ffprobe_output = "1920\n1080\n30000/1001"
+    result = self.processor._parse_video_stream_output(ffprobe_output)
+    expected = {
+        "width": "1920", "height": "1080", "framerate": "30000/1001",
+        "fps": "29.970", "frameduration": "1001/30000"
+    }
+    self.assertEqual(result, expected)
+
+def test_parse_framerate_info_division_by_zero(self):
+    """Test edge case: division by zero in framerate"""
+    result = self.processor._parse_framerate_info("30000/0")
+    expected = {"framerate": None, "fps": None, "frameduration": None}
+    self.assertEqual(result, expected)  # Should handle gracefully
+```
+
+**Categories of Pure Function Tests:**
+
+1. **Video Details Parsing Functions:**
+   - `_parse_duration()` - Duration parsing logic
+   - `_parse_audio_streams()` - Audio stream selection logic
+   - `_parse_framerate_info()` - Complex framerate calculations  
+   - `_parse_video_stream_output()` - Video dimension parsing
+
+2. **SRT Processing Functions:**
+   - `_parse_ffprobe_streams()` - JSON parsing logic
+   - `_find_srt_streams()` - Stream filtering logic
+   - `_select_best_srt_stream()` - Stream prioritization logic
+   - `_generate_srt_candidates()` - File path generation
+
+3. **Profanity Detection Functions:**
+   - `_clean_subtitle_text()` - Text cleaning logic
+   - `_build_profanity_pattern()` - Regex compilation
+   - `_contains_profanity()` - Profanity matching logic
+
+4. **FFmpeg Command Construction Functions:**
+   - `_build_volume_filters()` - Volume filter generation
+   - `_build_audio_filter_chain()` - Complete filter chain logic
+   - `_build_ffmpeg_base_command()` - Command construction
+
+**Benefits of Pure Function Tests:**
+- **Real Logic Testing**: Tests actual parsing, filtering, and processing logic with real data
+- **Better Bug Detection**: Catches real parsing errors, edge cases, and logic bugs that mocks would hide
+- **No External Dependencies**: Tests pure functions that don't require FFmpeg or file I/O
+- **Easy to Maintain**: Simple, direct function calls without complex mock setups
+- **Fast Execution**: No subprocess calls or file I/O operations
+- **Edge Case Coverage**: Tests division by zero, malformed data, empty inputs, special characters
+
+#### When to Use Pure Function Tests vs Mocked Tests
+
+**Use Pure Function Tests for:**
+- Data parsing and transformation logic
+- Mathematical calculations and algorithms
+- String processing and regex operations
+- Data structure manipulation
+- Business logic that doesn't require external dependencies
+
+**Use Mocked Tests for:**
+- File I/O operations
+- Subprocess calls (FFmpeg/ffprobe)
+- Network operations
+- System-dependent functionality
+- Integration between components
 
 ### Writing Tests
 
@@ -186,7 +348,50 @@ Follow these guidelines when writing tests:
    def test_process_video_with_valid_file_succeeds(self):
    ```
 
-2. **Use fixtures for common setup:**
+2. **Prefer pure function tests over mocked tests when possible:**
+
+   ```python
+   # BEFORE - Mock-heavy test that hides actual logic
+   @patch("subprocess.check_output")
+   def test_get_video_details_multiple_audio_streams(self, mock_check_output):
+       mock_check_output.side_effect = [
+           "120.5",  # duration
+           "aac|44100|1|mono\naac|48000|6|5.1",  # multiple audio streams
+           "1920\n1080\n30000/1001",  # video info
+       ]
+       result = self.processor.get_video_details(self.test_video_path)
+       # This tests mock interactions, not the actual parsing logic
+
+   # AFTER - Pure function tests that validate actual logic
+   def test_parse_audio_streams_multiple_streams(self):
+       """Test audio stream selection logic with real data"""
+       ffprobe_output = "aac|44100|1|mono\naac|48000|6|5.1"
+       result = self.processor._parse_audio_streams(ffprobe_output)
+       # Should pick the 6-channel stream
+       self.assertEqual(result["channels"], "6")
+       self.assertEqual(result["samplerate"], "48000")
+
+   def test_parse_video_stream_output_complete(self):
+       """Test video info parsing logic with real data"""
+       ffprobe_output = "1920\n1080\n30000/1001"
+       result = self.processor._parse_video_stream_output(ffprobe_output)
+       expected = {
+           "width": "1920",
+           "height": "1080", 
+           "framerate": "30000/1001",
+           "fps": "29.970",
+           "frameduration": "1001/30000"
+       }
+       self.assertEqual(result, expected)
+
+   def test_parse_framerate_info_fraction_format(self):
+       """Test complex framerate calculation logic"""
+       result = self.processor._parse_framerate_info("30000/1001")
+       self.assertEqual(result["fps"], "29.970")
+       self.assertEqual(result["frameduration"], "1001/30000")
+   ```
+
+3. **Use fixtures for common setup:**
 
    ```python
    @pytest.fixture
@@ -194,17 +399,29 @@ Follow these guidelines when writing tests:
        return "samples/sample.mp4"
    ```
 
-3. **Mock external dependencies:**
+4. **Mock external dependencies only when necessary:**
 
    ```python
    @patch('guardian.core.subprocess.run')
    def test_ffmpeg_call(self, mock_run):
    ```
 
-4. **Test both success and failure cases:**
+5. **Test both success and failure cases:**
    ```python
    def test_process_video_success(self):
    def test_process_video_file_not_found(self):
+   ```
+
+6. **Extract complex logic into pure functions for better testability:**
+   ```python
+   # Extract this logic into a pure function
+   def _parse_framerate(self, framerate_str: str) -> Dict[str, str]:
+       # Complex parsing logic here
+       
+   # Then test it directly without mocks
+   def test_parse_framerate_division_by_zero(self):
+       result = self.processor._parse_framerate("30000/0")
+       self.assertIsNone(result["fps"])
    ```
 
 ### Test Coverage

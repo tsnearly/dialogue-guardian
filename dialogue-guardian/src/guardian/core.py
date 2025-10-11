@@ -155,6 +155,20 @@ class GuardianProcessor:
         )
         return cmd_name
 
+    def _parse_duration(self, duration_output: str) -> Dict[str, str]:
+        """
+        Parse duration output from ffprobe.
+        
+        Args:
+            duration_output: Raw duration output from ffprobe (e.g., "120.5")
+            
+        Returns:
+            Dictionary with duration
+            
+        This function is extracted to be testable without mocking subprocess.
+        """
+        return {"duration": duration_output.strip()}
+
     def _parse_audio_streams(self, ffprobe_output: str) -> Dict[str, str]:
         """
         Parse ffprobe audio stream output and select the best audio stream.
@@ -261,6 +275,20 @@ class GuardianProcessor:
         
         return video_info
 
+    def _parse_duration(self, duration_output: str) -> Dict[str, str]:
+        """
+        Parse duration output from ffprobe.
+        
+        Args:
+            duration_output: Raw duration string from ffprobe (e.g., "120.5")
+            
+        Returns:
+            Dictionary with duration
+            
+        This function is extracted to be testable without mocking subprocess.
+        """
+        return {"duration": duration_output.strip()}
+
     def get_video_details(self, filename: str) -> Optional[Dict[str, Any]]:
         """
         Extracts video and audio details using ffprobe.
@@ -290,7 +318,10 @@ class GuardianProcessor:
             stdout_duration = subprocess.check_output(
                 cmd_duration, text=True, stderr=subprocess.PIPE
             ).strip()
-            details["duration"] = stdout_duration
+            
+            # Parse duration using extracted function
+            duration_info = self._parse_duration(stdout_duration)
+            details.update(duration_info)
 
             # Get audio stream details
             cmd_audio = [

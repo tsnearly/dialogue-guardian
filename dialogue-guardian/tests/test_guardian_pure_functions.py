@@ -22,6 +22,54 @@ class TestGuardianPureFunctions(unittest.TestCase):
         """Set up test fixtures"""
         self.processor = GuardianProcessor()
 
+    def test_parse_duration(self):
+        """Test parsing duration output from ffprobe"""
+        duration_output = "120.5"
+        result = self.processor._parse_duration(duration_output)
+        
+        expected = {"duration": "120.5"}
+        self.assertEqual(result, expected)
+
+    def test_parse_duration_with_whitespace(self):
+        """Test parsing duration output with whitespace"""
+        duration_output = "  120.5  \n"
+        result = self.processor._parse_duration(duration_output)
+        
+        expected = {"duration": "120.5"}
+        self.assertEqual(result, expected)
+
+    def test_parse_duration_empty(self):
+        """Test parsing empty duration output"""
+        duration_output = ""
+        result = self.processor._parse_duration(duration_output)
+        
+        expected = {"duration": ""}
+        self.assertEqual(result, expected)
+
+    def test_parse_duration(self):
+        """Test parsing duration output from ffprobe"""
+        duration_output = "120.5"
+        result = self.processor._parse_duration(duration_output)
+        
+        expected = {"duration": "120.5"}
+        self.assertEqual(result, expected)
+
+    def test_parse_duration_with_whitespace(self):
+        """Test parsing duration output with whitespace"""
+        duration_output = "  120.5  \n"
+        result = self.processor._parse_duration(duration_output)
+        
+        expected = {"duration": "120.5"}
+        self.assertEqual(result, expected)
+
+    def test_parse_duration_empty_input(self):
+        """Test parsing empty duration output"""
+        duration_output = ""
+        result = self.processor._parse_duration(duration_output)
+        
+        expected = {"duration": ""}
+        self.assertEqual(result, expected)
+
     def test_parse_audio_streams_single_stream(self):
         """Test parsing single audio stream"""
         ffprobe_output = "aac|44100|2|stereo"

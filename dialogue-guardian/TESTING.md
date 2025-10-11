@@ -15,6 +15,7 @@ The test suite is organized into the following files located in the `tests/` dir
 -   **`test_guardian_cli.py`**: Unit tests for the command-line interface (CLI) argument parsing and main execution flow.
 -   **`test_guardian_cli_extended.py`**: Extended tests for the CLI, covering more edge cases and argument combinations.
 -   **`test_guardian_core.py`**: Unit tests for the core processing logic in `guardian/core.py`.
+-   **`test_guardian_pure_functions.py`**: **NEW** - Pure function tests that test actual logic without mocks (34 tests).
 -   **`test_guardian_edge_cases.py`**: Tests for specific edge cases in the core logic, such as malformed data and unexpected failures.
 -   **`test_guardian_integration.py`**: Integration tests that verify the interaction between different components and with `ffmpeg`/`ffprobe` (using mocks).
 -   **`test_integration_complete.py`**: Comprehensive integration tests for the enhanced audio censoring system with sample media files.
@@ -81,6 +82,22 @@ make test-verbose
 -   Profanity detection in subtitle segments.
 -   Construction of `ffmpeg` commands.
 
+### Pure Function Tests (`test_guardian_pure_functions.py`) - **NEW**
+
+**34 tests that validate actual logic without mocks:**
+
+-   **Video Details Parsing**: Tests audio stream selection, framerate calculations, and video dimension parsing with real data
+-   **SRT Processing**: Tests JSON parsing, stream filtering, and stream prioritization logic
+-   **Profanity Detection**: Tests text cleaning, regex compilation, and profanity matching with various patterns
+-   **FFmpeg Command Construction**: Tests volume filter generation, audio filter chains, and command building
+-   **Edge Cases**: Division by zero, malformed data, empty inputs, special characters, and encoding issues
+
+**Key Benefits:**
+- Tests real parsing logic instead of mock interactions
+- Catches actual bugs in data processing
+- Validates edge cases with real data scenarios
+- No external dependencies required (pure functions)
+
 ### Edge Case Tests (`test_guardian_edge_cases.py`)
 
 -   Tests for handling malformed video metadata.
@@ -108,13 +125,26 @@ make test-verbose
 -   Logging and diagnostic system validation.
 -   Embedded SRT workflow testing.
 
-## Mocking Strategy
+## Testing Strategy
 
-The tests use extensive mocking via `unittest.mock` to:
+The project uses a **hybrid testing approach** combining mocked integration tests with pure function tests:
+
+### Mocked Integration Tests
+
+Traditional tests use extensive mocking via `unittest.mock` to:
 
 -   Avoid actual FFmpeg/ffprobe operations during unit testing, ensuring tests are fast and don't require external dependencies to be installed.
 -   Simulate various error conditions (e.g., `subprocess.CalledProcessError`, `FileNotFoundError`).
 -   Test edge cases without requiring actual video/SRT files.
+
+### Pure Function Tests (**NEW**)
+
+**34 pure function tests** validate actual business logic without mocks:
+
+-   **Real Data Testing**: Uses actual data structures and strings to test parsing logic
+-   **No External Dependencies**: Tests pure functions that don't require FFmpeg or file I/O
+-   **Better Bug Detection**: Catches real parsing errors, edge cases, and logic bugs
+-   **Maintainable**: Easy to understand and modify without complex mock setups
 
 ### Key Mock Objects
 

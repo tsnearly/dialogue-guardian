@@ -42,6 +42,8 @@ guardian --input movie.mp4
 - **🎙 Quality Preservation**: Maintains video quality while achieving effective audio silence
 - **🧰 Comprehensive Diagnostics**: Detailed logging and JSON diagnostic reports for troubleshooting
 - **🏷 Robust Error Handling**: Graceful handling of missing files, corrupted data, and processing failures
+- **🧪 High-Quality Testing**: 86% test coverage with pure function testing (no mocks) for reliable logic validation
+- **🔧 Modular Architecture**: Refactored codebase with extracted pure functions for better maintainability and testability
 
 ## 📋 Requirements
 
@@ -107,6 +109,8 @@ if censored_file:
 
 ## 🧪 Testing
 
+The project features comprehensive testing with **86% code coverage** and a focus on testing real logic rather than mocked interfaces.
+
 ```bash
 # Run all tests
 make test
@@ -116,9 +120,20 @@ make test-coverage
 
 # Run specific test
 pytest tests/test_guardian_core.py -v
+
+# Run pure function tests (no mocks)
+pytest tests/test_guardian_pure_functions.py -v
 ```
 
-### 📈 Current code coverage
+### 📈 Test Architecture
+
+- **115 total tests** across 7 test files
+- **34 pure function tests** that test actual logic without mocks
+- **Real data testing** for parsing, filtering, and processing logic
+- **Edge case coverage** including malformed data, division by zero, and encoding issues
+- **Integration tests** with sample media files for end-to-end validation
+
+### 📊 Current Code Coverage: 86%
 
 [![CoverageGraph](https://codecov.io/gh/tsnearly/dialogue-guardian/graphs/icicle.svg?token=0XIMSERI3U)](https://codecov.io/gh/tsnearly/dialogue-guardian)
 
