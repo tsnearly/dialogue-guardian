@@ -347,10 +347,13 @@ class TestGuardianIntegration(unittest.TestCase):
         mock_srt_parse.return_value = [mock_subtitle]
 
         with patch("subprocess.run") as mock_run, patch.object(
-            self.processor, '_verify_silence_level'
+            self.processor, "_verify_silence_level"
         ) as mock_verify:
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
+            mock_verify.return_value = (
+                True,
+                -100.0,
+            )  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -397,11 +400,14 @@ class TestGuardianIntegration(unittest.TestCase):
         with patch.object(
             self.processor, "extract_embedded_srt"
         ) as mock_extract, patch("subprocess.run") as mock_run, patch.object(
-            self.processor, '_verify_silence_level'
+            self.processor, "_verify_silence_level"
         ) as mock_verify:
             mock_extract.return_value = True
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
+            mock_verify.return_value = (
+                True,
+                -100.0,
+            )  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -454,10 +460,13 @@ class TestGuardianIntegration(unittest.TestCase):
         mock_srt_parse.return_value = subtitles
 
         with patch("subprocess.run") as mock_run, patch.object(
-            self.processor, '_verify_silence_level'
+            self.processor, "_verify_silence_level"
         ) as mock_verify:
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
+            mock_verify.return_value = (
+                True,
+                -100.0,
+            )  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 

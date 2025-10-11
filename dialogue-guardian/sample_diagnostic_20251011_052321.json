@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-10-11T04:55:37.293578",
+  "timestamp": "2025-10-11T05:23:21.757969",
   "input_video": "/Volumes/Expansion/dev/dialogue-guardian/dialogue-guardian/samples/sample.mp4",
-  "output_video": "/var/folders/kg/hjkys5ln2vlc78bntdl0v29w0000gn/T/tmp32t_9xa3/logging_test.mp4",
+  "output_video": "/var/folders/kg/hjkys5ln2vlc78bntdl0v29w0000gn/T/tmpt21nu936/workflow_test.mp4",
   "total_segments": 2,
   "total_censored_duration": 3.5999999999999996,
   "successful_segments": 2,

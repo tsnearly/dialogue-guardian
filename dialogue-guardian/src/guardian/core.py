@@ -758,9 +758,13 @@ class GuardianProcessor:
                         try:
                             if os.path.exists(output_path):
                                 os.remove(output_path)
-                                logging.debug(f"Removed failed output file: {output_path}")
+                                logging.debug(
+                                    f"Removed failed output file: {output_path}"
+                                )
                         except (OSError, FileNotFoundError) as cleanup_error:
-                            logging.debug(f"Could not remove failed output file: {cleanup_error}")
+                            logging.debug(
+                                f"Could not remove failed output file: {cleanup_error}"
+                            )
                     else:
                         logging.warning("Maximum fallback attempts reached")
                         logging.info("=== END FALLBACK CENSORING SYSTEM ===")
@@ -808,7 +812,9 @@ class GuardianProcessor:
                             os.remove(output_path)
                             logging.debug(f"Removed failed output file: {output_path}")
                     except (OSError, FileNotFoundError) as cleanup_error:
-                        logging.debug(f"Could not remove failed output file: {cleanup_error}")
+                        logging.debug(
+                            f"Could not remove failed output file: {cleanup_error}"
+                        )
                 else:
                     logging.error(
                         "Maximum fallback attempts reached due to unexpected errors"
@@ -1200,8 +1206,10 @@ class GuardianProcessor:
         # Add volume filters for censored segments
         logging.info("Adding volume filters for censored segments:")
         for i, (start_s, end_s) in enumerate(censor_segments, 1):
-            volume_filter = f"{volume_filter_base}:enable={quote_char}"
-            f"between(t,{start_s},{end_s}){quote_char}"
+            volume_filter = (
+                f"{volume_filter_base}:enable={quote_char}"
+                f"between(t,{start_s},{end_s}){quote_char}"
+            )
             filter_parts.append(volume_filter)
             logging.info(
                 f"  Segment {i}: {start_s:.3f}s - {end_s:.3f}s (duration:"
@@ -1403,86 +1411,3 @@ class GuardianProcessor:
 
         # Perform the audio censoring
         return self.censor_audio_with_ffmpeg(video_path, output_path)
-
-    def _construct_ffmpeg_command(
-        self,
-        input_path: str,
-        output_path: str,
-        censor_segments: List[Tuple[float, float]],
-        strategy_level: int = 2,
-    ) -> List[str]:
-        """
-        Construct FFmpeg command for backward compatibility with tests.
-        
-        This method provides compatibility with existing tests while using
-        the enhanced filter construction system.
-        
-        Args:
-            input_path: Path to input video file
-            output_path: Path to output video file  
-            censor_segments: List of (start, end) time segments to censor
-            strategy_level: Filter strategy level (1=basic, 2=enhanced, 3=aggressive)
-            
-        Returns:
-            List of FFmpeg command arguments
-        """
-        logging.info("=== FILTER CONSTRUCTION ===")
-        strategy = self._get_filter_strategy(strategy_level)
-        logging.info(f"Using strategy level {strategy_level}: {strategy['name']}")
-        logging.info(f"Strategy description: {strategy['description']}")
-        
-        logging.info(f"Constructing FFmpeg filters for {len(censor_segments)} segments")
-        
-        # Build filter chain components
-        filter_components = []
-        
-        # Add format normalization if enabled
-        if strategy.get("use_format_normalization", False):
-            format_filter = "aformat=sample_fmts=s16:channel_layouts=stereo"
-            filter_components.append(format_filter)
-            logging.info(f"Added format normalization filter: {format_filter}")
-        
-        # Add volume filters for censored segments
-        if censor_segments:
-            logging.info("Adding volume filters for censored segments:")
-            for i, (start_s, end_s) in enumerate(censor_segments, 1):
-                duration = end_s - start_s
-                logging.info(f"  Segment {i}: {start_s:.3f}s - {end_s:.3f}s (duration: {duration:.3f}s)")
-                
-                volume_filter = f"{strategy['volume_filter']}:enable='between(t,{start_s},{end_s})'"
-                filter_components.append(volume_filter)
-        
-        # Add compression if enabled
-        if strategy.get("use_compression", False):
-            compression_filter = "acompressor=threshold=-20dB:ratio=20:attack=5:release=50"
-            filter_components.append(compression_filter)
-            logging.info(f"Added dynamic range compression filter: {compression_filter}")
-        
-        # Add null mixing processing if enabled
-        if strategy.get("use_null_mixing", False):
-            logging.info("Using null source mixing strategy with multi-stage processing")
-            # Add additional processing stages for aggressive strategy
-            null_filters = [
-                "volume=-60dB",
-                "volume=0", 
-                "agate=threshold=-90dB:ratio=10:attack=1:release=10"
-            ]
-            filter_components.extend(null_filters)
-            logging.info(f"Added null mixing processing stages: {', '.join(null_filters)}")
-        
-        # Combine all filter components
-        audio_filter = ",".join(filter_components)
-        logging.info(f"Complete audio filter graph: {audio_filter}")
-        
-        # Construct the complete FFmpeg command
-        command = [
-            self.ffmpeg_cmd,
-            "-i", input_path,
-            "-af", audio_filter,
-            "-c:v", "copy",  # Copy video stream without re-encoding
-            "-y",  # Overwrite output file
-            output_path
-        ]
-        
-        logging.info("=== END FILTER CONSTRUCTION ===")
-        return command

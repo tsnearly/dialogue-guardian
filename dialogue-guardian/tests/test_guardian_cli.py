@@ -254,7 +254,9 @@ class TestGuardianCLI(unittest.TestCase):
 
             # Mock processor to raise unexpected error
             mock_processor = MagicMock()
-            mock_processor.censor_audio_with_ffmpeg.side_effect = RuntimeError("Unexpected error")
+            mock_processor.censor_audio_with_ffmpeg.side_effect = RuntimeError(
+                "Unexpected error"
+            )
             mock_processor_class.return_value = mock_processor
 
             result = main()

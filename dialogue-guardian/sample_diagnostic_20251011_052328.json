@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-10-11T04:55:33.520295",
+  "timestamp": "2025-10-11T05:23:28.357406",
   "input_video": "/Volumes/Expansion/dev/dialogue-guardian/dialogue-guardian/samples/sample.mp4",
-  "output_video": "/var/folders/kg/hjkys5ln2vlc78bntdl0v29w0000gn/T/tmpburil2ye/fallback_test.mp4",
+  "output_video": "/var/folders/kg/hjkys5ln2vlc78bntdl0v29w0000gn/T/tmposz18k0s/fallback_test.mp4",
   "total_segments": 2,
   "total_censored_duration": 3.5999999999999996,
   "successful_segments": 2,

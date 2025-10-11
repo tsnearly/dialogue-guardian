@@ -163,7 +163,9 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             mock_validate.return_value = True
             mock_processor = MagicMock()
-            mock_processor.censor_audio_with_ffmpeg.return_value = "/output/censored.mp4"
+            mock_processor.censor_audio_with_ffmpeg.return_value = (
+                "/output/censored.mp4"
+            )
             mock_processor_class.return_value = mock_processor
 
             result = main()
@@ -190,7 +192,9 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             mock_validate.return_value = True
             mock_processor = MagicMock()
-            mock_processor.censor_audio_with_ffmpeg.return_value = "/output/censored.mp4"
+            mock_processor.censor_audio_with_ffmpeg.return_value = (
+                "/output/censored.mp4"
+            )
             mock_processor_class.return_value = mock_processor
 
             result = main()
@@ -219,7 +223,9 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             mock_validate.return_value = True
             mock_processor = MagicMock()
-            mock_processor.censor_audio_with_ffmpeg.return_value = "/output/censored.mp4"
+            mock_processor.censor_audio_with_ffmpeg.return_value = (
+                "/output/censored.mp4"
+            )
             mock_processor_class.return_value = mock_processor
 
             result = main()
@@ -316,7 +322,9 @@ class TestGuardianCLIExtended(unittest.TestCase):
 
             self.assertEqual(result, 0)
             # Should pass empty string as output path
-            mock_processor.censor_audio_with_ffmpeg.assert_called_once_with("/abs/test.mp4", "")
+            mock_processor.censor_audio_with_ffmpeg.assert_called_once_with(
+                "/abs/test.mp4", ""
+            )
 
 
 if __name__ == "__main__":

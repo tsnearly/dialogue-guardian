@@ -174,7 +174,9 @@ def main() -> int:
             )
 
             # Process the video
-            censored_file = processor.censor_audio_with_ffmpeg(video_path, args.outputfile)
+            censored_file = processor.censor_audio_with_ffmpeg(
+                video_path, args.outputfile
+            )
 
             if censored_file:
                 logging.info("Censoring process a success.")
