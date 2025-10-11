@@ -624,7 +624,7 @@ class GuardianProcessor:
         pattern = r"\b(" + "|".join(re.escape(word) for word in words) + r")\b"
         return re.compile(pattern, re.IGNORECASE)
 
-    def _contains_profanity(self, text: str, pattern: re.Pattern[str]) -> bool:
+    def _contains_profanity(self, text: str, pattern: Pattern[str]) -> bool:
         """
         Check if text contains profanity using the given pattern.
 
