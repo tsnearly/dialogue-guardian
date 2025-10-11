@@ -10,12 +10,11 @@ import os
 import platform
 import re
 import subprocess
+import srt  # type: ignore
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
-import srt
 
 
 @dataclass
@@ -826,7 +825,7 @@ class GuardianProcessor:
         final_strategy: int,
         fallback_attempts: int,
         overall_success: bool,
-        error_messages: List[str] | None = None,
+        error_messages: Optional[List[str]] = None,
     ) -> CensoringDiagnostic:
         """
         Generates a comprehensive diagnostic report for the censoring operation.
