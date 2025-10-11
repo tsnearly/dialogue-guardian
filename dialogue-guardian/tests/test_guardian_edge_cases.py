@@ -186,8 +186,11 @@ class TestGuardianEdgeCases(unittest.TestCase):
 
         mock_srt_parse.return_value = subtitles
 
-        with patch("subprocess.run") as mock_run:
+        with patch("subprocess.run") as mock_run, patch.object(
+            self.processor, '_verify_silence_level'
+        ) as mock_verify:
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -227,8 +230,11 @@ class TestGuardianEdgeCases(unittest.TestCase):
 
         mock_srt_parse.return_value = subtitles
 
-        with patch("subprocess.run") as mock_run:
+        with patch("subprocess.run") as mock_run, patch.object(
+            self.processor, '_verify_silence_level'
+        ) as mock_verify:
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -322,7 +328,9 @@ class TestGuardianEdgeCases(unittest.TestCase):
 
             mock_exists.return_value = True
             mock_subtitle = MagicMock()
-            mock_subtitle.content = "Clean content"
+            mock_subtitle.content = "This is fucking bad"  # Use profane content to trigger censoring
+            mock_subtitle.start.total_seconds.return_value = 10.0
+            mock_subtitle.end.total_seconds.return_value = 15.0
             mock_subtitle.index = 1
             mock_srt_parse.return_value = [mock_subtitle]
 

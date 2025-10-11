@@ -346,8 +346,11 @@ class TestGuardianIntegration(unittest.TestCase):
         mock_subtitle.index = 1
         mock_srt_parse.return_value = [mock_subtitle]
 
-        with patch("subprocess.run") as mock_run:
+        with patch("subprocess.run") as mock_run, patch.object(
+            self.processor, '_verify_silence_level'
+        ) as mock_verify:
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -393,9 +396,12 @@ class TestGuardianIntegration(unittest.TestCase):
 
         with patch.object(
             self.processor, "extract_embedded_srt"
-        ) as mock_extract, patch("subprocess.run") as mock_run:
+        ) as mock_extract, patch("subprocess.run") as mock_run, patch.object(
+            self.processor, '_verify_silence_level'
+        ) as mock_verify:
             mock_extract.return_value = True
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -447,8 +453,11 @@ class TestGuardianIntegration(unittest.TestCase):
 
         mock_srt_parse.return_value = subtitles
 
-        with patch("subprocess.run") as mock_run:
+        with patch("subprocess.run") as mock_run, patch.object(
+            self.processor, '_verify_silence_level'
+        ) as mock_verify:
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
+            mock_verify.return_value = (True, -100.0)  # Mock successful silence verification
 
             result = self.processor.censor_audio_with_ffmpeg(self.test_video_path)
 
@@ -457,10 +466,10 @@ class TestGuardianIntegration(unittest.TestCase):
         call_args = mock_run.call_args[0][0]
         af_index = call_args.index("-af")
         filter_string = call_args[af_index + 1]
-        # Should contain multiple volume filters with -inf
-        self.assertIn("volume=-inf:enable=", filter_string)
+        # Should contain multiple volume filters (now using volume=0 instead of -inf)
+        self.assertIn("volume=0:enable=", filter_string)
         # Should have commas separating multiple filters
-        volume_count = filter_string.count("volume=-inf:enable=")
+        volume_count = filter_string.count("volume=0:enable=")
         self.assertEqual(volume_count, 4)
 
     def test_custom_matching_words(self):
