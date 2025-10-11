@@ -52,8 +52,10 @@ def create_parser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser(
         prog="guardian",
-        description="Dialogue Guardian: Universal Media Censor - "
-        "Automatically detect and censor profane language in video files.",
+        description=(
+            "Dialogue Guardian: Universal Media Censor - "
+            "Automatically detect and censor profane language in video files."
+        ),
         epilog="Example: guardian movie.mp4",
     )
 
@@ -70,8 +72,10 @@ def create_parser() -> argparse.ArgumentParser:
         "--output",
         "-o",
         dest="outputfile",
-        help="Output path for the censored video file. "
-        "If not specified, creates a file with '_censored' suffix.",
+        help=(
+            "Output path for the censored video file. "
+            "If not specified, creates a file with '_censored' suffix."
+        ),
     )
 
     parser.add_argument(
@@ -106,11 +110,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--version",
-        "-ver",
-        help="Show version",
-        action="version",
-        version=__version__
+        "--version", "-ver", help="Show version", action="version", version=__version__
     )
 
     return parser

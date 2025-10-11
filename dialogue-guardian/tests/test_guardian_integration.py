@@ -63,31 +63,40 @@ class TestGuardianIntegration(unittest.TestCase):
     def test_censor_audio_with_ffmpeg_integration(self):
         """Test real audio censoring with ffmpeg."""
         output_path = os.path.join(self.temp_dir, "censored.mp4")
-        
+
         # Enable debug logging for this test
         import logging
+
         logging.basicConfig(level=logging.DEBUG)
-        
+
         result = self.processor.censor_audio_with_ffmpeg(
             self.test_video_path, output_path
         )
-        
+
         # Add debugging output for test failures
         if result is None:
-            print(f"DEBUG: censor_audio_with_ffmpeg returned None")
+            print("DEBUG: censor_audio_with_ffmpeg returned None")
             print(f"DEBUG: Expected output path: {output_path}")
             print(f"DEBUG: Output file exists: {os.path.exists(output_path)}")
-            
-        # The method should return a valid path (either output_path or original video path)
-        # Note: The method may return None if all fallback attempts fail, but the output file should still exist
+
+        # The method should return a valid path (either output_path or
+        #     original video path)
+        # Note: The method may return None if all fallback attempts fail, but the
+        #     output file should still exist
         if result is None:
             # Check if output file was created despite the failure
             if os.path.exists(output_path):
-                print(f"DEBUG: Method returned None but output file exists - using output_path for verification")
+                print(
+                    "DEBUG: Method returned None but output file exists - using"
+                    " output_path for verification"
+                )
                 result = output_path
             else:
-                self.fail("censor_audio_with_ffmpeg returned None and no output file was created")
-        
+                self.fail(
+                    "censor_audio_with_ffmpeg returned None and no output file was"
+                    " created"
+                )
+
         # Parse SRT to find profane segments
         srt_path = self.test_srt_path
         with open(srt_path, "r", encoding="utf-8") as f:
@@ -105,48 +114,77 @@ class TestGuardianIntegration(unittest.TestCase):
                 end_s = sub.end.total_seconds()
                 censored_segments.append((start_s, end_s))
 
-        print(f"DEBUG: Found {len(censored_segments)} censored segments: {censored_segments}")
+        print(
+            f"DEBUG: Found {len(censored_segments)} censored segments:"
+            f" {censored_segments}"
+        )
 
         if censored_segments:
             # If profane segments were found, we should have a censored output
-            self.assertEqual(result, output_path, "Should return output path when censoring is needed")
+            self.assertEqual(
+                result,
+                output_path,
+                "Should return output path when censoring is needed",
+            )
             self.assertTrue(os.path.exists(output_path), "Output file should exist")
-            
+
             # Verify that censored segments show significant volume reduction
             for start, end in censored_segments:
                 meets_threshold, actual_rms_db = self.processor._verify_silence_level(
                     result, start, end
                 )
-                print(f"DEBUG: Segment {start}-{end}: RMS={actual_rms_db} dB, meets_threshold={meets_threshold}")
-                
+                print(
+                    f"DEBUG: Segment {start}-{end}: RMS={actual_rms_db} dB,"
+                    f" meets_threshold={meets_threshold}"
+                )
+
                 # For now, let's verify that we achieve significant volume reduction
                 # The ideal target is -50 dB, but we'll accept substantial reduction
-                if actual_rms_db != float('inf') and actual_rms_db > -100:
+                if actual_rms_db != float("inf") and actual_rms_db > -100:
                     # We have a measurable value
                     self.assertLessEqual(
-                        actual_rms_db, -15, 
-                        f"Insufficient volume reduction in segment {start}-{end}s. "
-                        f"RMS level: {actual_rms_db} dB (should be significantly reduced)"
+                        actual_rms_db,
+                        -15,
+                        f"Insufficient volume reduction in segment {start}-{end}s. RMS"
+                        f" level: {actual_rms_db} dB (should be significantly reduced)",
                     )
-                    
+
                     # Log whether we meet the ideal -50 dB threshold
                     if actual_rms_db <= -50:
-                        print(f"✓ Segment {start}-{end}s meets -50 dB threshold: {actual_rms_db} dB")
+                        print(
+                            f"✓ Segment {start}-{end}s meets -50 dB threshold:"
+                            f" {actual_rms_db} dB"
+                        )
                     else:
-                        print(f"⚠ Segment {start}-{end}s shows reduction but not -50 dB: {actual_rms_db} dB")
+                        print(
+                            f"⚠ Segment {start}-{end}s shows reduction but not -50 dB:"
+                            f" {actual_rms_db} dB"
+                        )
                 else:
                     # Very quiet or unmeasurable - likely meets threshold
-                    print(f"✓ Segment {start}-{end}s appears to be very quiet (unmeasurable or < -100 dB)")
-            
+                    print(
+                        f"✓ Segment {start}-{end}s appears to be very quiet"
+                        " (unmeasurable or < -100 dB)"
+                    )
+
             # Verify that the output video has correct properties
             details = self.processor.get_video_details(output_path)
-            self.assertIsNotNone(details, "Should be able to get details from output video")
-            self.assertAlmostEqual(float(details["duration"]), 9.495, places=1, 
-                                 msg="Output video duration should match input")
+            self.assertIsNotNone(
+                details, "Should be able to get details from output video"
+            )
+            self.assertAlmostEqual(
+                float(details["duration"]),
+                9.495,
+                places=1,
+                msg="Output video duration should match input",
+            )
         else:
             # If no profane segments found, the result should be the original video path
-            self.assertEqual(result, self.test_video_path, 
-                           "Should return original video path when no censoring is needed")
+            self.assertEqual(
+                result,
+                self.test_video_path,
+                "Should return original video path when no censoring is needed",
+            )
 
     def test_get_video_details_complex_framerate(self):
         """Test video details with complex framerate calculations"""
