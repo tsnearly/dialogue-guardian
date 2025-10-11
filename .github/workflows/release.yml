@@ -39,15 +39,16 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache release dependencies
+      - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-release-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          key: ${{ runner.os }}-pip-release-${{ hashFiles('**/pyproject.toml', '**/requirements*.txt', '**/setup.py') }}-bump2version-build-twine
           restore-keys: |
-            ${{ runner.os }}-release-
+            ${{ runner.os }}-pip-release-
+            ${{ runner.os }}-pip-
 
-      - name: Install dependencies
+      - name: Install release dependencies
         run: |
           python -m pip install --upgrade pip
           pip install bump2version build twine
