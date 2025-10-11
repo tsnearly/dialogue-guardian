@@ -13,7 +13,7 @@ import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Pattern, Tuple
 
 import srt  # type: ignore
 
@@ -605,7 +605,7 @@ class GuardianProcessor:
         """
         return re.sub(r"[^\w\s\']", "", content).lower()
 
-    def _build_profanity_pattern(self, words: List[str]) -> re.Pattern[str]:
+    def _build_profanity_pattern(self, words: List[str]) -> Pattern[str]:
         """
         Build compiled regex pattern for profanity detection.
 
