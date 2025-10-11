@@ -81,13 +81,34 @@ jobs:
           bump2version ${{ github.event.inputs.version_type }}
 
           # Get the new version that was just set
-          NEW_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d' ' -f3)
+          NEW_VERSION=$(awk -F' = ' '/current_version/ {print $2}' .bumpversion.cfg)
+          
+          # Validate version extraction succeeded
+          if [ -z "$NEW_VERSION" ]; then
+            echo "Error: Failed to extract version from .bumpversion.cfg"
+            echo "Contents of .bumpversion.cfg:"
+            cat .bumpversion.cfg
+            exit 1
+          fi
+          
+          # Log the extracted version for debugging
+          echo "Successfully extracted version: $NEW_VERSION"
 
           # Manually update docs/conf.py using a Python script
           python scripts/update_conf_py.py "$NEW_VERSION"
 
           # Update README download link
           sed -i.bak "s/__VERSION__/$NEW_VERSION/g" ../README.md
+          
+          # Verify that all __VERSION__ placeholders were replaced
+          REMAINING_PLACEHOLDERS=$(grep -c "__VERSION__" ../README.md || echo "0")
+          if [ "$REMAINING_PLACEHOLDERS" -gt 0 ]; then
+            echo "Warning: $REMAINING_PLACEHOLDERS __VERSION__ placeholders still remain in README.md"
+            echo "Remaining placeholders:"
+            grep -n "__VERSION__" ../README.md || echo "None found"
+          else
+            echo "Successfully replaced all __VERSION__ placeholders in README.md with version $NEW_VERSION"
+          fi
 
           # Commit the additional docs changes
           git add docs/conf.py ../README.md
