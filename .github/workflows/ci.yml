@@ -91,30 +91,17 @@ jobs:
         id: ffmpeg-cache
         uses: actions/cache@v4
         with:
-          path: |
-            ~/ffmpeg
-            /usr/local/bin/ffmpeg
-            /usr/local/bin/ffprobe
-            C:\ProgramData\chocolatey\lib\ffmpeg
-          key: ${{ runner.os }}-ffmpeg-v1
+          path: dialogue-guardian/bin
+          key: ${{ runner.os }}-ffmpeg-local-v2
           restore-keys: |
-            ${{ runner.os }}-ffmpeg-
+            ${{ runner.os }}-ffmpeg-local-
 
-      - name: Install FFmpeg (Ubuntu)
-        if: matrix.os == 'ubuntu-latest' && steps.ffmpeg-cache.outputs.cache-hit != 'true'
+      - name: Install FFmpeg using download script
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-
-      - name: Install FFmpeg (macOS)
-        if: matrix.os == 'macos-latest' && steps.ffmpeg-cache.outputs.cache-hit != 'true'
-        run: |
-          brew install ffmpeg
-
-      - name: Install FFmpeg (Windows)
-        if: matrix.os == 'windows-latest' && steps.ffmpeg-cache.outputs.cache-hit != 'true'
-        run: |
-          choco install ffmpeg -y
+          cd dialogue-guardian
+          pip install requests
+          python scripts/download_ffmpeg.py
 
       - name: Cache Python dependencies
         uses: actions/cache@v4
