@@ -5,6 +5,12 @@
 Unit tests for guardian-by-ffmpeg.py
 """
 
+from guardian_by_ffmpeg import (
+    get_video_details,
+    extract_embedded_srt,
+    censor_audio_with_ffmpeg,
+    matching_words
+)
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import json
@@ -12,16 +18,9 @@ import os
 import sys
 import tempfile
 import subprocess
-from pathlib import Path
 
 # Import the functions we want to test
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from guardian_by_ffmpeg import (
-    get_video_details,
-    extract_embedded_srt,
-    censor_audio_with_ffmpeg,
-    matching_words
-)
 
 
 class TestGuardianByFFmpeg(unittest.TestCase):
@@ -47,10 +46,10 @@ class TestGuardianByFFmpeg(unittest.TestCase):
             "aac|44100|2|stereo",  # audio info
             "1920\n1080\n30000/1001"  # video info
         ]
-        
+
         with patch('guardian_by_ffmpeg.ffprobe_cmd', './ffprobe'):
             result = get_video_details(self.test_video_path)
-        
+
         self.assertIsNotNone(result)
         self.assertEqual(result['duration'], "120.5")
         self.assertEqual(result['width'], "1920")
@@ -63,20 +62,20 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         mock_check_output.side_effect = subprocess.CalledProcessError(
             1, "ffprobe", stderr="File not found"
         )
-        
+
         with patch('guardian_by_ffmpeg.ffprobe_cmd', './ffprobe'):
             result = get_video_details(self.test_video_path)
-        
+
         self.assertIsNone(result)
 
     @patch('subprocess.check_output')
     def test_get_video_details_file_not_found(self, mock_check_output):
         """Test handling of ffprobe not found"""
         mock_check_output.side_effect = FileNotFoundError()
-        
+
         with patch('guardian_by_ffmpeg.ffprobe_cmd', './ffprobe'):
             result = get_video_details(self.test_video_path)
-        
+
         self.assertIsNone(result)
 
     @patch('subprocess.check_output')
@@ -88,41 +87,41 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         mock_json_loads.return_value = {
             "streams": [{"index": 2, "codec_name": "subrip", "disposition": {"default": 1}}]
         }
-        
+
         # Mock successful ffmpeg extraction
         with patch('subprocess.run') as mock_run, \
              patch('guardian_by_ffmpeg.ffprobe_cmd', './ffprobe'), \
              patch('guardian_by_ffmpeg.ffmpeg_cmd', './ffmpeg'):
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-            
+
             result = extract_embedded_srt(self.test_video_path, self.test_srt_path)
-        
+
         self.assertTrue(result)
 
     @patch('subprocess.check_output')
     def test_extract_embedded_srt_no_srt_tracks(self, mock_check_output):
         """Test when no SRT tracks are found"""
         mock_check_output.return_value = '{"streams": []}'
-        
+
         with patch('json.loads') as mock_json:
             mock_json.return_value = {"streams": []}
-            
+
             with patch('guardian_by_ffmpeg.ffprobe_cmd', './ffprobe'):
                 result = extract_embedded_srt(self.test_video_path, self.test_srt_path)
-        
+
         self.assertFalse(result)
 
     @patch('subprocess.check_output')
     def test_extract_embedded_srt_json_error(self, mock_check_output):
         """Test handling of invalid JSON from ffprobe"""
         mock_check_output.return_value = 'invalid json'
-        
+
         with patch('json.loads') as mock_json:
             mock_json.side_effect = json.JSONDecodeError("Invalid", "", 0)
-            
+
             with patch('guardian_by_ffmpeg.ffprobe_cmd', './ffprobe'):
                 result = extract_embedded_srt(self.test_video_path, self.test_srt_path)
-        
+
         self.assertFalse(result)
 
     @patch('os.path.exists')
@@ -133,7 +132,7 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         """Test audio censoring with external SRT file"""
         # Mock file existence
         mock_exists.return_value = True
-        
+
         # Mock SRT parsing
         mock_subtitle = MagicMock()
         mock_subtitle.start.total_seconds.return_value = 10.0
@@ -141,14 +140,14 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         mock_subtitle.content = "This is fucking bad"
         mock_subtitle.index = 1
         mock_srt_parse.return_value = [mock_subtitle]
-        
+
         # Mock successful ffmpeg execution
         mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-        
+
         result = censor_audio_with_ffmpeg(self.test_video_path)
-        
+
         self.assertEqual(result, f"{os.path.splitext(self.test_video_path)[0]}_censored.mp4")
-        
+
         # Verify ffmpeg was called with correct filter
         mock_run.assert_called_once()
         call_args = mock_run.call_args[0][0]
@@ -165,10 +164,10 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         """Test audio censoring with embedded SRT extraction"""
         # Mock file existence to simulate no external SRT file being found
         mock_exists.return_value = False
-        
+
         # Mock successful SRT extraction
         mock_extract.return_value = True
-        
+
         # Mock SRT parsing
         mock_subtitle = MagicMock()
         mock_subtitle.start.total_seconds.return_value = 5.0
@@ -176,12 +175,12 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         mock_subtitle.content = "Holy shit"
         mock_subtitle.index = 1
         mock_srt_parse.return_value = [mock_subtitle]
-        
+
         # Mock successful ffmpeg execution
         mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-        
+
         result = censor_audio_with_ffmpeg(self.test_video_path)
-        
+
         self.assertEqual(result, f"{os.path.splitext(self.test_video_path)[0]}_censored.mp4")
         mock_extract.assert_called_once()
 
@@ -189,12 +188,12 @@ class TestGuardianByFFmpeg(unittest.TestCase):
     def test_censor_audio_no_srt_found(self, mock_exists):
         """Test when no SRT file is found"""
         mock_exists.return_value = False
-        
+
         with patch('guardian_by_ffmpeg.extract_embedded_srt') as mock_extract:
             mock_extract.return_value = False
-            
+
             result = censor_audio_with_ffmpeg(self.test_video_path)
-        
+
         self.assertIsNone(result)
 
     @patch('os.path.exists')
@@ -204,20 +203,20 @@ class TestGuardianByFFmpeg(unittest.TestCase):
     def test_censor_audio_no_profanity_found(self, mock_run, mock_srt_parse, mock_file, mock_exists):
         """Test when no profanity is found in subtitles"""
         mock_exists.return_value = True
-        
+
         # Mock SRT with no profanity
         mock_subtitle = MagicMock()
         mock_subtitle.content = "This is clean content"
         mock_subtitle.index = 1
         mock_srt_parse.return_value = [mock_subtitle]
-        
+
         # Mock successful ffmpeg execution
         mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-        
+
         result = censor_audio_with_ffmpeg(self.test_video_path)
-        
+
         self.assertEqual(result, f"{os.path.splitext(self.test_video_path)[0]}_censored.mp4")
-        
+
         # Verify no volume filter was applied (anull filter used instead)
         call_args = mock_run.call_args[0][0]
         self.assertIn('-af', call_args)
@@ -230,7 +229,7 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         mock_run.side_effect = subprocess.CalledProcessError(
             1, "ffmpeg", stderr="Encoding failed"
         )
-        
+
         with patch('os.path.exists') as mock_exists, \
              patch('builtins.open', new_callable=mock_open), \
              patch('srt.parse') as mock_srt_parse:
@@ -239,9 +238,9 @@ class TestGuardianByFFmpeg(unittest.TestCase):
             mock_subtitle.content = "This is fucking bad"
             mock_subtitle.index = 1
             mock_srt_parse.return_value = [mock_subtitle]
-            
+
             result = censor_audio_with_ffmpeg(self.test_video_path)
-        
+
         self.assertIsNone(result)
 
     def test_matching_words_list(self):
@@ -259,7 +258,7 @@ class TestGuardianByFFmpeg(unittest.TestCase):
         import re
         pattern = r'\b(' + '|'.join(re.escape(word) for word in matching_words) + r')\b'
         compiled_pattern = re.compile(pattern, re.IGNORECASE)
-        
+
         # Test pattern matches expected words
         test_cases = [
             ("This is fucking bad", True),
@@ -268,7 +267,7 @@ class TestGuardianByFFmpeg(unittest.TestCase):
             ("Hello world", False),
             ("SHIT happens", True),  # Test case insensitivity
         ]
-        
+
         for text, should_match in test_cases:
             match = compiled_pattern.search(text.lower())
             self.assertEqual(bool(match), should_match, f"Failed for text: {text}")
@@ -302,7 +301,7 @@ class TestIntegration(unittest.TestCase):
                 "aac|44100|2|stereo",  # audio info
                 "1920\n1080\n30/1"  # video info
             ]
-            
+
             # Mock SRT file existence and parsing
             mock_exists.return_value = True
             mock_subtitle = MagicMock()
@@ -311,14 +310,14 @@ class TestIntegration(unittest.TestCase):
             mock_subtitle.content = "This is fucking bad"
             mock_subtitle.index = 1
             mock_srt_parse.return_value = [mock_subtitle]
-            
+
             # Mock successful ffmpeg execution
             mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
-            
+
             # Mock ffprobe and ffmpeg commands
             with patch('guardian_by_ffmpeg.ffprobe_cmd', './ffprobe'), \
                  patch('guardian_by_ffmpeg.ffmpeg_cmd', './ffmpeg'):
-                
+
                 video_info = get_video_details(self.test_video)
                 censored_file = censor_audio_with_ffmpeg(self.test_video)
 

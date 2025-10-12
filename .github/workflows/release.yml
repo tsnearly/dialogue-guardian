@@ -140,17 +140,13 @@ jobs:
           generate_release_notes: true
 
       - name: Publish to PyPI
-        if: github.event.inputs.prerelease == 'false'
+        environment: pypi
+        if: github.event.inputs.prerelease == 'true'
+          environment:
+            name: testpypi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           twine upload dialogue-guardian/dist/*
-
-      - name: Publish to TestPyPI
-        if: github.event.inputs.prerelease == 'true'
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        run: |
-          twine upload --repository testpypi dialogue-guardian/dist/*
+          #twine upload --repository testpypi dialogue-guardian/dist/*

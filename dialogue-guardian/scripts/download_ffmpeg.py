@@ -90,7 +90,7 @@ def extract_archive(archive_path, extract_dir):
         else:
             raise ValueError(f"Unsupported archive format: {archive_path.suffix}")
         print("Extraction complete.")
-        
+
         # Debug: List extracted contents
         print("Extracted contents:")
         for item in extract_dir.rglob("*"):
@@ -98,7 +98,7 @@ def extract_archive(archive_path, extract_dir):
                 print(f"  File: {item.relative_to(extract_dir)}")
             elif item.is_dir():
                 print(f"  Dir:  {item.relative_to(extract_dir)}/")
-                
+
     except Exception as e:
         print(f"ERROR: Failed to extract {archive_path}: {e}")
         raise
@@ -173,7 +173,11 @@ def main():
     """
     BIN_DIR.mkdir(exist_ok=True)
 
-    if any(f.name.startswith("ffmpeg") for f in BIN_DIR.iterdir()) and any(f.name.startswith("ffprobe") for f in BIN_DIR.iterdir()):
+    if any(
+        f.name.startswith("ffmpeg") for f in BIN_DIR.iterdir()
+    ) and any(
+        f.name.startswith("ffprobe") for f in BIN_DIR.iterdir()
+    ):
         print("FFmpeg and ffprobe already found in bin directory. Skipping download.")
         return
 

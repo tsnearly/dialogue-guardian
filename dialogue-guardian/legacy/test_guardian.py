@@ -5,21 +5,19 @@
 Unit tests for guardian.py
 """
 
+from guardian import (
+    get_video_details,
+    create_fcpxml
+)
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import os
 import sys
 import tempfile
-import xml.etree.ElementTree as ET
-from xml.dom.minidom import parseString
 
 # Import the functions we want to test
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from guardian import (
-    get_video_details,
-    create_fcpxml,
-    matching_words
-)
+
 
 class TestGuardian(unittest.TestCase):
     """Test cases for guardian.py functionality"""
@@ -91,9 +89,9 @@ class TestGuardian(unittest.TestCase):
     def test_create_fcpxml_no_srt(self, mock_file, mock_exists):
         """Test FCPXML creation when no SRT file is found"""
         mock_exists.return_value = False
-        
+
         tree = create_fcpxml(self.test_video_path, self.video_info)
-        
+
         # Check that the XML was created but has no keyframes other than the initial one
         self.assertIsNotNone(tree)
         root = tree.getroot()
@@ -107,7 +105,7 @@ class TestGuardian(unittest.TestCase):
     def test_create_fcpxml_with_profanity(self, mock_srt_parse, mock_open_file, mock_exists):
         """Test FCPXML creation with a profane SRT file"""
         mock_exists.return_value = True
-        
+
         mock_subtitle = MagicMock()
         mock_subtitle.start.total_seconds.return_value = 5.5
         mock_subtitle.end.total_seconds.return_value = 7.0
@@ -116,14 +114,14 @@ class TestGuardian(unittest.TestCase):
         mock_srt_parse.return_value = [mock_subtitle]
 
         tree = create_fcpxml(self.test_video_path, self.video_info)
-        
+
         self.assertIsNotNone(tree)
         root = tree.getroot()
         keyframes = root.findall(".//keyframe")
-        
+
         # Expected keyframes: initial, fade out, mute start, mute end, fade in
-        self.assertTrue(len(keyframes) > 1) 
-        
+        self.assertTrue(len(keyframes) > 1)
+
         values = [k.get("value") for k in keyframes]
         self.assertIn('-96dB', values)
 
@@ -142,11 +140,11 @@ class TestGuardian(unittest.TestCase):
         mock_srt_parse.return_value = [mock_subtitle]
 
         tree = create_fcpxml(self.test_video_path, self.video_info)
-        
+
         self.assertIsNotNone(tree)
         root = tree.getroot()
         keyframes = root.findall(".//keyframe")
-        
+
         # Only the initial keyframe should exist
         self.assertEqual(len(keyframes), 1)
         self.assertEqual(keyframes[0].get("value"), "0dB")
@@ -158,7 +156,7 @@ class TestGuardian(unittest.TestCase):
         """Test FCPXML creation with a language-specific SRT file"""
         # .srt is false, .en.srt is true
         mock_exists.side_effect = [False, True]
-        
+
         mock_subtitle = MagicMock()
         mock_subtitle.start.total_seconds.return_value = 1.0
         mock_subtitle.end.total_seconds.return_value = 2.0
@@ -178,8 +176,8 @@ class TestGuardian(unittest.TestCase):
         with patch('os.path.exists') as mock_exists, \
              patch('builtins.open', new_callable=mock_open), \
              patch('srt.parse') as mock_srt_parse:
-            
-            mock_exists.return_value = False # No SRT
+
+            mock_exists.return_value = False        # No SRT
             mock_srt_parse.return_value = []
 
             tree = create_fcpxml(self.test_video_path, self.video_info)
@@ -188,7 +186,7 @@ class TestGuardian(unittest.TestCase):
             self.assertEqual(root.tag, 'fcpxml')
             self.assertIsNotNone(root.find("resources"))
             self.assertIsNotNone(root.find("library/event/project/sequence/spine"))
-            
+
             # Check that format is correctly referenced
             asset_clip = root.find(".//asset-clip")
             self.assertIsNotNone(asset_clip)

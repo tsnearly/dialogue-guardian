@@ -7,7 +7,6 @@ import re
 import sys
 import json
 import srt
-from pathlib import Path
 
 # --- Word/Phrase Matching List (ranked by frequency occurrence) ---
 matching_words = [
@@ -17,13 +16,14 @@ matching_words = [
     'smartass', 'tits', 'whore', 'cunt', 'slut', 'boobs', 'orgasm',
     'penis', 'blowjob', 'handjob', 'hard on', 'cocksucker', 'dipshit',
     'horseshit', 'jack off', 'nympho', 'rape', 'fuckface', 'skank',
-    'shitspray', 'bitches', 'nigga', 'nigger', 'dickhead', 'prick', 
+    'shitspray', 'bitches', 'nigga', 'nigger', 'dickhead', 'prick',
     'arsehole', 'motherfucker', 'goddamn', 'shithead', 'douchebag', 'fag', 'faggot'
 ]
 
 # Assume ffmpeg and ffprobe are in the system's PATH
 ffprobe_cmd = '/Users/Shared/FFmpegTools/ffprobe'
 ffmpeg_cmd = '/Users/Shared/FFmpegTools/ffmpeg'
+
 
 def get_video_details(filename):
     """
@@ -46,7 +46,7 @@ def get_video_details(filename):
         # Get audio stream details
         cmd_audio = [ffprobe_cmd, "-v", "error", "-select_streams", "a", "-show_entries", "stream=codec_name,channels,channel_layout,sample_rate", "-of", "compact=p=0:nk=1", filename]
         stdout_audio = subprocess.check_output(cmd_audio, text=True, stderr=subprocess.PIPE).strip()
-        
+
         save_channels = 0
         for line in stdout_audio.split('\n'):
             parts = line.split('|')
@@ -62,7 +62,7 @@ def get_video_details(filename):
         # Get video stream details
         cmd_video = [ffprobe_cmd, "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=r_frame_rate,width,height", "-of", "default=noprint_wrappers=1:nokey=1", filename]
         stdout_video = subprocess.check_output(cmd_video, text=True, stderr=subprocess.PIPE).strip()
-        
+
         lines = stdout_video.split('\n')
         if len(lines) >= 3:
             details["width"] = lines[0]
@@ -87,8 +87,8 @@ def get_video_details(filename):
             details["fps"] = None
             details["framerate"] = None
             details["frameduration"] = None
-            
-        logging.debug(f"Video Info Dictionary:\n{json.dumps(details, indent=4)}")   
+
+        logging.debug(f"Video Info Dictionary:\n{json.dumps(details, indent=4)}")
         return details
     except subprocess.CalledProcessError as e:
         logging.error(f"ffprobe command failed: {e.stderr}")
@@ -96,6 +96,7 @@ def get_video_details(filename):
     except FileNotFoundError:
         logging.error("ffprobe not found. Please ensure FFmpeg is installed and in your system's PATH.")
         return None
+
 
 def extract_embedded_srt(video_path, output_srt_path):
     """
@@ -108,21 +109,21 @@ def extract_embedded_srt(video_path, output_srt_path):
         bool: True if an SRT track was successfully extracted, False otherwise.
     """
     logging.info(f"Checking for embedded SRT subtitles in {video_path}")
-    probe_output_raw = "" # Initialize to empty string
+    probe_output_raw = ""       # Initialize to empty string
     try:
         # Use ffprobe to list all streams in JSON format
         cmd_probe_streams = [
             ffprobe_cmd,
             "-v", "error",
-            "-select_streams", "s", # Select only subtitle streams
-            "-show_entries", "stream=index,codec_name,disposition", # Get index, codec, and disposition
+            "-select_streams", "s",         # Select only subtitle streams
+            "-show_entries", "stream=index,codec_name,disposition",     # Get index, codec, and disposition
             "-of", "json",
             video_path
         ]
-        
+
         probe_output_raw = subprocess.check_output(cmd_probe_streams, text=True, stderr=subprocess.PIPE).strip()
         probe_output = json.loads(probe_output_raw)
-        
+
         srt_stream_index = -1
         found_srt_streams = []
 
@@ -130,7 +131,7 @@ def extract_embedded_srt(video_path, output_srt_path):
             for stream in probe_output["streams"]:
                 if stream.get("codec_name") == "subrip":
                     found_srt_streams.append(stream)
-        
+
         if found_srt_streams:
             # Prioritize default SRT track
             for stream in found_srt_streams:
@@ -138,7 +139,7 @@ def extract_embedded_srt(video_path, output_srt_path):
                     srt_stream_index = stream["index"]
                     logging.info(f"Found default embedded SRT stream at index: {srt_stream_index}")
                     break
-            
+
             # If no default, just pick the first one found
             if srt_stream_index == -1:
                 srt_stream_index = found_srt_streams[0]["index"]
@@ -148,12 +149,12 @@ def extract_embedded_srt(video_path, output_srt_path):
             # Use ffmpeg to extract the identified SRT stream
             cmd_extract_srt = [
                 ffmpeg_cmd,
-                "-v", "debug", # Add debug verbosity for FFmpeg
+                "-v", "debug",      # Add debug verbosity for FFmpeg
                 "-i", video_path,
-                "-map", f"0:{srt_stream_index}", # Changed from 0:s:INDEX to 0:INDEX
-                "-c:s", "srt", # Ensure output codec is srt
+                "-map", f"0:{srt_stream_index}",    # Changed from 0:s:INDEX to 0:INDEX
+                "-c:s", "srt",      # Ensure output codec is srt
                 output_srt_path,
-                "-y" # Overwrite existing srt
+                "-y"                # Overwrite existing srt
             ]
             logging.info(f"Executing SRT extraction: {' '.join(cmd_extract_srt)}")
             process = subprocess.run(cmd_extract_srt, check=True, capture_output=True, text=True)
@@ -170,8 +171,8 @@ def extract_embedded_srt(video_path, output_srt_path):
         return False
     except subprocess.CalledProcessError as e:
         logging.error(f"FFmpeg/ffprobe command failed during SRT extraction. Return code: {e.returncode}")
-        logging.error(f"FFmpeg stdout (SRT extraction error):\n{e.stdout}") # Added for debugging
-        logging.error(f"FFmpeg stderr (SRT extraction error):\n{e.stderr}") # Added for debugging
+        logging.error(f"FFmpeg stdout (SRT extraction error):\n{e.stdout}")     # Added for debugging
+        logging.error(f"FFmpeg stderr (SRT extraction error):\n{e.stderr}")     # Added for debugging
         return False
     except FileNotFoundError:
         logging.error("ffmpeg or ffprobe not found during SRT extraction. Ensure FFmpeg is installed and in your system's PATH.")
@@ -180,12 +181,13 @@ def extract_embedded_srt(video_path, output_srt_path):
         logging.error(f"An unexpected error occurred during SRT extraction: {e}")
         return False
 
+
 def censor_audio_with_ffmpeg(video_path):
     """
     Censors profane audio segments in a video file using FFmpeg.
     It identifies profane words from an associated SRT file (external or embedded)
     and mutes those segments in the output video.
-    
+
     Args:
         video_path (str): Path to the input video file.
     Returns:
@@ -251,7 +253,7 @@ def censor_audio_with_ffmpeg(video_path):
         pattern = r'\b(' + '|'.join(re.escape(word) for word in matching_words) + r')\b'
         censor_pattern = re.compile(pattern, re.IGNORECASE)
 
-        censor_segments = [] # List of (start_s, end_s) tuples for segments to mute
+        censor_segments = []    # List of (start_s, end_s) tuples for segments to mute
 
         for sub in subs:
             cleaned_text = re.sub(r'[^\w\s\']', '', sub.content).lower()
@@ -267,19 +269,19 @@ def censor_audio_with_ffmpeg(video_path):
             # Apply volume filter to mute the segment. Volume 0 means mute.
             filter_parts.append(f"volume=enable='between(t,{start_s},{end_s})':volume=0")
 
-        audio_filter_graph = ",".join(filter_parts) if filter_parts else "anull" 
+        audio_filter_graph = ",".join(filter_parts) if filter_parts else "anull"
 
     # Construct the FFmpeg command
     ffmpeg_command = [
         ffmpeg_cmd,
         '-i', video_path,
-        '-c:v', 'copy',  # Copy video stream without re-encoding (faster, no quality loss)
-        '-c:a', 'aac',   # Re-encode audio to AAC (common and widely supported)
-        '-b:a', '192k',  # Audio bitrate (adjust as needed)
-        '-af', audio_filter_graph, # Apply the generated audio filter graph
-        '-map_metadata', '-1', # Remove all metadata from the output file
-        '-movflags', '+faststart', # Optimize for web streaming
-        '-y', # Overwrite output file if it already exists
+        '-c:v', 'copy',     # Copy video stream without re-encoding (faster, no quality loss)
+        '-c:a', 'aac',      # Re-encode audio to AAC (common and widely supported)
+        '-b:a', '192k',     # Audio bitrate (adjust as needed)
+        '-af', audio_filter_graph,      # Apply the generated audio filter graph
+        '-map_metadata', '-1',          # Remove all metadata from the output file
+        '-movflags', '+faststart',      # Optimize for web streaming
+        '-y',               # Overwrite output file if it already exists
         output_filename
     ]
 
@@ -299,6 +301,7 @@ def censor_audio_with_ffmpeg(video_path):
         logging.error("ffmpeg not found. Please ensure FFmpeg is installed and in your system's PATH.")
         return None
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python guardian.py <videofile>")
@@ -307,20 +310,20 @@ if __name__ == "__main__":
     script_fullpath = sys.argv[0]
     script_filename = os.path.basename(script_fullpath)
     log_file = f"{os.path.splitext(script_filename)[0]}.log"
-    
+
     # Configure logging to file and console
     logging.basicConfig(
-        level=logging.DEBUG, 
-        format='%(asctime)s - %(levelname)s - %(message)s', 
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - %(message)s',
         handlers=[
             logging.FileHandler(log_file, mode='w'),
             logging.StreamHandler()
         ]
     )
-    
+
     filepath = os.path.abspath(sys.argv[1])
     logging.info(f"Processing file: {filepath}")
-    
+
     # Check if the video file exists
     if not os.path.exists(filepath):
         logging.error(f"Video file not found: {filepath}. Exiting.")
@@ -333,7 +336,7 @@ if __name__ == "__main__":
 
     # Perform the audio censoring using FFmpeg
     censored_file = censor_audio_with_ffmpeg(filepath)
-    
+
     if censored_file:
         logging.info(f"Censoring process completed. Output file: {censored_file}")
     else:
