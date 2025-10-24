@@ -46,7 +46,7 @@ jobs:
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
+          path: ${{ runner.os == 'Linux' && '~/.cache/pip' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/AppData/Local/pip/Cache' }}
           key: ${{ runner.os }}-pip-cache
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -117,7 +117,7 @@ jobs:
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
+          path: ${{ runner.os == 'Linux' && '~/.cache/pip' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/AppData/Local/pip/Cache' }}
           key: ${{ runner.os }}-lint-cache
           restore-keys: |
             ${{ runner.os }}-lint-
