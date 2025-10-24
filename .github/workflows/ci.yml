@@ -51,6 +51,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Cache apt packages (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-cache-${{ hashFiles('/etc/apt/sources.list*') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-cache-
+
+      - name: Cache Homebrew (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-homebrew-cache
+          restore-keys: |
+            ${{ runner.os }}-homebrew-
+
       - name: Install FFmpeg (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -121,6 +139,14 @@ jobs:
           key: ${{ runner.os }}-lint-cache
           restore-keys: |
             ${{ runner.os }}-lint-
+
+      - name: Cache apt packages (Ubuntu)
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-cache-${{ hashFiles('/etc/apt/sources.list*') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-cache-
 
       - name: Install FFmpeg
         run: |
