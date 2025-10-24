@@ -7,6 +7,23 @@ Requirements
 * Python 3.7 or higher
 * FFmpeg installed and accessible in your system's PATH
 
+Installing Python
+-----------------
+
+**Windows:**
+
+1. Visit `python.org <https://www.python.org/downloads/windows/>`_
+2. Click "Download Python 3.x.x" (latest version for Windows)
+3. Run the installer executable
+4. **Important:** Check the box "Add Python to PATH" during installation
+5. Click "Install Now" or customize installation options as needed
+6. Verify installation by opening Command Prompt and running:
+
+.. code-block:: bash
+
+   python --version
+   pip --version
+
 Installing FFmpeg
 -----------------
 
