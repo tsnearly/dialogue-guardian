@@ -69,22 +69,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-homebrew-
 
-      - name: Install FFmpeg (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-
-      - name: Install FFmpeg (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install ffmpeg
-
-      - name: Install FFmpeg (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install ffmpeg -y
-        shell: powershell
+      - name: Set up FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify FFmpeg installation
         run: |
@@ -148,10 +136,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-cache-
 
-      - name: Install FFmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+      - name: Set up FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install linting tools
         run: |
@@ -196,10 +184,10 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install FFmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+      - name: Set up FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install build tools
         run: |
