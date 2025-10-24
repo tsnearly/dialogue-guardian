@@ -4,6 +4,7 @@
 Pytest configuration and fixtures.
 """
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -12,34 +13,54 @@ import pytest
 
 
 @pytest.fixture(scope="session", autouse=True)
-def download_ffmpeg_fixture(request):
+def verify_ffmpeg_available(request):
     """
-    Fixture to run the FFmpeg download script before any tests run.
+    Fixture to verify that FFmpeg and ffprobe are available before tests run.
     This is a session-scoped fixture that runs automatically.
+    
+    FFmpeg should be installed via the system package manager (apt-get, brew, choco, etc.)
+    or available in PATH. The download_ffmpeg.py script is no longer used during CI tests.
     """
     # Only run this on the master node in a distributed testing environment
     if not hasattr(request.config, "workerinput"):
-        script_path = Path(__file__).parent.parent / "scripts" / "download_ffmpeg.py"
-        print(f"\nRunning FFmpeg download script: {script_path}")
-
-        # Use the same Python executable that is running pytest
-        python_executable = sys.executable
-        result = subprocess.run(
-            [python_executable, str(script_path)],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-
-        if "skipping download" not in result.stdout.lower():
-            print("--- FFmpeg Download Script STDOUT ---")
-            print(result.stdout)
-
-        if result.returncode != 0:
-            print("--- FFmpeg Download Script STDERR ---")
-            print(result.stderr)
+        print("\nVerifying FFmpeg availability...")
+        
+        # Check if ffmpeg is available in PATH
+        ffmpeg_available = shutil.which("ffmpeg") is not None
+        ffprobe_available = shutil.which("ffprobe") is not None
+        
+        if ffmpeg_available:
+            print("✓ FFmpeg found in PATH")
+        else:
+            print("✗ FFmpeg not found in PATH")
+        
+        if ffprobe_available:
+            print("✓ ffprobe found in PATH")
+        else:
+            print("✗ ffprobe not found in PATH")
+        
+        if not (ffmpeg_available and ffprobe_available):
             pytest.fail(
-                "The FFmpeg download script failed. Halting tests.", pytrace=False
+                "FFmpeg and/or ffprobe are not available. "
+                "Please install FFmpeg using your system package manager "
+                "(apt-get on Ubuntu, brew on macOS, choco on Windows).",
+                pytrace=False
             )
-
-        print("FFmpeg setup is complete.")
+        
+        # Verify they actually work
+        try:
+            result = subprocess.run(
+                ["ffmpeg", "-version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False
+            )
+            if result.returncode == 0:
+                print("✓ FFmpeg executable works correctly")
+            else:
+                pytest.fail("FFmpeg executable exists but failed to run", pytrace=False)
+        except Exception as e:
+            pytest.fail(f"Failed to run FFmpeg: {e}", pytrace=False)
+        
+        print("FFmpeg verification complete.")
