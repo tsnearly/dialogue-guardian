@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/requirements.txt', 'dialogue-guardian/dev-requirements.txt') }}
+          key: ${{ runner.os }}-pip-cache
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -118,7 +118,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-lint-${{ hashFiles('dialogue-guardian/pyproject.toml', 'dialogue-guardian/dev-requirements.txt') }}
+          key: ${{ runner.os }}-lint-cache
           restore-keys: |
             ${{ runner.os }}-lint-
 
