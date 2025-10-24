@@ -94,7 +94,7 @@ class TestGuardianCLI(unittest.TestCase):
         with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
             result = validate_args(args)
             self.assertFalse(result)
-            self.assertIn("Input video file not found", mock_stderr.getvalue())
+            self.assertIn("Input path not found", mock_stderr.getvalue())
 
     def test_validate_args_invalid_output_dir(self):
         """Test argument validation with invalid output directory"""

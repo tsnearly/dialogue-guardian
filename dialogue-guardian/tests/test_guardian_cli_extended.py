@@ -262,7 +262,6 @@ class TestGuardianCLIExtended(unittest.TestCase):
             self.assertIn("An unexpected error occurred:", mock_stderr.getvalue())
             # The error message contains the exception message, not the type name
             self.assertIn("Invalid video format", mock_stderr.getvalue())
-
     def test_validate_args_edge_case_paths(self):
         """Test argument validation with edge case paths"""
         # Test with empty string path
@@ -321,10 +320,16 @@ class TestGuardianCLIExtended(unittest.TestCase):
             result = main()
 
             self.assertEqual(result, 0)
-            # Should pass empty string as output path
-            mock_processor.censor_audio_with_ffmpeg.assert_called_once_with(
-                "/abs/test.mp4", ""
-            )
+            # Should have called the censor function once; be tolerant about
+            # whether the optional `full` parameter was passed positionally or
+            # as a kwarg. We only care that the input path and output path
+            # were forwarded correctly.
+            mock_processor.censor_audio_with_ffmpeg.assert_called_once()
+            called_args, called_kwargs = mock_processor.censor_audio_with_ffmpeg.call_args
+            # Positional args: (input_path, output_path, [optional full])
+            self.assertGreaterEqual(len(called_args), 2)
+            self.assertEqual(called_args[0], "/abs/test.mp4")
+            self.assertEqual(called_args[1], "")
 
 
 if __name__ == "__main__":

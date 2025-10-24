@@ -90,6 +90,10 @@ guardian --input movie.mp4 --verbose
 
 # Custom FFmpeg paths
 guardian --input movie.mp4 --ffmpeg-path /usr/local/bin/ffmpeg
+# Full verification (slow)
+# Use --full to enable exhaustive per-segment verification and multiple fallback
+# attempts. This is slower but provides a comprehensive diagnostic report and
+# higher confidence that censored segments meet the silence threshold.
 ```
 
 ### Python API

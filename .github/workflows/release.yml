@@ -25,6 +25,36 @@ permissions:
   pull-requests: write
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+    steps:
+      - name: Configure for PyPI
+        shell: bash
+        run: |
+          if [ "${{ github.event.inputs.prerelease }}" == "false" ]; then
+            echo "Configuring for PyPI"
+          fi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
+  setup-testpypi:
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+    steps:
+      - name: Configure for TestPyPI
+        shell: bash
+        run: |
+          if [ "${{ github.event.inputs.prerelease }}" == "true" ]; then
+            echo "Configuring for TestPyPI"
+          fi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
   release:
     runs-on: ubuntu-latest
     steps:
@@ -64,7 +94,7 @@ jobs:
         run: |
           # Configure git remote for pushing
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          
+
           # Get current version for logging
           CURRENT_VERSION=$(python -c "
           import configparser
@@ -73,21 +103,21 @@ jobs:
           print(config['bumpversion']['current_version'])
           ")
           echo "Current version: $CURRENT_VERSION"
-          
+
           # Preview what the new version will be
           NEXT_VERSION=$(bump2version --dry-run --list ${{ github.event.inputs.version_type }} | grep new_version= | cut -d= -f2)
           echo "Next version will be: $NEXT_VERSION"
-          
+
           # Clean up any existing tag (in case of re-runs)
           if git tag -l "v$NEXT_VERSION" | grep -q "v$NEXT_VERSION"; then
             echo "Removing existing tag v$NEXT_VERSION..."
             git tag -d "v$NEXT_VERSION" || true
             git push origin ":refs/tags/v$NEXT_VERSION" || true
           fi
-          
+
           # Let bump2version handle all file updates, commits, and tagging
           bump2version ${{ github.event.inputs.version_type }}
-          
+
           # Get the final version and export it
           NEW_VERSION=$(python -c "
           import configparser
@@ -95,11 +125,11 @@ jobs:
           config.read('.bumpversion.cfg')
           print(config['bumpversion']['current_version'])
           ")
-          
+
           echo "Successfully bumped to version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          
+
           # Push the changes and tags
           git push origin main
           git push origin "v$NEW_VERSION"
@@ -116,7 +146,7 @@ jobs:
           echo "## Version $NEW_VERSION" > CHANGELOG_ENTRY.md
           echo "" >> CHANGELOG_ENTRY.md
           echo "### Changes" >> CHANGELOG_ENTRY.md
-          
+
           # Get commits since last tag for release notes
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
           if [ -n "$LAST_TAG" ]; then
@@ -139,14 +169,7 @@ jobs:
           files: dialogue-guardian/dist/*.tar.gz
           generate_release_notes: true
 
-      - name: Publish to PyPI
-        environment: pypi
-        if: github.event.inputs.prerelease == 'true'
-          environment:
-            name: testpypi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Publish release to PyPI (using twine)
+        working-directory: dialogue-guardian
         run: |
-          twine upload dialogue-guardian/dist/*
-          #twine upload --repository testpypi dialogue-guardian/dist/*
+          twine upload dist/*

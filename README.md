@@ -88,6 +88,7 @@ guardian --input movie.mp4 --verbose
 
 # Custom FFmpeg paths
 guardian --input movie.mp4 --ffmpeg-path /usr/local/bin/ffmpeg
+ - `--full` : When set, run the full (and slower) verification path which performs per-segment audio analysis using FFmpeg astats, produces a comprehensive diagnostic report, and allows multiple fallback attempts to improve censoring. Default: disabled (fast path). Use `--full` when you want maximum assurance at the cost of slower runs.
 ```
 
 ### Python API

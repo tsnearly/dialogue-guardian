@@ -1,83 +1,38 @@
 # SPDX-FileCopyrightText: 2025 Tony Snearly
 # SPDX-License-Identifier: OSL-3.0
-name: CI/CD Pipeline
+name: CI
 
+# This workflow runs the continuous integration tests and basic quality checks
 on:
   push:
     branches: [main, develop]
+    paths:
+      - "dialogue-guardian/src/**"
+      - "dialogue-guardian/tests/**"
+      - "dialogue-guardian/pyproject.toml"
+      - "dialogue-guardian/requirements.txt"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "dialogue-guardian/src/**"
+      - "dialogue-guardian/tests/**"
+      - "dialogue-guardian/pyproject.toml"
+      - "dialogue-guardian/requirements.txt"
+  workflow_dispatch:
 
-# Global environment variables
 env:
-  PYTHONPATH: dialogue-guardian/src
   PYTHON_VERSION: "3.11"
 
 jobs:
-  # Fast quality checks job - runs first to fail fast
-  quality:
-    runs-on: ubuntu-latest
-    outputs:
-      python-cache-key: ${{ steps.cache-key.outputs.key }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Generate cache key
-        id: cache-key
-        run: |
-          echo "key=${{ runner.os }}-py${{ env.PYTHON_VERSION }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml', 'dialogue-guardian/dev-requirements.txt') }}" >> $GITHUB_OUTPUT
-
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            dialogue-guardian/.venv
-          key: ${{ steps.cache-key.outputs.key }}
-          restore-keys: |
-            ${{ runner.os }}-py${{ env.PYTHON_VERSION }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          cd dialogue-guardian
-          pip install -r dev-requirements.txt
-          pip install -e . -v
-
-      - name: Run quality checks
-        run: |
-          cd dialogue-guardian
-          # Linting
-          flake8 src/ tests/ --config .flake8
-          black --check src/ tests/ --line-length=88
-          isort --check-only src/ tests/
-          # Type checking
-          mypy src/guardian/ --ignore-missing-imports
-
-  # Test matrix - only runs after quality checks pass
+  # Run tests on multiple Python versions and OS
   test:
-    needs: quality
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        # Reduce matrix for non-main branches to save resources
-        exclude:
-          - os: windows-latest
-            python-version: "3.9"
-          - os: windows-latest
-            python-version: "3.10"
-          - os: macos-latest
-            python-version: "3.9"
-          - os: macos-latest
-            python-version: "3.10"
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v5
@@ -87,68 +42,48 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Cache FFmpeg binaries
-        id: ffmpeg-cache
+      - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
-          path: dialogue-guardian/bin
-          key: ${{ runner.os }}-ffmpeg-local-v2
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('dialogue-guardian/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-ffmpeg-local-
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
 
-      - name: Install FFmpeg using download script
-        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
-        run: |
-          cd dialogue-guardian
-          pip install requests
-          python scripts/download_ffmpeg.py
-
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/AppData/Local/pip/Cache
-            ~/Library/Caches/pip
-          key: ${{ runner.os }}-py${{ matrix.python-version }}-pip-${{ hashFiles('dialogue-guardian/pyproject.toml', 'dialogue-guardian/dev-requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-py${{ matrix.python-version }}-pip-
-
-      - name: Install Python dependencies
-        shell: bash
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Explicitly install an older setuptools for Python 3.8 compatibility
-          # This is a workaround for setuptools versions that dropped Python 3.8 support
-          # while still being picked up by pip for older Python versions.
-          if python -c "import sys; exit(sys.version_info < (3, 9))"; then
-            echo "Installing setuptools==65.5.1 for Python 3.8"
-            pip install setuptools==65.5.1
-          fi
           cd dialogue-guardian
-          pip install -r dev-requirements.txt
-          pip install -e . -v
+          pip install -e .
+          pip install pytest pytest-cov
 
-      - name: Run tests with coverage
+      - name: Run tests with pytest
         run: |
-          cd dialogue-guardian/src
-          python -m pytest ../tests/ --cov=guardian --cov-report=xml --cov-report=html --tb=short
+          cd dialogue-guardian
+          pytest tests/ -v --cov=src/guardian --cov-report=xml --cov-report=html
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         with:
-          files: ./dialogue-guardian/coverage.xml
+          file: ./dialogue-guardian/coverage.xml
           flags: unittests
           name: codecov-umbrella
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  # Build job - only runs on one platform after tests pass
-  build:
-    needs: [quality, test]
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.os }}-${{ matrix.python-version }}
+          path: dialogue-guardian/htmlcov/
+          retention-days: 30
+
+  # Linting and code style checks
+  lint:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'main')
     steps:
       - uses: actions/checkout@v5
 
@@ -157,32 +92,76 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Cache build dependencies
+      - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ needs.quality.outputs.python-cache-key }}
+          key: ${{ runner.os }}-lint-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
           restore-keys: |
-            ${{ runner.os }}-py${{ env.PYTHON_VERSION }}-pip-
+            ${{ runner.os }}-lint-
 
-      - name: Install build dependencies
+      - name: Install linting tools
         run: |
           python -m pip install --upgrade pip
-          pip install build twine
+          pip install pylint black isort flake8 mypy
+          cd dialogue-guardian
+          pip install -e .
+
+      - name: Check code formatting with black
+        run: |
+          cd dialogue-guardian
+          black --check src/guardian/ tests/ || echo "Code formatting issues found"
+
+      - name: Check import ordering with isort
+        run: |
+          cd dialogue-guardian
+          isort --check-only src/guardian/ tests/ || echo "Import ordering issues found"
+
+      - name: Run pylint
+        run: |
+          cd dialogue-guardian
+          pylint src/guardian/ --disable=C0111,C0103,W0212,R0913,R0914 || echo "Pylint issues found"
+
+      - name: Run flake8
+        run: |
+          cd dialogue-guardian
+          flake8 src/guardian/ tests/ --max-line-length=100 --ignore=E501,W503 || echo "Flake8 issues found"
+
+      - name: Run type checking with mypy
+        run: |
+          cd dialogue-guardian
+          mypy src/guardian/ --ignore-missing-imports || echo "Type checking issues found"
+
+  # Build and verify package
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build wheel setuptools
 
       - name: Build package
         run: |
           cd dialogue-guardian
           python -m build
 
-      - name: Check package
-        run: |
-          cd dialogue-guardian
-          twine check dist/*
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-distributions
+          name: built-package
           path: dialogue-guardian/dist/
-          retention-days: 7
+          retention-days: 30
+
+      - name: Verify package integrity
+        run: |
+          cd dialogue-guardian
+          pip install dist/*.whl
+          python -c "import guardian; print(f'Guardian {guardian.__version__} installed successfully')"

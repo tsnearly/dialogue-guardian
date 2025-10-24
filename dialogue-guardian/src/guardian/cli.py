@@ -8,10 +8,14 @@ import argparse
 import logging
 import os
 import sys
+from pathlib import Path
 from typing import List, Optional
 
 from . import __version__
 from .core import GuardianProcessor
+
+# Supported video file extensions
+SUPPORTED_VIDEO_EXTENSIONS = {".mkv"}
 
 
 def setup_logging(log_file: Optional[List[str]] = None, verbose: bool = False) -> None:
@@ -46,6 +50,45 @@ def setup_logging(log_file: Optional[List[str]] = None, verbose: bool = False) -
     )
 
 
+def expand_input_paths(input_paths: List[str]) -> List[str]:
+    """
+    Expand input paths to include video files from directories.
+
+    If an input path is a directory, discover all video files in that directory.
+    If an input path is a file, include it as-is.
+
+    Args:
+        input_paths: List of file or directory paths provided by user.
+
+    Returns:
+        List of file paths to process.
+    """
+    expanded_files: List[str] = []
+
+    for path in input_paths:
+        if os.path.isdir(path):
+            # Find all video files in the directory
+            video_files = []
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    if Path(file).suffix.lower() in SUPPORTED_VIDEO_EXTENSIONS:
+                        full_path = os.path.join(root, file)
+                        video_files.append(full_path)
+
+            if video_files:
+                logging.info(
+                    f"Found {len(video_files)} video file(s) in directory: {path}"
+                )
+                expanded_files.extend(sorted(video_files))
+            else:
+                logging.warning(f"No video files found in directory: {path}")
+        else:
+            # It's a file, include it as-is
+            expanded_files.append(path)
+
+    return expanded_files
+
+
 def create_parser() -> argparse.ArgumentParser:
     """
     Create and configure the argument parser.
@@ -65,7 +108,8 @@ def create_parser() -> argparse.ArgumentParser:
         dest="inputfile",
         nargs="+",
         required=True,
-        help="Path of the video file to process",
+        help="Path(s) of video file(s) or directory to process. "
+        "If a directory is provided, all video files in that directory will be processed.",
     )
 
     parser.add_argument(
@@ -110,6 +154,17 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--full",
+        action="store_true",
+        dest="full",
+        help=(
+            "Execute full audio verification routines (slower). "
+            "By default the processor will assume censoring succeeded and "
+            "skip repeated audio checks to speed up processing."
+        ),
+    )
+
+    parser.add_argument(
         "--version", "-ver", help="Show version", action="version", version=__version__
     )
 
@@ -126,16 +181,16 @@ def validate_args(args: argparse.Namespace) -> bool:
     Returns:
         True if arguments are valid, False otherwise.
     """
-    # Check if input files exist
-    for input_file in args.inputfile:
-        if not os.path.exists(input_file):
-            print(f"Error: Input video file not found: {input_file}", file=sys.stderr)
+    # Check if input files/directories exist
+    for input_path in args.inputfile:
+        if not os.path.exists(input_path):
+            print(f"Error: Input path not found: {input_path}", file=sys.stderr)
             return False
 
     # Validate output path if provided
     if args.outputfile:
         output_dir = os.path.dirname(os.path.abspath(args.outputfile))
-        if not os.path.exists(output_dir):
+        if output_dir and not os.path.exists(output_dir):
             print(
                 f"Error: Output directory does not exist: {output_dir}",
                 file=sys.stderr,
@@ -163,8 +218,18 @@ def main() -> int:
         # Setup logging
         setup_logging(args.logfile, args.verbose)
 
-        # Process each input file
-        for input_file in args.inputfile:
+        # Expand directories to video files
+        video_files = expand_input_paths(args.inputfile)
+
+        if not video_files:
+            print("Error: No video files found to process.", file=sys.stderr)
+            logging.error("No video files found to process.")
+            return 1
+
+        logging.info(f"Processing {len(video_files)} video file(s)...")
+
+        # Process each video file
+        for input_file in video_files:
             video_path = os.path.abspath(input_file)
             logging.info(f"Processing file: {video_path}")
 
@@ -174,8 +239,13 @@ def main() -> int:
             )
 
             # Process the video
+            # Keep the CLI call backwards-compatible: do not pass the optional
+            # `full` parameter positionally so existing callers and tests
+            # that expect a two-argument call continue to work. The
+            # `censor_audio_with_ffmpeg` API accepts an optional `full`
+            # parameter if callers want to pass it directly.
             censored_file = processor.censor_audio_with_ffmpeg(
-                video_path, args.outputfile
+                video_path, args.outputfile, full=args.full
             )
 
             if censored_file:
@@ -200,7 +270,6 @@ def main() -> int:
         logging.error(f"Unexpected error: {e}")
         print(f"Error: An unexpected error occurred: {e}", file=sys.stderr)
         return 1
-    logging.info("Script finished.")
 
 
 if __name__ == "__main__":
