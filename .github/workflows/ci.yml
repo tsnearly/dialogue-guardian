@@ -43,6 +43,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('dialogue-guardian/requirements.txt', 'dialogue-guardian/dev-requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install FFmpeg (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -64,15 +72,6 @@ jobs:
         run: |
           ffmpeg -version
           ffprobe -version
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('dialogue-guardian/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}-
-            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
@@ -115,18 +114,18 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install FFmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-lint-${{ hashFiles('dialogue-guardian/pyproject.toml') }}
+          key: ${{ runner.os }}-lint-${{ hashFiles('dialogue-guardian/pyproject.toml', 'dialogue-guardian/dev-requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-lint-
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       - name: Install linting tools
         run: |
