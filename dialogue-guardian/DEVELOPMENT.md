@@ -51,6 +51,38 @@ dialogue-guardian/
 - FFmpeg installed and available in PATH
 - Git for version control
 
+### Installing FFmpeg
+
+FFmpeg is required for the project to function. Install it using your system package manager:
+
+**Ubuntu/Debian:**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg
+```
+
+**macOS (with Homebrew):**
+
+```bash
+brew install ffmpeg
+```
+
+**Windows (with Chocolatey):**
+
+```powershell
+choco install ffmpeg
+```
+
+**Verify Installation:**
+
+```bash
+ffmpeg -version
+ffprobe -version
+```
+
+Both `ffmpeg` and `ffprobe` should be available in your PATH.
+
 ### Initial Setup
 
 1. **Clone the repository:**
@@ -88,12 +120,14 @@ dialogue-guardian/
 The `core.py` module has been **significantly refactored** to improve testability and maintainability:
 
 #### Before Refactoring:
+
 - Large monolithic functions mixing I/O with business logic
 - Complex parsing logic buried inside subprocess calls
 - Difficult to test without extensive mocking
 - Hard to debug and maintain
 
 #### After Refactoring:
+
 - **Extracted pure functions** for all complex logic
 - **Separation of concerns**: I/O operations separate from parsing logic
 - **Highly testable**: Pure functions can be tested with real data
@@ -108,7 +142,7 @@ def _parse_audio_streams(self, ffprobe_output: str) -> Dict[str, str]:
 def _parse_framerate_info(self, framerate_str: Optional[str]) -> Dict[str, Optional[str]]:
 def _parse_video_stream_output(self, ffprobe_output: str) -> Dict[str, Optional[str]]:
 
-# SRT processing pure functions  
+# SRT processing pure functions
 def _parse_ffprobe_streams(self, json_output: str) -> List[Dict[str, Any]]:
 def _find_srt_streams(self, streams: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def _select_best_srt_stream(self, srt_streams: List[Dict[str, Any]]) -> Optional[int]:
@@ -258,7 +292,7 @@ The project features a **hybrid testing approach** that combines traditional moc
 def test_get_video_details_multiple_audio_streams(self, mock_check_output):
     mock_check_output.side_effect = [
         "120.5",  # duration
-        "aac|44100|1|mono\naac|48000|6|5.1",  # audio streams  
+        "aac|44100|1|mono\naac|48000|6|5.1",  # audio streams
         "1920\n1080\n30000/1001",  # video info
     ]
     result = self.processor.get_video_details(self.test_video_path)
@@ -293,18 +327,21 @@ def test_parse_framerate_info_division_by_zero(self):
 **Categories of Pure Function Tests:**
 
 1. **Video Details Parsing Functions:**
+
    - `_parse_duration()` - Duration parsing logic
    - `_parse_audio_streams()` - Audio stream selection logic
-   - `_parse_framerate_info()` - Complex framerate calculations  
+   - `_parse_framerate_info()` - Complex framerate calculations
    - `_parse_video_stream_output()` - Video dimension parsing
 
 2. **SRT Processing Functions:**
+
    - `_parse_ffprobe_streams()` - JSON parsing logic
    - `_find_srt_streams()` - Stream filtering logic
    - `_select_best_srt_stream()` - Stream prioritization logic
    - `_generate_srt_candidates()` - File path generation
 
 3. **Profanity Detection Functions:**
+
    - `_clean_subtitle_text()` - Text cleaning logic
    - `_build_profanity_pattern()` - Regex compilation
    - `_contains_profanity()` - Profanity matching logic
@@ -315,6 +352,7 @@ def test_parse_framerate_info_division_by_zero(self):
    - `_build_ffmpeg_base_command()` - Command construction
 
 **Benefits of Pure Function Tests:**
+
 - **Real Logic Testing**: Tests actual parsing, filtering, and processing logic with real data
 - **Better Bug Detection**: Catches real parsing errors, edge cases, and logic bugs that mocks would hide
 - **No External Dependencies**: Tests pure functions that don't require FFmpeg or file I/O
@@ -325,6 +363,7 @@ def test_parse_framerate_info_division_by_zero(self):
 #### When to Use Pure Function Tests vs Mocked Tests
 
 **Use Pure Function Tests for:**
+
 - Data parsing and transformation logic
 - Mathematical calculations and algorithms
 - String processing and regex operations
@@ -332,6 +371,7 @@ def test_parse_framerate_info_division_by_zero(self):
 - Business logic that doesn't require external dependencies
 
 **Use Mocked Tests for:**
+
 - File I/O operations
 - Subprocess calls (FFmpeg/ffprobe)
 - Network operations
@@ -377,7 +417,7 @@ Follow these guidelines when writing tests:
        result = self.processor._parse_video_stream_output(ffprobe_output)
        expected = {
            "width": "1920",
-           "height": "1080", 
+           "height": "1080",
            "framerate": "30000/1001",
            "fps": "29.970",
            "frameduration": "1001/30000"
@@ -407,6 +447,7 @@ Follow these guidelines when writing tests:
    ```
 
 5. **Test both success and failure cases:**
+
    ```python
    def test_process_video_success(self):
    def test_process_video_file_not_found(self):
@@ -417,7 +458,7 @@ Follow these guidelines when writing tests:
    # Extract this logic into a pure function
    def _parse_framerate(self, framerate_str: str) -> Dict[str, str]:
        # Complex parsing logic here
-       
+
    # Then test it directly without mocks
    def test_parse_framerate_division_by_zero(self):
        result = self.processor._parse_framerate("30000/0")

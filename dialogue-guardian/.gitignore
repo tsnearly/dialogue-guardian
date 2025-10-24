@@ -1,2 +1,10 @@
 # Ignore downloaded binaries
-/bin/
+# FFmpeg should be installed via system package manager, not bundled
+/bin/ffmpeg
+/bin/ffprobe
+/bin/ffmpeg.exe
+/bin/ffprobe.exe
+/bin/temp/
+
+# Ignore generated diagnostic files from testing
+input_diagnostic_*.json

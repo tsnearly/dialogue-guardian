@@ -50,7 +50,37 @@ guardian --input movie.mp4
 - **Python 3.7+**
 - **FFmpeg** (must be installed and accessible in PATH)
 
-## 🛠️ Installation
+## � Installing FFmpeg
+
+Before using Dialogue Guardian, you must install FFmpeg on your system:
+
+**Ubuntu/Debian:**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg
+```
+
+**macOS (with Homebrew):**
+
+```bash
+brew install ffmpeg
+```
+
+**Windows (with Chocolatey):**
+
+```powershell
+choco install ffmpeg
+```
+
+**Verify Installation:**
+
+```bash
+ffmpeg -version
+ffprobe -version
+```
+
+## �🛠️ Installation
 
 ### From PyPI (Recommended)
 

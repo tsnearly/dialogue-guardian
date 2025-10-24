@@ -2,6 +2,14 @@
 # SPDX-License-Identifier: OSL-3.0
 """
 Script to download and extract FFmpeg for the current platform.
+
+DEPRECATION NOTICE:
+This script is deprecated. FFmpeg should be installed via system package managers:
+- Ubuntu/Debian: sudo apt-get install -y ffmpeg
+- macOS: brew install ffmpeg
+- Windows: choco install ffmpeg
+
+This script is maintained for backward compatibility only and may be removed in a future release.
 """
 import platform
 import re
@@ -170,7 +178,22 @@ def find_and_move_binaries(extract_dir, archive_path):
 def main():
     """
     Main function to download and set up FFmpeg.
+    
+    DEPRECATION WARNING: This script is deprecated. Please install FFmpeg using your
+    system package manager instead:
+    - Ubuntu/Debian: sudo apt-get install -y ffmpeg
+    - macOS: brew install ffmpeg
+    - Windows: choco install ffmpeg
     """
+    print("=" * 70)
+    print("WARNING: This script is deprecated.")
+    print("Please install FFmpeg using your system package manager:")
+    print("  Ubuntu/Debian: sudo apt-get install -y ffmpeg")
+    print("  macOS: brew install ffmpeg")
+    print("  Windows: choco install ffmpeg")
+    print("=" * 70)
+    print()
+    
     BIN_DIR.mkdir(exist_ok=True)
 
     if any(
