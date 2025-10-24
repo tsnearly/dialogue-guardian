@@ -12,16 +12,45 @@ This document provides instructions for running and developing unit tests for th
 
 The test suite is organized into the following files located in the `tests/` directory:
 
--   **`test_guardian_cli.py`**: Unit tests for the command-line interface (CLI) argument parsing and main execution flow.
+-   **`test_guardian_cli.py`**: Unit tests for the command-line interface (CLI) argument parsing and main execution flow, including directory processing support.
 -   **`test_guardian_cli_extended.py`**: Extended tests for the CLI, covering more edge cases and argument combinations.
 -   **`test_guardian_core.py`**: Unit tests for the core processing logic in `guardian/core.py`.
--   **`test_guardian_pure_functions.py`**: **NEW** - Pure function tests that test actual logic without mocks (34 tests).
+-   **`test_guardian_pure_functions.py`**: Pure function tests that test actual logic without mocks (34 tests).
 -   **`test_guardian_edge_cases.py`**: Tests for specific edge cases in the core logic, such as malformed data and unexpected failures.
+-   **`test_core_full_flag.py`**: Tests for the full flag functionality in core processing.
 -   **`test_guardian_integration.py`**: Integration tests that verify the interaction between different components and with `ffmpeg`/`ffprobe` (using mocks).
 -   **`test_integration_complete.py`**: Comprehensive integration tests for the enhanced audio censoring system with sample media files.
 -   **`test_end_to_end_workflow.py`**: End-to-end workflow validation tests covering complete SRT parsing to output verification.
 
 ## Running Tests
+
+### FFmpeg Requirement
+
+All tests require FFmpeg and ffprobe to be available in your system PATH. Install via your system package manager:
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg
+```
+
+**macOS:**
+```bash
+brew install ffmpeg
+```
+
+**Windows (with Chocolatey):**
+```bash
+choco install ffmpeg
+```
+
+**Verify installation:**
+```bash
+ffmpeg -version
+ffprobe -version
+```
+
+The test suite will verify FFmpeg availability before running (see `conftest.py`).
 
 ### Using pytest (Recommended)
 
@@ -71,7 +100,9 @@ make test-verbose
 ### CLI Tests (`test_guardian_cli.py`, `test_guardian_cli_extended.py`)
 
 -   Tests for argument parsing (`--input`, `--output`, `--debug`, etc.).
--   Validation of arguments (e.g., file existence).
+-   **Batch processing**: Directory input support - users can pass a directory to process all MKV files within it.
+-   **Path expansion**: Recursive discovery of video files in nested directories.
+-   Validation of arguments (e.g., file existence, directory traversal).
 -   Main application entry point (`main()`) success and failure scenarios.
 -   Logging setup.
 
@@ -103,6 +134,12 @@ make test-verbose
 -   Tests for handling malformed video metadata.
 -   Graceful failure on unexpected exceptions.
 -   Behavior with empty or specially-formatted profanity lists.
+
+### Full Flag Tests (`test_core_full_flag.py`)
+
+-   Tests for the full flag functionality in core processing
+-   Validates complete processing workflows with various input combinations
+-   Tests configuration and behavioral changes related to the full flag
 
 ### Integration Tests (`test_guardian_integration.py`)
 
@@ -153,6 +190,15 @@ Traditional tests use extensive mocking via `unittest.mock` to:
 -   **`builtins.open`**: Mocks file I/O operations.
 -   **`srt.parse`**: Mocks the parsing of SRT files.
 -   **`platform.system`**: Mocks the operating system check for cross-platform testing.
+
+### FFmpeg Verification
+
+The test suite includes an automatic FFmpeg verification fixture (`verify_ffmpeg_available` in `conftest.py`) that:
+
+-   Checks for FFmpeg and ffprobe availability in PATH at test session start
+-   Provides clear error messages if FFmpeg is not installed
+-   Skips the verification in distributed testing environments (e.g., pytest-xdist workers)
+-   Supports all platforms: Linux, macOS, and Windows
 
 ## Test Dependencies
 
