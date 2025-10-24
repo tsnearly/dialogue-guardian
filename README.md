@@ -152,7 +152,7 @@ make upload
 ## Releases
 
 [![GitHub Release Date](https://img.shields.io/github/release-date/tsnearly/dialogue-guardian?display_date=published_at&style=plastic)](https://github.com/tsnearly/dialogue-guardian/releases)
-[![GitHub Downloads (specific asset, latest release)](https://img.shields.io/github/downloads/tsnearly/dialogue-guardian/v1.3.0/dialogue_guardian-1.3.0.tar.gz?sort=semver&style=plastic)](https://github.com/tsnearly/dialogue-guardian/releases/download/v1.3.0/dialogue_guardian-1.3.0.tar.gz)
+[![GitHub Downloads (specific asset, latest release)](https://img.shields.io/github/downloads/tsnearly/dialogue-guardian/v__VERSION__/dialogue-guardian-__VERSION__.tar.gz?sort=semver&style=plastic)](https://github.com/tsnearly/dialogue-guardian/releases/download/v__VERSION__/dialogue-guardian-__VERSION__.tar.gz)
 
 ## 📚 Documentation
 

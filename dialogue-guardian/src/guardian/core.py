@@ -127,11 +127,7 @@ class GuardianProcessor:
             ffprobe_cmd: Path to ffprobe executable.
             Defaults to checking local 'bin' dir.
         """
-        self.matching_words = (
-            matching_words
-            if matching_words is not None
-            else self.DEFAULT_MATCHING_WORDS
-        )
+        self.matching_words = matching_words if matching_words is not None else self.DEFAULT_MATCHING_WORDS
         self.ffmpeg_cmd = ffmpeg_cmd or self._get_local_ffmpeg_cmd("ffmpeg")
         self.ffprobe_cmd = ffprobe_cmd or self._get_local_ffmpeg_cmd("ffprobe")
 
@@ -140,19 +136,14 @@ class GuardianProcessor:
         Checks for a local FFmpeg command and returns its path if it exists,
         otherwise returns the command name for system PATH resolution.
         """
-        executable_name = (
-            f"{cmd_name}.exe" if platform.system() == "Windows" else cmd_name
-        )
+        executable_name = f"{cmd_name}.exe" if platform.system() == "Windows" else cmd_name
         # Assumes this script is in src/guardian/core.py
         bin_dir = Path(__file__).parent.parent.parent / "bin"
         local_path = bin_dir / executable_name
         if local_path.is_file():
             logging.debug(f"Using local executable: {local_path}")
             return str(local_path)
-        logging.debug(
-            f"Local executable not found at {local_path}. "
-            f"Falling back to system PATH for '{cmd_name}'."
-        )
+        logging.debug(f"Local executable not found at {local_path}. " f"Falling back to system PATH for '{cmd_name}'.")
         return cmd_name
 
     def _parse_duration(self, duration_output: str) -> Dict[str, str]:
@@ -200,9 +191,7 @@ class GuardianProcessor:
 
         return best_audio
 
-    def _parse_framerate_info(
-        self, framerate_str: Optional[str]
-    ) -> Dict[str, Optional[str]]:
+    def _parse_framerate_info(self, framerate_str: Optional[str]) -> Dict[str, Optional[str]]:
         """
         Parse framerate string and calculate fps and frame duration.
 
@@ -246,9 +235,7 @@ class GuardianProcessor:
 
         return framerate_info
 
-    def _parse_video_stream_output(
-        self, ffprobe_output: str
-    ) -> Dict[str, Optional[str]]:
+    def _parse_video_stream_output(self, ffprobe_output: str) -> Dict[str, Optional[str]]:
         """
         Parse ffprobe video stream output to extract width, height, and framerate.
 
@@ -309,9 +296,7 @@ class GuardianProcessor:
                 "default=noprint_wrappers=1:nokey=1",
                 filename,
             ]
-            stdout_duration = subprocess.check_output(
-                cmd_duration, text=True, stderr=subprocess.PIPE
-            ).strip()
+            stdout_duration = subprocess.check_output(cmd_duration, text=True, stderr=subprocess.PIPE).strip()
 
             # Parse duration using extracted function
             duration_info = self._parse_duration(stdout_duration)
@@ -330,9 +315,7 @@ class GuardianProcessor:
                 "compact=p=0:nk=1",
                 filename,
             ]
-            stdout_audio = subprocess.check_output(
-                cmd_audio, text=True, stderr=subprocess.PIPE
-            ).strip()
+            stdout_audio = subprocess.check_output(cmd_audio, text=True, stderr=subprocess.PIPE).strip()
 
             # Parse audio streams using extracted function
             audio_info = self._parse_audio_streams(stdout_audio)
@@ -351,9 +334,7 @@ class GuardianProcessor:
                 "default=noprint_wrappers=1:nokey=1",
                 filename,
             ]
-            stdout_video = subprocess.check_output(
-                cmd_video, text=True, stderr=subprocess.PIPE
-            ).strip()
+            stdout_video = subprocess.check_output(cmd_video, text=True, stderr=subprocess.PIPE).strip()
 
             # Parse video stream using extracted function
             video_info = self._parse_video_stream_output(stdout_video)
@@ -365,10 +346,7 @@ class GuardianProcessor:
             logging.error(f"ffprobe command failed: {e.stderr}")
             return None
         except FileNotFoundError:
-            logging.error(
-                "ffprobe not found. Please ensure FFmpeg is installed and in "
-                "your system's PATH."
-            )
+            logging.error("ffprobe not found. Please ensure FFmpeg is installed and in " "your system's PATH.")
             return None
 
     def _parse_ffprobe_streams(self, json_output: str) -> List[Dict[str, Any]]:
@@ -407,9 +385,7 @@ class GuardianProcessor:
                 srt_streams.append(stream)
         return srt_streams
 
-    def _select_best_srt_stream(
-        self, srt_streams: List[Dict[str, Any]]
-    ) -> Optional[int]:
+    def _select_best_srt_stream(self, srt_streams: List[Dict[str, Any]]) -> Optional[int]:
         """
         Select the best SRT stream from available options, prioritizing default streams.
 
@@ -500,9 +476,7 @@ class GuardianProcessor:
                 video_path,
             ]
 
-            probe_output_raw = subprocess.check_output(
-                cmd_probe_streams, text=True, stderr=subprocess.PIPE
-            ).strip()
+            probe_output_raw = subprocess.check_output(cmd_probe_streams, text=True, stderr=subprocess.PIPE).strip()
 
             # Parse streams using extracted function
             streams = self._parse_ffprobe_streams(probe_output_raw)
@@ -521,9 +495,7 @@ class GuardianProcessor:
                     if stream["index"] == srt_stream_index
                 )
                 stream_type = "default" if is_default else "non-default"
-                logging.info(
-                    f"Found {stream_type} SRT stream at index: {srt_stream_index}"
-                )
+                logging.info(f"Found {stream_type} SRT stream at index: {srt_stream_index}")
 
             if srt_stream_index is not None:
                 # Use ffmpeg to extract the identified SRT stream
@@ -541,9 +513,7 @@ class GuardianProcessor:
                     "-y",
                 ]
                 logging.info(f"Executing SRT extraction: {' '.join(cmd_extract_srt)}")
-                process = subprocess.run(
-                    cmd_extract_srt, check=True, capture_output=True, text=True
-                )
+                process = subprocess.run(cmd_extract_srt, check=True, capture_output=True, text=True)
                 logging.info("FFmpeg stdout (SRT extraction):\n%s", process.stdout)
                 logging.info("Successfully extracted SRT to: %s", output_srt_path)
                 return True
@@ -556,16 +526,12 @@ class GuardianProcessor:
             logging.error("ffprobe raw output: %s", probe_output_raw)
             return False
         except subprocess.CalledProcessError as e:
-            logging.error(
-                f"FFmpeg/ffprobe failed during extraction. Return code: {e.returncode}"
-            )
+            logging.error(f"FFmpeg/ffprobe failed during extraction. Return code: {e.returncode}")
             logging.error(f"FFmpeg stdout (SRT extraction error):\n{e.stdout}")
             logging.error(f"FFmpeg stderr (SRT extraction error):\n{e.stderr}")
             return False
         except FileNotFoundError:
-            logging.error(
-                "ffmpeg or ffprobe not found. Check installation and system path."
-            )
+            logging.error("ffmpeg or ffprobe not found. Check installation and system path.")
             return False
         except Exception as e:
             logging.error(f"An unexpected error occurred during SRT extraction: {e}")
@@ -639,9 +605,7 @@ class GuardianProcessor:
         """
         return bool(pattern.search(text))
 
-    def _find_profane_segments(
-        self, subs: List[srt.Subtitle]
-    ) -> List[Tuple[float, float]]:
+    def _find_profane_segments(self, subs: List[srt.Subtitle]) -> List[Tuple[float, float]]:
         """Finds profane segments in a list of subtitles."""
         censor_pattern = self._build_profanity_pattern(self.matching_words)
         censor_segments = []
@@ -656,9 +620,7 @@ class GuardianProcessor:
 
         return censor_segments
 
-    def _verify_silence_level(
-        self, video_path: str, start: float, end: float
-    ) -> Tuple[bool, float]:
+    def _verify_silence_level(self, video_path: str, start: float, end: float) -> Tuple[bool, float]:
         """
         Verifies that a specific segment meets silence requirements using FFmpeg astats.
 
@@ -677,10 +639,7 @@ class GuardianProcessor:
         segment_duration = end - start
 
         logging.info("=== SILENCE VERIFICATION ===")
-        logging.info(
-            f"Verifying segment: {start:.3f}s - {end:.3f}s (duration:"
-            f" {segment_duration:.3f}s)"
-        )
+        logging.info(f"Verifying segment: {start:.3f}s - {end:.3f}s (duration:" f" {segment_duration:.3f}s)")
         logging.info(f"Silence threshold: {silence_threshold_db} dB")
 
         try:
@@ -710,34 +669,27 @@ class GuardianProcessor:
                 check=False,  # Don't raise exception on non-zero exit
             )
 
-            logging.debug(f"FFmpeg process exit code: {process.returncode}")
+            logging.debug("FFmpeg process exit code: %d", process.returncode)
             if process.stdout:
-                logging.debug(f"FFmpeg stdout: {process.stdout}")
+                logging.debug("FFmpeg stdout: %s", process.stdout)
 
             # Parse the stderr output to extract RMS level
             actual_rms_db = self._parse_astats_output(process.stderr)
 
             # Debug: Log the raw stderr output for troubleshooting
-            logging.debug(
-                f"FFmpeg astats stderr output for segment {start:.3f}-{end:.3f}s:"
-            )
-            logging.debug(f"Process return code: {process.returncode}")
-            logging.debug(f"Stderr length: {len(process.stderr)} chars")
-            logging.debug(f"Stderr content:\n{process.stderr}")
+            logging.debug(f"FFmpeg astats stderr output for segment {start:.3f}-{end:.3f}s:")
+            logging.debug("Process return code: %d", process.returncode)
+            logging.debug("Stderr length: %d chars", len(process.stderr))
+            logging.debug("Stderr content:\n%s", process.stderr)
 
             if actual_rms_db == float("inf"):
-                logging.warning(
-                    "Could not parse RMS level from astats output for segment"
-                    f" {start:.3f}-{end:.3f}s"
-                )
+                logging.warning("Could not parse RMS level from astats output for segment" f" {start:.3f}-{end:.3f}s")
 
                 # Check if this might be due to complete silence
                 if process.returncode == 0 and len(process.stderr.strip()) > 0:
                     # FFmpeg completed successfully but we can't parse RMS
                     # This might indicate the audio is extremely quiet
-                    logging.info(
-                        "FFmpeg completed successfully - audio may be completely silent"
-                    )
+                    logging.info("FFmpeg completed successfully - audio may be completely silent")
                     logging.info("=== END SILENCE VERIFICATION (ASSUMED SILENT) ===")
                     return True, -100.0  # Assume very quiet audio meets threshold
                 else:
@@ -749,29 +701,19 @@ class GuardianProcessor:
 
             logging.info(f"Measured RMS level: {actual_rms_db:.2f} dB")
             logging.info(f"Threshold difference: {threshold_diff:+.2f} dB")
-            logging.info(
-                f"Meets silence threshold: {'YES' if meets_threshold else 'NO'}"
-            )
+            logging.info(f"Meets silence threshold: {'YES' if meets_threshold else 'NO'}")
 
             if meets_threshold:
                 logging.info(f"✓ Segment {start:.3f}-{end:.3f}s successfully silenced")
             else:
-                logging.warning(
-                    f"✗ Segment {start:.3f}-{end:.3f}s insufficient silencing"
-                )
-                logging.warning(
-                    f"  Expected: ≤ {silence_threshold_db} dB, Got:"
-                    f" {actual_rms_db:.2f} dB"
-                )
+                logging.warning(f"✗ Segment {start:.3f}-{end:.3f}s insufficient silencing")
+                logging.warning(f"  Expected: ≤ {silence_threshold_db} dB, Got:" f" {actual_rms_db:.2f} dB")
 
             logging.info("=== END SILENCE VERIFICATION ===")
             return meets_threshold, actual_rms_db
 
         except Exception as e:
-            logging.error(
-                "Error during silence verification for segment"
-                f" {start:.3f}-{end:.3f}s: {e}"
-            )
+            logging.error("Error during silence verification for segment" f" {start:.3f}-{end:.3f}s: {e}")
             logging.info("=== END SILENCE VERIFICATION (ERROR) ===")
             return False, float("inf")
 
@@ -806,15 +748,11 @@ class GuardianProcessor:
                 if matches:
                     # Take the last match (most recent/final value)
                     rms_db = float(matches[-1])
-                    logging.debug(
-                        f"Parsed RMS level: {rms_db} dB using pattern: {pattern}"
-                    )
+                    logging.debug(f"Parsed RMS level: {rms_db} dB using pattern: {pattern}")
                     return rms_db
 
             # Look for any lines containing "astats" and extract numeric values
-            astats_lines = [
-                line for line in stderr_output.split("\n") if "astats" in line.lower()
-            ]
+            astats_lines = [line for line in stderr_output.split("\n") if "astats" in line.lower()]
             logging.debug(f"Found {len(astats_lines)} astats lines")
 
             for line in astats_lines:
@@ -830,33 +768,27 @@ class GuardianProcessor:
                 # Also look for zero values that might indicate silence
                 zero_matches = re.findall(r"\b0\.0+\b", line)
                 if zero_matches and "rms" in line.lower():
-                    logging.debug(
-                        "Found zero RMS value in astats line - assuming very quiet"
-                        " audio"
-                    )
+                    logging.debug("Found zero RMS value in astats line - assuming very quiet" " audio")
                     return -100.0  # Treat 0.0 RMS as very quiet
 
             # Check if the audio might be completely silent (no astats output)
             if "astats" in stderr_output.lower():
                 # If astats filter was applied but no RMS values found,
                 # the audio might be completely silent
-                logging.debug(
-                    "Astats filter was applied but no RMS values found - assuming"
-                    " complete silence"
-                )
+                logging.debug("Astats filter was applied but no RMS values found - assuming" " complete silence")
                 return -100.0  # Assume very quiet audio
 
             # If still no match, log the output for debugging
             logging.warning("Could not parse RMS level from astats output")
-            logging.debug(f"Full astats stderr output:\n{stderr_output}")
+            logging.debug("Full astats stderr output:\n%s", stderr_output)
             return float("inf")
 
         except (ValueError, IndexError) as e:
-            logging.error(f"Error parsing astats output: {e}")
-            logging.debug(f"Problematic stderr output:\n{stderr_output}")
+            logging.error("Error parsing astats output: %s", e)
+            logging.debug("Problematic stderr output:\n%s", stderr_output)
             return float("inf")
         except Exception as e:
-            logging.error(f"Unexpected error parsing astats output: {e}")
+            logging.error("Unexpected error parsing astats output: %s", e)
             return float("inf")
 
     def _get_filter_strategy(self, strategy_level: int = 1) -> Dict[str, Any]:
@@ -884,10 +816,7 @@ class GuardianProcessor:
                 "use_format_normalization": True,
                 "use_compression": True,
                 "use_null_mixing": False,
-                "description": (
-                    "Very low volume reduction with format normalization and"
-                    " compression"
-                ),
+                "description": ("Very low volume reduction with format normalization and" " compression"),
             },
             3: {
                 "name": "Aggressive Null Mixing",
@@ -895,10 +824,7 @@ class GuardianProcessor:
                 "use_format_normalization": True,
                 "use_compression": True,
                 "use_null_mixing": True,
-                "description": (
-                    "Complete silence with null source mixing and multiple processing"
-                    " stages"
-                ),
+                "description": ("Complete silence with null source mixing and multiple processing" " stages"),
             },
         }
 
@@ -927,12 +853,12 @@ class GuardianProcessor:
               final_strategy, error_messages)
         """
         logging.info("=== FALLBACK CENSORING SYSTEM ===")
-        logging.info(f"Maximum fallback attempts: {max_attempts}")
+        logging.info("Maximum fallback attempts: %d", max_attempts)
 
         error_messages: list[str] = []
 
         for attempt in range(1, max_attempts + 1):
-            logging.info(f"--- Attempt {attempt}/{max_attempts} ---")
+            logging.info("--- Attempt %d/%d ---", attempt, max_attempts)
 
             try:
                 # Construct FFmpeg command with current strategy level
@@ -941,15 +867,13 @@ class GuardianProcessor:
                 )
 
                 strategy = self._get_filter_strategy(attempt)
-                logging.info(f"Trying strategy: {strategy['name']}")
+                logging.info("Trying strategy: %s", strategy["name"])
 
                 # Execute FFmpeg command
                 logging.info("Executing FFmpeg processing...")
-                process = subprocess.run(
-                    ffmpeg_command, check=True, capture_output=True, text=True
-                )
+                process = subprocess.run(ffmpeg_command, check=True, capture_output=True, text=True)
                 logging.info("FFmpeg processing completed successfully")
-                logging.debug(f"FFmpeg stdout:\n{process.stdout}")
+                logging.debug("FFmpeg stdout:\n%s", process.stdout)
 
                 # Verify silence levels for all segments (optional)
                 logging.info("Verifying censoring effectiveness...")
@@ -958,9 +882,7 @@ class GuardianProcessor:
 
                 if verify:
                     for start_s, end_s in censor_segments:
-                        meets_threshold, actual_rms_db = self._verify_silence_level(
-                            output_path, start_s, end_s
-                        )
+                        meets_threshold, actual_rms_db = self._verify_silence_level(output_path, start_s, end_s)
                         verification_results.append((start_s, end_s, actual_rms_db))
 
                         if not meets_threshold:
@@ -973,10 +895,7 @@ class GuardianProcessor:
                     all_segments_pass = True
 
                 if all_segments_pass:
-                    logging.info(
-                        "✓ SUCCESS: All segments meet silence threshold with strategy"
-                        f" {attempt}"
-                    )
+                    logging.info("✓ SUCCESS: All segments meet silence threshold with strategy" f" {attempt}")
                     logging.info("=== END FALLBACK CENSORING SYSTEM ===")
                     return (
                         True,
@@ -986,29 +905,18 @@ class GuardianProcessor:
                         error_messages,
                     )
                 else:
-                    failed_count = sum(
-                        1 for _, _, rms in verification_results if rms > -50.0
-                    )
-                    logging.warning(
-                        f"✗ PARTIAL SUCCESS: {failed_count} segments still above"
-                        " threshold"
-                    )
+                    failed_count = sum(1 for _, _, rms in verification_results if rms > -50.0)
+                    logging.warning(f"✗ PARTIAL SUCCESS: {failed_count} segments still above" " threshold")
 
                     if attempt < max_attempts:
-                        logging.info(
-                            f"Attempting fallback to strategy level {attempt + 1}"
-                        )
+                        logging.info(f"Attempting fallback to strategy level {attempt + 1}")
                         # Clean up failed attempt output
                         try:
                             if os.path.exists(output_path):
                                 os.remove(output_path)
-                                logging.debug(
-                                    f"Removed failed output file: {output_path}"
-                                )
+                                logging.debug(f"Removed failed output file: {output_path}")
                         except (OSError, FileNotFoundError) as cleanup_error:
-                            logging.debug(
-                                f"Could not remove failed output file: {cleanup_error}"
-                            )
+                            logging.debug(f"Could not remove failed output file: {cleanup_error}")
                     else:
                         logging.warning("Maximum fallback attempts reached")
                         logging.info("=== END FALLBACK CENSORING SYSTEM ===")
@@ -1021,10 +929,7 @@ class GuardianProcessor:
                         )
 
             except subprocess.CalledProcessError as e:
-                error_msg = (
-                    f"FFmpeg command failed on attempt {attempt}. Return code:"
-                    f" {e.returncode}"
-                )
+                error_msg = f"FFmpeg command failed on attempt {attempt}. Return code:" f" {e.returncode}"
                 logging.error(error_msg)
                 logging.error(f"FFmpeg stderr:\n{e.stderr}")
                 error_messages.append(error_msg)
@@ -1037,9 +942,7 @@ class GuardianProcessor:
                         os.remove(output_path)
                         logging.debug(f"Removed failed output file: {output_path}")
                 else:
-                    logging.error(
-                        "Maximum fallback attempts reached due to FFmpeg failures"
-                    )
+                    logging.error("Maximum fallback attempts reached due to FFmpeg failures")
                     logging.info("=== END FALLBACK CENSORING SYSTEM ===")
                     return False, None, [], attempt, error_messages
 
@@ -1056,20 +959,14 @@ class GuardianProcessor:
                             os.remove(output_path)
                             logging.debug(f"Removed failed output file: {output_path}")
                     except (OSError, FileNotFoundError) as cleanup_error:
-                        logging.debug(
-                            f"Could not remove failed output file: {cleanup_error}"
-                        )
+                        logging.debug(f"Could not remove failed output file: {cleanup_error}")
                 else:
-                    logging.error(
-                        "Maximum fallback attempts reached due to unexpected errors"
-                    )
+                    logging.error("Maximum fallback attempts reached due to unexpected errors")
                     logging.info("=== END FALLBACK CENSORING SYSTEM ===")
                     return False, None, [], attempt, error_messages
 
         # This should not be reached, but included for completeness
-        logging.error(
-            "Fallback system completed without returning - this should not happen"
-        )
+        logging.error("Fallback system completed without returning - this should not happen")
         logging.info("=== END FALLBACK CENSORING SYSTEM ===")
         return False, None, [], max_attempts, error_messages
 
@@ -1111,9 +1008,7 @@ class GuardianProcessor:
 
         strategy = self._get_filter_strategy(final_strategy)
 
-        for i, ((start_s, end_s), (_, _, actual_rms_db)) in enumerate(
-            zip(censor_segments, verification_results), 1
-        ):
+        for i, ((start_s, end_s), (_, _, actual_rms_db)) in enumerate(zip(censor_segments, verification_results), 1):
             duration = end_s - start_s
             total_censored_duration += duration
             meets_threshold = actual_rms_db <= -50.0
@@ -1186,52 +1081,30 @@ class GuardianProcessor:
 
         # Recommendations based on success rate
         if failed_segments == 0:
-            recommendations.append(
-                "✓ All segments successfully censored. No action needed."
-            )
+            recommendations.append("✓ All segments successfully censored. No action needed.")
         elif successful_segments == 0:
             recommendations.append("✗ No segments met the silence threshold. Consider:")
-            recommendations.append(
-                "  - Checking FFmpeg installation and version compatibility"
-            )
-            recommendations.append(
-                "  - Verifying audio codec support in your FFmpeg build"
-            )
+            recommendations.append("  - Checking FFmpeg installation and version compatibility")
+            recommendations.append("  - Verifying audio codec support in your FFmpeg build")
             recommendations.append("  - Testing with a different input video file")
         else:
-            success_rate = (
-                successful_segments / (successful_segments + failed_segments)
-            ) * 100
-            recommendations.append(
-                f"⚠ Partial success ({success_rate:.1f}% of segments). Consider:"
-            )
+            success_rate = (successful_segments / (successful_segments + failed_segments)) * 100
+            recommendations.append(f"⚠ Partial success ({success_rate:.1f}% of segments). Consider:")
 
             if final_strategy < 3:
-                recommendations.append(
-                    "  - The system may benefit from more aggressive filtering"
-                )
-                recommendations.append(
-                    "  - Consider manually increasing max_attempts in fallback system"
-                )
+                recommendations.append("  - The system may benefit from more aggressive filtering")
+                recommendations.append("  - Consider manually increasing max_attempts in fallback system")
 
-            recommendations.append(
-                "  - Some audio formats may be more resistant to silencing"
-            )
-            recommendations.append(
-                "  - Check if input video has unusual audio characteristics"
-            )
+            recommendations.append("  - Some audio formats may be more resistant to silencing")
+            recommendations.append("  - Check if input video has unusual audio characteristics")
 
         # Recommendations based on strategy used
         if final_strategy == 1:
             recommendations.append("ℹ Basic volume reduction was sufficient")
         elif final_strategy == 2:
-            recommendations.append(
-                "ℹ Enhanced filtering was required for optimal results"
-            )
+            recommendations.append("ℹ Enhanced filtering was required for optimal results")
         elif final_strategy == 3:
-            recommendations.append(
-                "ℹ Aggressive filtering was required - input may have challenging audio"
-            )
+            recommendations.append("ℹ Aggressive filtering was required - input may have challenging audio")
 
         # Recommendations based on error messages
         if any("not found" in msg.lower() for msg in error_messages):
@@ -1243,28 +1116,20 @@ class GuardianProcessor:
         if any("permission" in msg.lower() for msg in error_messages):
             recommendations.append("⚠ File permission issues detected:")
             recommendations.append("  - Check write permissions for output directory")
-            recommendations.append(
-                "  - Ensure input file is not locked by another process"
-            )
+            recommendations.append("  - Ensure input file is not locked by another process")
 
         if any("codec" in msg.lower() for msg in error_messages):
             recommendations.append("⚠ Audio codec issues detected:")
             recommendations.append("  - Input video may use an unsupported audio codec")
-            recommendations.append(
-                "  - Consider converting input to a standard format (MP4/AAC)"
-            )
+            recommendations.append("  - Consider converting input to a standard format (MP4/AAC)")
 
         # General troubleshooting recommendations
         if failed_segments > 0:
             recommendations.append("General troubleshooting steps:")
             recommendations.append("  - Test with a known-good sample video file")
             recommendations.append("  - Check FFmpeg version: ffmpeg -version")
-            recommendations.append(
-                "  - Enable debug logging for more detailed information"
-            )
-            recommendations.append(
-                "  - Verify subtitle timing accuracy against audio content"
-            )
+            recommendations.append("  - Enable debug logging for more detailed information")
+            recommendations.append("  - Verify subtitle timing accuracy against audio content")
 
         return recommendations
 
@@ -1279,47 +1144,31 @@ class GuardianProcessor:
         logging.info(f"Timestamp: {diagnostic.timestamp}")
         logging.info(f"Input Video: {diagnostic.input_video}")
         logging.info(f"Output Video: {diagnostic.output_video}")
-        logging.info(
-            f"Overall Success: {'YES' if diagnostic.overall_success else 'NO'}"
-        )
+        logging.info(f"Overall Success: {'YES' if diagnostic.overall_success else 'NO'}")
         logging.info("")
 
         logging.info("OPERATION SUMMARY:")
         logging.info(f"  Total Segments: {diagnostic.total_segments}")
-        logging.info(
-            f"  Total Censored Duration: {diagnostic.total_censored_duration:.3f}s"
-        )
+        logging.info(f"  Total Censored Duration: {diagnostic.total_censored_duration:.3f}s")
         logging.info(f"  Successful Segments: {diagnostic.successful_segments}")
         logging.info(f"  Failed Segments: {diagnostic.failed_segments}")
         logging.info(f"  Final Strategy Used: Level {diagnostic.final_strategy_used}")
         logging.info(f"  Fallback Attempts: {diagnostic.fallback_attempts}")
 
         if diagnostic.successful_segments > 0:
-            success_rate = (
-                diagnostic.successful_segments / diagnostic.total_segments
-            ) * 100
+            success_rate = (diagnostic.successful_segments / diagnostic.total_segments) * 100
             logging.info(f"  Success Rate: {success_rate:.1f}%")
 
         logging.info("")
 
         # Log detailed segment information
         logging.info("SEGMENT DETAILS:")
-        logging.info(
-            "  ID | Start    | End      | Duration | Target   | Actual   | Status |"
-            " Strategy"
-        )
-        logging.info(
-            "  ---|----------|----------|----------|----------|----------|"
-            "--------|----------"
-        )
+        logging.info("  ID | Start    | End      | Duration | Target   | Actual   | Status |" " Strategy")
+        logging.info("  ---|----------|----------|----------|----------|----------|" "--------|----------")
 
         for seg in diagnostic.segments:
             status = "PASS" if seg.meets_threshold else "FAIL"
-            actual_str = (
-                f"{seg.actual_rms_db:.2f}"
-                if seg.actual_rms_db != float("inf")
-                else "N/A"
-            )
+            actual_str = f"{seg.actual_rms_db:.2f}" if seg.actual_rms_db != float("inf") else "N/A"
             logging.info(
                 f"  {seg.segment_id:2d} | {seg.start_time:8.3f} | {seg.end_time:8.3f} |"
                 f" {seg.duration:8.3f} | {seg.target_rms_db:8.1f} | {actual_str:8s} |"
@@ -1339,13 +1188,11 @@ class GuardianProcessor:
         if diagnostic.recommendations:
             logging.info("RECOMMENDATIONS:")
             for rec in diagnostic.recommendations:
-                logging.info(f"  {rec}")
+                logging.info("  %s", rec)
 
         logging.info("=== END DIAGNOSTIC REPORT ===")
 
-    def _save_diagnostic_report(
-        self, diagnostic: CensoringDiagnostic, output_path: Optional[str] = None
-    ) -> str:
+    def _save_diagnostic_report(self, diagnostic: CensoringDiagnostic, output_path: Optional[str] = None) -> str:
         """
         Saves diagnostic report to a JSON file.
 
@@ -1381,9 +1228,7 @@ class GuardianProcessor:
                     "end_time": seg.end_time,
                     "duration": seg.duration,
                     "target_rms_db": seg.target_rms_db,
-                    "actual_rms_db": (
-                        seg.actual_rms_db if seg.actual_rms_db != float("inf") else None
-                    ),
+                    "actual_rms_db": (seg.actual_rms_db if seg.actual_rms_db != float("inf") else None),
                     "meets_threshold": seg.meets_threshold,
                     "strategy_used": seg.strategy_used,
                     "strategy_name": seg.strategy_name,
@@ -1399,11 +1244,11 @@ class GuardianProcessor:
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(diagnostic_dict, f, indent=2, ensure_ascii=False)
 
-            logging.info(f"Diagnostic report saved to: {output_path}")
+            logging.info("Diagnostic report saved to: %s", output_path)
             return output_path
 
         except Exception as e:
-            logging.error(f"Failed to save diagnostic report: {e}")
+            logging.error("Failed to save diagnostic report: %s", e)
             return ""
 
     def _build_volume_filters(
@@ -1427,16 +1272,11 @@ class GuardianProcessor:
         """
         volume_filters = []
         for start_s, end_s in segments:
-            volume_filter = (
-                f"{volume_setting}:enable={quote_char}"
-                f"between(t,{start_s},{end_s}){quote_char}"
-            )
+            volume_filter = f"{volume_setting}:enable={quote_char}" f"between(t,{start_s},{end_s}){quote_char}"
             volume_filters.append(volume_filter)
         return volume_filters
 
-    def _build_audio_filter_chain(
-        self, segments: List[Tuple[float, float]], strategy_level: int
-    ) -> str:
+    def _build_audio_filter_chain(self, segments: List[Tuple[float, float]], strategy_level: int) -> str:
         """
         Build complete audio filter chain for censoring.
 
@@ -1458,16 +1298,12 @@ class GuardianProcessor:
             filter_parts.append("aformat=sample_fmts=s16:channel_layouts=stereo")
 
         # Add volume filters for censored segments
-        volume_filters = self._build_volume_filters(
-            segments, strategy["volume_filter"], quote_char
-        )
+        volume_filters = self._build_volume_filters(segments, strategy["volume_filter"], quote_char)
         filter_parts.extend(volume_filters)
 
         # Add dynamic range compression filter if enabled
         if strategy["use_compression"]:
-            filter_parts.append(
-                "acompressor=threshold=-20dB:ratio=20:attack=5:release=50"
-            )
+            filter_parts.append("acompressor=threshold=-20dB:ratio=20:attack=5:release=50")
 
         # Add additional null mixing processing if enabled
         if strategy["use_null_mixing"]:
@@ -1480,9 +1316,7 @@ class GuardianProcessor:
 
         return ",".join(filter_parts) if filter_parts else "anull"
 
-    def _build_ffmpeg_base_command(
-        self, video_path: str, output_path: str, audio_filter_graph: str
-    ) -> List[str]:
+    def _build_ffmpeg_base_command(self, video_path: str, output_path: str, audio_filter_graph: str) -> List[str]:
         """
         Build base FFmpeg command with standard parameters.
 
@@ -1529,30 +1363,23 @@ class GuardianProcessor:
         strategy = self._get_filter_strategy(strategy_level)
 
         logging.info("=== FILTER CONSTRUCTION ===")
-        logging.info(f"Using strategy level {strategy_level}: {strategy['name']}")
-        logging.info(f"Strategy description: {strategy['description']}")
-        logging.info(f"Constructing FFmpeg filters for {len(censor_segments)} segments")
+        logging.info("Using strategy level %d: %s", strategy_level, strategy["name"])
+        logging.info("Strategy description: %s", strategy["description"])
+        logging.info("Constructing FFmpeg filters for %d segments", len(censor_segments))
 
         # Build audio filter chain using extracted function
-        audio_filter_graph = self._build_audio_filter_chain(
-            censor_segments, strategy_level
-        )
+        audio_filter_graph = self._build_audio_filter_chain(censor_segments, strategy_level)
 
         # Log segment details
         logging.info("Adding volume filters for censored segments:")
         for i, (start_s, end_s) in enumerate(censor_segments, 1):
-            logging.info(
-                f"  Segment {i}: {start_s:.3f}s - {end_s:.3f}s (duration:"
-                f" {end_s-start_s:.3f}s)"
-            )
+            logging.info(f"  Segment {i}: {start_s:.3f}s - {end_s:.3f}s (duration:" f" {end_s-start_s:.3f}s)")
 
-        logging.info(f"Complete audio filter graph: {audio_filter_graph}")
+        logging.info("Complete audio filter graph: %s", audio_filter_graph)
         logging.info("=== END FILTER CONSTRUCTION ===")
 
         # Build complete command using extracted function
-        command = self._build_ffmpeg_base_command(
-            video_path, output_path, audio_filter_graph
-        )
+        command = self._build_ffmpeg_base_command(video_path, output_path, audio_filter_graph)
 
         logging.debug(f"Complete FFmpeg command: {' '.join(command)}")
         return command
@@ -1598,18 +1425,15 @@ class GuardianProcessor:
 
         # Log detailed segment information
         logging.info("=== CENSORING OPERATION STARTED ===")
-        logging.info(f"Input video: {video_path}")
-        logging.info(f"Output video: {output_path}")
-        logging.info(f"Found {len(censor_segments)} segments to censor:")
+        logging.info("Input video: %s", video_path)
+        logging.info("Output video: %s", output_path)
+        logging.info("Found %d segments to censor:", len(censor_segments))
 
         total_censored_duration: float = 0
         for i, (start_s, end_s) in enumerate(censor_segments, 1):
             duration = end_s - start_s
             total_censored_duration += duration
-            logging.info(
-                f"  Segment {i}: {start_s:.3f}s - {end_s:.3f}s (duration:"
-                f" {duration:.3f}s)"
-            )
+            logging.info(f"  Segment {i}: {start_s:.3f}s - {end_s:.3f}s (duration:" f" {duration:.3f}s)")
 
         logging.info(f"Total censored duration: {total_censored_duration:.3f}s")
 
@@ -1632,8 +1456,7 @@ class GuardianProcessor:
                 censor_segments=censor_segments,
                 verification_results=verification_results,
                 final_strategy=final_strategy,
-                fallback_attempts=final_strategy
-                - 1,  # Number of fallback attempts made
+                fallback_attempts=final_strategy - 1,  # Number of fallback attempts made
                 overall_success=success,
                 error_messages=error_messages,
             )
@@ -1655,8 +1478,8 @@ class GuardianProcessor:
         passed_segments = sum(1 for _, _, rms in verification_results if rms <= -50.0)
         failed_segments = len(verification_results) - passed_segments
 
-        logging.info(f"Segments passed: {passed_segments}/{len(verification_results)}")
-        logging.info(f"Segments failed: {failed_segments}/{len(verification_results)}")
+        logging.info("Segments passed: %d/%d", passed_segments, len(verification_results))
+        logging.info("Segments failed: %d/%d", failed_segments, len(verification_results))
 
         if passed_segments == len(verification_results):
             logging.info("✓ ALL SEGMENTS MEET SILENCE THRESHOLD")
@@ -1665,27 +1488,18 @@ class GuardianProcessor:
 
         # Log detailed verification table
         logging.info("Detailed verification results:")
-        logging.info(
-            "  Segment    | Start    | End      | Duration | RMS (dB) | Status"
-        )
-        logging.info(
-            "  -----------|----------|----------|----------|----------|--------"
-        )
+        logging.info("  Segment    | Start    | End      | Duration | RMS (dB) | Status")
+        logging.info("  -----------|----------|----------|----------|----------|--------")
         for i, (start_s, end_s, rms_db) in enumerate(verification_results, 1):
             duration = end_s - start_s
             status = "PASS" if rms_db <= -50.0 else "FAIL"
             rms_str = f"{rms_db:.2f}" if rms_db != float("inf") else "N/A"
-            logging.info(
-                f"  {i:9d} | {start_s:8.3f} | {end_s:8.3f} | {duration:8.3f} |"
-                f" {rms_str:8s} | {status}"
-            )
+            logging.info(f"  {i:9d} | {start_s:8.3f} | {end_s:8.3f} | {duration:8.3f} |" f" {rms_str:8s} | {status}")
 
         logging.info("=== CENSORING OPERATION COMPLETED ===")
         return result_path
 
-    def process_video(
-        self, video_path: str, output_path: Optional[str] = None
-    ) -> Optional[str]:
+    def process_video(self, video_path: str, output_path: Optional[str] = None) -> Optional[str]:
         """
         Main method to process a video file and create a censored version.
 
@@ -1698,7 +1512,7 @@ class GuardianProcessor:
         """
         # Validate input file
         if not os.path.exists(video_path):
-            logging.error(f"Video file not found: {video_path}")
+            logging.error("Video file not found: %s", video_path)
             return None
 
         # Get video details (for validation and potential future use)

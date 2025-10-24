@@ -76,7 +76,9 @@ def expand_input_paths(input_paths: List[str]) -> List[str]:
                         video_files.append(full_path)
 
             if video_files:
-                logging.info("Found %d video file(s) in directory: %s", len(video_files), path)
+                logging.info(
+                    "Found %d video file(s) in directory: %s", len(video_files), path
+                )
                 expanded_files.extend(sorted(video_files))
             else:
                 logging.warning("No video files found in directory: %s", path)
@@ -114,7 +116,8 @@ def create_parser() -> argparse.ArgumentParser:
         "--output",
         "-o",
         dest="outputfile",
-        help="Output path for the censored video file. " "If not specified, creates a file with '_censored' suffix.",
+        help="Output path for the censored video file. "
+        "If not specified, creates a file with '_censored' suffix.",
     )
 
     parser.add_argument(
@@ -159,7 +162,9 @@ def create_parser() -> argparse.ArgumentParser:
         ),
     )
 
-    parser.add_argument("--version", "-ver", help="Show version", action="version", version=__version__)
+    parser.add_argument(
+        "--version", "-ver", help="Show version", action="version", version=__version__
+    )
 
     return parser
 
@@ -227,7 +232,9 @@ def main() -> int:
             logging.info("Processing file: %s", video_path)
 
             # Initialize the processor
-            processor = GuardianProcessor(ffmpeg_cmd=args.ffmpeg, ffprobe_cmd=args.ffprobe)
+            processor = GuardianProcessor(
+                ffmpeg_cmd=args.ffmpeg, ffprobe_cmd=args.ffprobe
+            )
 
             # Process the video
             # Keep the CLI call backwards-compatible: do not pass the optional
@@ -235,7 +242,9 @@ def main() -> int:
             # that expect a two-argument call continue to work. The
             # `censor_audio_with_ffmpeg` API accepts an optional `full`
             # parameter if callers want to pass it directly.
-            censored_file = processor.censor_audio_with_ffmpeg(video_path, args.outputfile, full=args.full)
+            censored_file = processor.censor_audio_with_ffmpeg(
+                video_path, args.outputfile, full=args.full
+            )
 
             if censored_file:
                 logging.info("Censoring process a success.")
@@ -244,7 +253,8 @@ def main() -> int:
             else:
                 logging.error("Censoring process failed for file: %s", video_path)
                 print(
-                    f"Error: Censoring process failed for file: {video_path}. " "See log for details.",
+                    f"Error: Censoring process failed for file: {video_path}. "
+                    "See log for details.",
                     file=sys.stderr,
                 )
                 return 1

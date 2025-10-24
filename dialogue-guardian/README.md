@@ -50,7 +50,24 @@ guardian --input movie.mp4
 - **Python 3.7+**
 - **FFmpeg** (must be installed and accessible in PATH)
 
-## � Installing FFmpeg
+## 🐍 Installing Python
+
+### Windows
+
+Download and install Python from the official website:
+
+1. Visit [python.org](https://www.python.org/downloads/windows/)
+2. Click "Download Python 3.x.x" (latest version)
+3. Run the installer
+4. **Important**: Check the box "Add Python to PATH" during installation
+5. Click "Install Now" or customize installation options
+6. Verify installation by opening Command Prompt and running:
+   ```powershell
+   python --version
+   pip --version
+   ```
+
+## 📦 Installing FFmpeg
 
 Before using Dialogue Guardian, you must install FFmpeg on your system:
 
