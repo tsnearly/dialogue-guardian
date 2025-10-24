@@ -544,16 +544,16 @@ class GuardianProcessor:
                 process = subprocess.run(
                     cmd_extract_srt, check=True, capture_output=True, text=True
                 )
-                logging.info(f"FFmpeg stdout (SRT extraction):\n{process.stdout}")
-                logging.info(f"Successfully extracted SRT to: {output_srt_path}")
+                logging.info("FFmpeg stdout (SRT extraction):\n%s", process.stdout)
+                logging.info("Successfully extracted SRT to: %s", output_srt_path)
                 return True
-            else:
-                logging.info("No embedded SRT subtitle track (subrip codec) found.")
-                return False
+
+            logging.info("No embedded SRT subtitle track (subrip codec) found.")
+            return False
 
         except json.JSONDecodeError as e:
-            logging.error(f"Failed to parse ffprobe JSON output: {e}")
-            logging.error(f"ffprobe raw output: {probe_output_raw}")
+            logging.error("Failed to parse ffprobe JSON output: %s", e)
+            logging.error("ffprobe raw output: %s", probe_output_raw)
             return False
         except subprocess.CalledProcessError as e:
             logging.error(
@@ -937,10 +937,7 @@ class GuardianProcessor:
             try:
                 # Construct FFmpeg command with current strategy level
                 ffmpeg_command = self._construct_ffmpeg_command(
-                    video_path,
-                    output_path,
-                    censor_segments,
-                    strategy_level=attempt
+                    video_path, output_path, censor_segments, strategy_level=attempt
                 )
 
                 strategy = self._get_filter_strategy(attempt)
@@ -1147,10 +1144,7 @@ class GuardianProcessor:
 
         # Generate recommendations based on results
         recommendations = self._generate_recommendations(
-            successful_segments,
-            failed_segments,
-            final_strategy,
-            error_messages
+            successful_segments, failed_segments, final_strategy, error_messages
         )
 
         return CensoringDiagnostic(
@@ -1564,7 +1558,10 @@ class GuardianProcessor:
         return command
 
     def censor_audio_with_ffmpeg(
-        self, video_path: str, output_path: Optional[str] = None, full: Optional[bool] = False
+        self,
+        video_path: str,
+        output_path: Optional[str] = None,
+        full: Optional[bool] = False,
     ) -> Optional[str]:
         """
         Censors profane audio segments in a video file using FFmpeg.
@@ -1635,7 +1632,8 @@ class GuardianProcessor:
                 censor_segments=censor_segments,
                 verification_results=verification_results,
                 final_strategy=final_strategy,
-                fallback_attempts=final_strategy - 1,  # Number of fallback attempts made
+                fallback_attempts=final_strategy
+                - 1,  # Number of fallback attempts made
                 overall_success=success,
                 error_messages=error_messages,
             )

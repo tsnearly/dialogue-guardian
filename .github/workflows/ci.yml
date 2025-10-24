@@ -40,6 +40,8 @@ jobs:
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
         with:
           python-version: ${{ matrix.python-version }}
 

@@ -76,12 +76,10 @@ def expand_input_paths(input_paths: List[str]) -> List[str]:
                         video_files.append(full_path)
 
             if video_files:
-                logging.info(
-                    f"Found {len(video_files)} video file(s) in directory: {path}"
-                )
+                logging.info("Found %d video file(s) in directory: %s", len(video_files), path)
                 expanded_files.extend(sorted(video_files))
             else:
-                logging.warning(f"No video files found in directory: {path}")
+                logging.warning("No video files found in directory: %s", path)
         else:
             # It's a file, include it as-is
             expanded_files.append(path)
@@ -116,10 +114,7 @@ def create_parser() -> argparse.ArgumentParser:
         "--output",
         "-o",
         dest="outputfile",
-        help=(
-            "Output path for the censored video file. "
-            "If not specified, creates a file with '_censored' suffix."
-        ),
+        help="Output path for the censored video file. " "If not specified, creates a file with '_censored' suffix.",
     )
 
     parser.add_argument(
@@ -164,9 +159,7 @@ def create_parser() -> argparse.ArgumentParser:
         ),
     )
 
-    parser.add_argument(
-        "--version", "-ver", help="Show version", action="version", version=__version__
-    )
+    parser.add_argument("--version", "-ver", help="Show version", action="version", version=__version__)
 
     return parser
 
@@ -226,17 +219,15 @@ def main() -> int:
             logging.error("No video files found to process.")
             return 1
 
-        logging.info(f"Processing {len(video_files)} video file(s)...")
+        logging.info("Processing %d video file(s)...", len(video_files))
 
         # Process each video file
         for input_file in video_files:
             video_path = os.path.abspath(input_file)
-            logging.info(f"Processing file: {video_path}")
+            logging.info("Processing file: %s", video_path)
 
             # Initialize the processor
-            processor = GuardianProcessor(
-                ffmpeg_cmd=args.ffmpeg, ffprobe_cmd=args.ffprobe
-            )
+            processor = GuardianProcessor(ffmpeg_cmd=args.ffmpeg, ffprobe_cmd=args.ffprobe)
 
             # Process the video
             # Keep the CLI call backwards-compatible: do not pass the optional
@@ -244,19 +235,16 @@ def main() -> int:
             # that expect a two-argument call continue to work. The
             # `censor_audio_with_ffmpeg` API accepts an optional `full`
             # parameter if callers want to pass it directly.
-            censored_file = processor.censor_audio_with_ffmpeg(
-                video_path, args.outputfile, full=args.full
-            )
+            censored_file = processor.censor_audio_with_ffmpeg(video_path, args.outputfile, full=args.full)
 
             if censored_file:
                 logging.info("Censoring process a success.")
-                logging.info(f"Output file: {censored_file}")
+                logging.info("Output file: %s", censored_file)
                 print(f"Censored video created: {censored_file}")
             else:
-                logging.error(f"Censoring process failed for file: {video_path}")
+                logging.error("Censoring process failed for file: %s", video_path)
                 print(
-                    f"Error: Censoring process failed for file: {video_path}. "
-                    "See log for details.",
+                    f"Error: Censoring process failed for file: {video_path}. " "See log for details.",
                     file=sys.stderr,
                 )
                 return 1
@@ -267,7 +255,7 @@ def main() -> int:
         print("\nProcess interrupted by user.", file=sys.stderr)
         return 1
     except Exception as e:
-        logging.error(f"Unexpected error: {e}")
+        logging.error("Unexpected error: %s", e)
         print(f"Error: An unexpected error occurred: {e}", file=sys.stderr)
         return 1
 
