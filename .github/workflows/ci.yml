@@ -12,6 +12,7 @@ on:
       - "dialogue-guardian/pyproject.toml"
       - "dialogue-guardian/requirements.txt"
       - ".github/workflows/ci.yml"
+      - ".gitignore"
   pull_request:
     branches: [main]
     paths:
