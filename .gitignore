@@ -74,6 +74,9 @@ docs/_templates/
 *.log
 logs/
 
+# Generated diagnostic files from testing
+input_diagnostic_*.json
+
 # Temporary files
 *.tmp
 *.temp
