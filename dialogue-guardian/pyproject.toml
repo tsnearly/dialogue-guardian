@@ -8,17 +8,19 @@ build-backend = "setuptools.build_meta"
 name = "dialogue-guardian"
 version = "1.3.1"
 authors = [
-    {name = "Tony Snearly"},
+    {name = "Tony Snearly", email = "tony.snearly@gmail.com" },
 ]
 description = "Universal Media Censor - Automatically detect and censor profane language in video files"
 readme = "README.md"
-license = {text = "OSL-3.0"}
 requires-python = ">=3.8"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved :: Open Software License 3.0 (OSL-3.0)",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
     "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
     "Topic :: Text Processing :: Filters",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
@@ -26,8 +28,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Framework :: Pytest",
+    "Framework :: Sphinx",
     "Operating System :: OS Independent",
 ]
+license = "OSL-3.0"
+license-files = ["LICEN[CS]E*"]
 keywords = ["video", "audio", "censoring", "subtitles", "ffmpeg", "profanity", "media"]
 dependencies = [
     "srt",
@@ -61,8 +67,9 @@ test = [
 
 [project.urls]
 Homepage = "https://github.com/tsnearly/dialogue-guardian"
-Documentation = "https://tsnearly.github.io/dialogue-guardian/"
+Documentation = "https://dialogue-guardian.readthedocs.io/en/latest/"
 Repository = "https://github.com/tsnearly/dialogue-guardian.git"
+GitHub = "https://github.com/tsnearly/dialogue-guardian"
 Issues = "https://github.com/tsnearly/dialogue-guardian/issues"
 Changelog = "https://tsnearly.github.io/dialogue-guardian/changelog.html"
 
