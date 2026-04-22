@@ -32,7 +32,7 @@ classifiers = [
     "Framework :: Sphinx",
     "Operating System :: OS Independent",
 ]
-license = "OSL-3.0"
+license = {text = "OSL-3.0"}
 license-files = ["LICEN[CS]E*"]
 keywords = ["video", "audio", "censoring", "subtitles", "ffmpeg", "profanity", "media"]
 dependencies = [
