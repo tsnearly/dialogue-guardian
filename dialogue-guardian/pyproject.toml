@@ -32,8 +32,7 @@ classifiers = [
     "Framework :: Sphinx",
     "Operating System :: OS Independent",
 ]
-license = {text = "OSL-3.0"}
-license-files = ["LICEN[CS]E*"]
+license = {file = "LICENSE"}
 keywords = ["video", "audio", "censoring", "subtitles", "ffmpeg", "profanity", "media"]
 dependencies = [
     "srt",
@@ -62,7 +61,11 @@ dev = [
 test = [
     "pytest",     # Test runner
     "pytest-cov", # Code coverage
-    "pytest-mock"
+    "pytest-mock",
+    "pytest-json-report",
+    "xdoctest",
+    "requests-mock",
+    "Pygments",
 ]
 
 [project.urls]
