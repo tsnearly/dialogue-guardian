@@ -59,11 +59,11 @@ setup(
     },
     keywords="video, audio, censoring, subtitles, ffmpeg, profanity, media",
     project_urls={
-        "Homepage" = "https://github.com/tsnearly/dialogue-guardian",
-        "Documentation" = "https://dialogue-guardian.readthedocs.io/en/latest/",
-        "Repository" = "https://github.com/tsnearly/dialogue-guardian.git",
-        "Source" = "https://github.com/tsnearly/dialogue-guardian",
-        "Issues" = "https://github.com/tsnearly/dialogue-guardian/issues",
-        "Changelog" = "https://tsnearly.github.io/dialogue-guardian/changelog.html",
+        "Homepage": "https://github.com/tsnearly/dialogue-guardian",
+        "Documentation": "https://dialogue-guardian.readthedocs.io/en/latest/",
+        "Repository": "https://github.com/tsnearly/dialogue-guardian.git",
+        "Source": "https://github.com/tsnearly/dialogue-guardian",
+        "Issues": "https://github.com/tsnearly/dialogue-guardian/issues",
+        "Changelog": "https://tsnearly.github.io/dialogue-guardian/changelog.html",
     },
 )
